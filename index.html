@@ -6,6 +6,7 @@
   <title>AgileBuild - Gestión Ágil de Diseño</title>
   <!-- Librería para comprimir los datos en el Link -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root{
       --bg:#f5f7fb;
@@ -409,7 +410,9 @@
               </select>
             </div>
             <!-- Botón Borrar Todo (Solo Admin) -->
-            <button class="btn danger admin-only" id="clearAllDataBtn">Borrar datos</button>
+            <button class="btn" id="refreshSharedDataBtn">↻ Actualizar datos</button>
+            <span class="badge info" id="syncStatus">Conectando…</span>
+            <button class="btn danger admin-only" id="clearAllDataBtn">Limpiar datos locales</button>
             <button class="btn primary admin-only" data-go="projects">+ Nuevo proyecto</button>
           </div>
         </div>
@@ -707,6 +710,83 @@
     // SISTEMA DE RECEPCIÓN DE DATOS POR LINK (COMPRESIÓN)
     // --------------------------------------------------------
     const KEY = { projects:"ab_v8_proj", activeProject:"ab_v8_act", tasks:"ab_v8_task", responsibles:"ab_v8_resp", sprints:"ab_v8_spr", risks:"ab_v8_risk", minutes:"ab_v8_min", changes:"ab_v8_chg", budget:"ab_v8_budg", evm:"ab_v8_evm" };
+
+    // --------------------------------------------------------
+    // SUPABASE - DATOS COMPARTIDOS DE LA DEMO
+    // --------------------------------------------------------
+    const SUPABASE_URL = "https://hwfivslrxrijpozmbahd.supabase.co";
+    const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_Eoc-mBideeAq-VhrZat20Q_N4wQ76xA";
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+    let sharedDataLoading = false;
+
+    function setSyncStatus(text, kind="info") {
+      const el = document.getElementById("syncStatus");
+      if (!el) return;
+      el.textContent = text;
+      el.className = `badge ${kind}`;
+    }
+
+    function projectFromDb(p){
+      return {
+        id:p.id, name:p.name||"", code:p.code||"", client:p.client||"",
+        type:p.project_type||"Administrativo", location:p.location||"",
+        sprintLength:String(p.sprint_length||2), description:p.description||""
+      };
+    }
+    function responsibleFromDb(r){
+      return {
+        id:r.id, projectId:r.project_id, name:r.name||"", role:r.role||"",
+        area:r.area||"", hourlyRate:Number(r.hourly_rate)||0
+      };
+    }
+    function taskFromDb(t){
+      return {
+        uid:t.id, projectId:t.project_id, id:t.code||"", name:t.name||"",
+        discipline:t.discipline||"", priority:t.priority||"Media",
+        sprintId:t.sprint_id||"", ownerId:t.responsible_id||"",
+        hours:Number(t.estimated_hours)||0, realHours:Number(t.real_hours)||0,
+        status:t.status||"Backlog", startDate:t.start_date||"", endDate:t.end_date||"",
+        physicalProgress:Number(t.physical_progress)||0
+      };
+    }
+
+    async function loadSharedData(showMessage=false){
+      if (sharedDataLoading) return;
+      sharedDataLoading = true;
+      setSyncStatus("Actualizando…", "warning");
+      try {
+        const [pRes, rRes, tRes] = await Promise.all([
+          supabaseClient.from("projects").select("*").order("created_at", {ascending:true}),
+          supabaseClient.from("responsibles").select("*").order("created_at", {ascending:true}),
+          supabaseClient.from("tasks").select("*").order("created_at", {ascending:true})
+        ]);
+        if (pRes.error) throw pRes.error;
+        if (rRes.error) throw rRes.error;
+        if (tRes.error) throw tRes.error;
+
+        projects = (pRes.data||[]).map(projectFromDb);
+        responsibles = (rRes.data||[]).map(responsibleFromDb);
+        tasks = (tRes.data||[]).map(taskFromDb);
+
+        if (!projects.some(p=>p.id===activeProjectId)) activeProjectId = projects[0]?.id || "";
+        localStorage.setItem(KEY.activeProject, activeProjectId);
+        // Caché local de respaldo; Supabase sigue siendo la fuente compartida.
+        localStorage.setItem(KEY.projects, JSON.stringify(projects));
+        localStorage.setItem(KEY.responsibles, JSON.stringify(responsibles));
+        localStorage.setItem(KEY.tasks, JSON.stringify(tasks));
+
+        renderAll();
+        setSyncStatus("Datos compartidos ✓", "success");
+        if (showMessage) showToast("Datos actualizados desde Supabase");
+      } catch (err) {
+        console.error("Error Supabase:", err);
+        setSyncStatus("Sin conexión", "danger");
+        if (showMessage) showToast("No se pudo actualizar Supabase");
+      } finally {
+        sharedDataLoading = false;
+      }
+    }
+
     
     const urlParams = new URLSearchParams(window.location.search);
     const demoDataFromUrl = urlParams.get('demo');
@@ -772,28 +852,21 @@
     });
 
     document.getElementById("clearAllDataBtn").addEventListener("click", () => {
-      if(confirm("¿Estás seguro de borrar todos los datos de todos los proyectos? Esto no se puede deshacer.")){
-        localStorage.clear(); location.href = window.location.href.split('?')[0];
+      if(confirm("Esto solo limpiará la caché de este navegador. Los datos compartidos de Supabase NO se borrarán. ¿Continuar?")){
+        Object.values(KEY).forEach(k => localStorage.removeItem(k));
+        activeProjectId = "";
+        showToast("Caché local limpiada. Volviendo a cargar datos compartidos…");
+        loadSharedData();
       }
     });
 
-    // GENERAR LINK PARA COMPARTIR
+    // GENERAR LINK PARA COMPARTIR: los datos ya viven en Supabase
     document.getElementById("generateShareLinkBtn").addEventListener("click", () => {
-      const allData = { projects, activeProjectId, tasks, responsibles, sprints, risks, minutes, changes, budgetSettings, evmSettings };
-      const jsonStr = JSON.stringify(allData);
-      
-      if (typeof LZString === "undefined") {
-          return showToast("Error: No se pudo cargar el compresor de enlaces.");
-      }
-      
-      const encoded = LZString.compressToEncodedURIComponent(jsonStr);
       const baseUrl = window.location.href.split('?')[0];
-      const shareUrl = baseUrl + "?mode=lector&demo=" + encoded;
-      
-      // Copiar al portapapeles
+      const shareUrl = baseUrl + "?mode=lector";
       navigator.clipboard.writeText(shareUrl).then(() => {
-        showToast("¡Link de Lector copiado al portapapeles!");
-      }).catch(err => {
+        showToast("¡Link de Lector copiado! Los datos se leerán desde Supabase.");
+      }).catch(() => {
         prompt("Copia este enlace manualmente:", shareUrl);
       });
     });
@@ -865,35 +938,57 @@
             <button class="btn small danger delete-project" data-id="${p.id}">Eliminar</button>
           </div>
         </div>`).join("") : '<div class="empty">Aún no hay proyectos. Crea uno nuevo.</div>';
-      
-      document.querySelectorAll(".activate-project").forEach(b=>b.addEventListener("click",()=>{activeProjectId=b.dataset.id;saveAll();renderAll();showToast("Proyecto activado")}));
-      document.querySelectorAll(".edit-project").forEach(b=>b.addEventListener("click",()=>{
-        const p = projects.find(x=>x.id===b.dataset.id);
-        if(!p) return;
-        ["Id","Name","Code","Client","Type","Location","Description"].forEach(k => {
-          const el = document.getElementById("project"+k); if(el && p[k.toLowerCase()]) el.value = p[k.toLowerCase()];
-        });
+
+      document.querySelectorAll(".activate-project").forEach(b=>b.addEventListener("click",()=>{
+        activeProjectId=b.dataset.id;
+        localStorage.setItem(KEY.activeProject, activeProjectId);
+        renderAll(); showToast("Proyecto activado");
       }));
-      document.querySelectorAll(".delete-project").forEach(b=>b.addEventListener("click",()=>{
-        const id=b.dataset.id;
-        projects = projects.filter(p=>p.id!==id); tasks = tasks.filter(t=>t.projectId!==id); responsibles = responsibles.filter(r=>r.projectId!==id);
-        if(activeProjectId===id) activeProjectId = projects[0]?.id||"";
-        saveAll(); renderAll(); showToast("Proyecto eliminado");
+      document.querySelectorAll(".edit-project").forEach(b=>b.addEventListener("click",()=>{
+        const p = projects.find(x=>x.id===b.dataset.id); if(!p) return;
+        document.getElementById("projectId").value = p.id;
+        document.getElementById("projectName").value = p.name||"";
+        document.getElementById("projectCode").value = p.code||"";
+        document.getElementById("projectClient").value = p.client||"";
+        document.getElementById("projectType").value = p.type||"Administrativo";
+        document.getElementById("projectLocation").value = p.location||"";
+        document.getElementById("sprintLength").value = p.sprintLength||"2";
+        document.getElementById("projectDescription").value = p.description||"";
+      }));
+      document.querySelectorAll(".delete-project").forEach(b=>b.addEventListener("click",async()=>{
+        if(!confirm("¿Eliminar este proyecto compartido y sus datos asociados?")) return;
+        const { error } = await supabaseClient.from("projects").delete().eq("id", b.dataset.id);
+        if(error) return showToast("Error al eliminar: "+error.message);
+        if(activeProjectId===b.dataset.id) activeProjectId="";
+        await loadSharedData(); showToast("Proyecto eliminado de Supabase");
       }));
     }
 
-    document.getElementById("projectForm").addEventListener("submit", e => {
+    document.getElementById("projectForm").addEventListener("submit", async e => {
       e.preventDefault();
-      const id = document.getElementById("projectId").value || uid();
-      const p = {
-        id, name: document.getElementById("projectName").value.trim(), code: document.getElementById("projectCode").value.trim(),
-        client: document.getElementById("projectClient").value.trim(), type: document.getElementById("projectType").value,
-        location: document.getElementById("projectLocation").value.trim(), sprintLength: document.getElementById("sprintLength").value,
-        description: document.getElementById("projectDescription").value.trim()
+      const existingId = document.getElementById("projectId").value;
+      const payload = {
+        name: document.getElementById("projectName").value.trim(),
+        code: document.getElementById("projectCode").value.trim() || null,
+        client: document.getElementById("projectClient").value.trim() || null,
+        project_type: document.getElementById("projectType").value,
+        location: document.getElementById("projectLocation").value.trim() || null,
+        sprint_length: Number(document.getElementById("sprintLength").value)||2,
+        description: document.getElementById("projectDescription").value.trim() || null,
+        updated_at: new Date().toISOString()
       };
-      const i = projects.findIndex(x=>x.id===id);
-      if(i>=0) projects[i] = p; else projects.push(p);
-      activeProjectId = id; saveAll(); document.getElementById("projectForm").reset(); renderAll(); showToast("Proyecto guardado");
+      let result;
+      if(existingId){
+        result = await supabaseClient.from("projects").update(payload).eq("id", existingId).select().single();
+      } else {
+        result = await supabaseClient.from("projects").insert(payload).select().single();
+      }
+      if(result.error) return showToast("Error al guardar proyecto: "+result.error.message);
+      activeProjectId = result.data.id;
+      localStorage.setItem(KEY.activeProject, activeProjectId);
+      document.getElementById("projectForm").reset();
+      document.getElementById("projectId").value="";
+      await loadSharedData(); showToast("Proyecto guardado en Supabase");
     });
 
     function renderResponsibles(){
@@ -906,41 +1001,53 @@
           </div>
           <button class="btn small danger delete-responsible admin-only" data-id="${r.id}">Eliminar</button>
         </div>`).join("") : '<div class="empty">No hay responsables agregados.</div>';
-      
-      document.querySelectorAll(".delete-responsible").forEach(b=>b.addEventListener("click",()=>{ responsibles=responsibles.filter(r=>r.id!==b.dataset.id); saveAll(); renderAll(); }));
+
+      document.querySelectorAll(".delete-responsible").forEach(b=>b.addEventListener("click",async()=>{
+        const { error } = await supabaseClient.from("responsibles").delete().eq("id", b.dataset.id);
+        if(error) return showToast("Error al eliminar responsable: "+error.message);
+        await loadSharedData(); showToast("Responsable eliminado");
+      }));
       updateDropdowns();
     }
 
-    document.getElementById("responsibleForm").addEventListener("submit", e => {
+    document.getElementById("responsibleForm").addEventListener("submit", async e => {
       e.preventDefault();
       if(!activeProjectId) return showToast("Activa un proyecto primero.");
-      responsibles.push({
-        id: uid(), projectId: activeProjectId, name: document.getElementById("responsibleName").value.trim(),
-        role: document.getElementById("responsibleRole").value, area: document.getElementById("responsibleArea").value,
-        hourlyRate: Number(document.getElementById("responsibleHourlyRate").value)||0
-      });
-      e.target.reset(); saveAll(); renderAll(); showToast("Responsable agregado");
+      const payload = {
+        project_id: activeProjectId,
+        name: document.getElementById("responsibleName").value.trim(),
+        role: document.getElementById("responsibleRole").value,
+        area: document.getElementById("responsibleArea").value,
+        hourly_rate: Number(document.getElementById("responsibleHourlyRate").value)||0,
+        updated_at: new Date().toISOString()
+      };
+      const { error } = await supabaseClient.from("responsibles").insert(payload);
+      if(error) return showToast("Error al guardar responsable: "+error.message);
+      e.target.reset(); await loadSharedData(); showToast("Responsable guardado en Supabase");
     });
 
     document.getElementById("csvFileInput").addEventListener("change", function(e) {
       if(!activeProjectId) return showToast("Activa un proyecto primero.");
-      const file = e.target.files[0]; if(!file) return;
-      const reader = new FileReader();
-      reader.onload = function(ev) {
-        const lines = ev.target.result.split('\n'); let count = 0;
-        for(let i=0; i<lines.length; i++) {
-          const cols = lines[i].split(',');
-          if(cols.length >= 3 && cols[0].trim() !== "" && cols[0].toLowerCase() !== "nombre") { 
-            responsibles.push({
-              id: uid(), projectId: activeProjectId, name: cols[0].trim(),
-              role: cols[1]?cols[1].trim():"Especialista", area: cols[2]?cols[2].trim():"General",
-              hourlyRate: cols[3] ? (Number(cols[3].trim())||0) : 0
-            }); count++;
+      const file=e.target.files[0]; if(!file) return;
+      const reader=new FileReader();
+      reader.onload=async function(ev){
+        const rows=[];
+        for(const line of ev.target.result.split(/\r?\n/)){
+          const cols=line.split(',');
+          if(cols.length>=3 && cols[0].trim() && cols[0].trim().toLowerCase()!=="nombre"){
+            rows.push({project_id:activeProjectId,name:cols[0].trim(),role:(cols[1]||"Especialista").trim(),area:(cols[2]||"General").trim(),hourly_rate:Number((cols[3]||"0").trim())||0});
           }
         }
-        e.target.value = ''; saveAll(); renderAll(); showToast(`Carga masiva completa: ${count} agregados`);
-      }; reader.readAsText(file);
+        if(rows.length){
+          const {error}=await supabaseClient.from("responsibles").insert(rows);
+          if(error) return showToast("Error en carga CSV: "+error.message);
+        }
+        e.target.value=''; await loadSharedData(); showToast(`Carga masiva: ${rows.length} responsables`);
+      };
+      reader.readAsText(file);
     });
+
+    function priorityBadge(p){ const c=p==="Alta"?"danger":p==="Media"?"warning":""; return `<span class="badge ${c}">${esc(p||"Media")}</span>`; }
 
     function updateDropdowns(){
       const ownerSel = document.getElementById("taskOwner"), sprintSel = document.getElementById("taskSprint");
@@ -951,32 +1058,58 @@
     function renderBacklog(){
       const arr = projectTasks(), body = document.getElementById("backlogBody");
       const spMap = Object.fromEntries(projectSprints().map(x=>[x.id,x]));
-      
       body.innerHTML = arr.length ? arr.map(t => `
         <tr>
-          <td><strong>${t.id}</strong></td><td>${esc(t.name)}</td><td>${t.discipline}</td>
+          <td><strong>${esc(t.id)}</strong></td><td>${esc(t.name)}</td><td>${esc(t.discipline)}</td>
           <td>${priorityBadge(t.priority)}</td><td>${spMap[t.sprintId]?.name||"—"}</td>
-          <td><select class="owner-editor" data-id="${t.uid}"><option value="">Por asignar</option>${projectResponsibles().map(r=>`<option value="${r.id}" ${r.id===t.ownerId?"selected":""}>${r.name}</option>`).join("")}</select></td>
+          <td><select class="owner-editor" data-id="${t.uid}"><option value="">Por asignar</option>${projectResponsibles().map(r=>`<option value="${r.id}" ${r.id===t.ownerId?"selected":""}>${esc(r.name)}</option>`).join("")}</select></td>
           <td>${t.hours||0} h</td>
           <td><select class="status-editor" data-id="${t.uid}">${["Backlog","Por iniciar","En proceso","En revisión","Bloqueado","Aprobado"].map(x=>`<option ${x===t.status?"selected":""}>${x}</option>`).join("")}</select></td>
           <td class="admin-only"><button class="btn small danger delete-task" data-id="${t.uid}">X</button></td>
         </tr>`).join("") : '<tr><td colspan="9"><div class="empty">No hay actividades.</div></td></tr>';
 
-      document.querySelectorAll(".owner-editor").forEach(x=>x.addEventListener("change",()=>{ const t=tasks.find(a=>a.uid===x.dataset.id); if(t) t.ownerId=x.value; saveAll(); renderKanban(); }));
-      document.querySelectorAll(".status-editor").forEach(x=>x.addEventListener("change",()=>{ const t=tasks.find(a=>a.uid===x.dataset.id); if(t) t.status=x.value; saveAll(); renderDashboard(); renderKanban(); }));
-      document.querySelectorAll(".delete-task").forEach(b=>b.addEventListener("click",()=>{ tasks=tasks.filter(t=>t.uid!==b.dataset.id); saveAll(); renderAll(); }));
+      document.querySelectorAll(".owner-editor").forEach(x=>x.addEventListener("change",async()=>{
+        const {error}=await supabaseClient.from("tasks").update({responsible_id:x.value||null,updated_at:new Date().toISOString()}).eq("id",x.dataset.id);
+        if(error) return showToast("Error al asignar responsable: "+error.message);
+        await loadSharedData();
+      }));
+      document.querySelectorAll(".status-editor").forEach(x=>x.addEventListener("change",async()=>{
+        const {error}=await supabaseClient.from("tasks").update({status:x.value,updated_at:new Date().toISOString()}).eq("id",x.dataset.id);
+        if(error) return showToast("Error al cambiar estado: "+error.message);
+        await loadSharedData();
+      }));
+      document.querySelectorAll(".delete-task").forEach(b=>b.addEventListener("click",async()=>{
+        const {error}=await supabaseClient.from("tasks").delete().eq("id",b.dataset.id);
+        if(error) return showToast("Error al eliminar actividad: "+error.message);
+        await loadSharedData(); showToast("Actividad eliminada");
+      }));
     }
 
-    document.getElementById("taskForm").addEventListener("submit", e => {
+    document.getElementById("openTaskModal").addEventListener("click",()=>{
+      if(!activeProjectId) return showToast("Crea o activa un proyecto primero.");
+      updateDropdowns(); openModal("taskModal");
+    });
+
+    document.getElementById("taskForm").addEventListener("submit", async e => {
       e.preventDefault();
-      tasks.push({
-        uid: uid(), projectId: activeProjectId, id: document.getElementById("taskId").value,
-        name: document.getElementById("taskName").value, discipline: document.getElementById("taskDiscipline").value,
-        priority: document.getElementById("taskPriority").value, sprintId: document.getElementById("taskSprint").value,
-        ownerId: document.getElementById("taskOwner").value, hours: Number(document.getElementById("taskHours").value)||0,
-        status: document.getElementById("taskStatus").value, startDate: document.getElementById("taskStartDate").value, endDate: document.getElementById("taskEndDate").value
-      });
-      e.target.reset(); saveAll(); closeModal("taskModal"); renderAll(); showToast("Actividad creada");
+      if(!activeProjectId) return showToast("Crea o activa un proyecto primero.");
+      const payload = {
+        project_id:activeProjectId,
+        code:document.getElementById("taskId").value.trim(),
+        name:document.getElementById("taskName").value.trim(),
+        discipline:document.getElementById("taskDiscipline").value,
+        priority:document.getElementById("taskPriority").value,
+        sprint_id:null,
+        responsible_id:document.getElementById("taskOwner").value||null,
+        estimated_hours:Number(document.getElementById("taskHours").value)||0,
+        status:document.getElementById("taskStatus").value,
+        start_date:document.getElementById("taskStartDate").value||null,
+        end_date:document.getElementById("taskEndDate").value||null,
+        updated_at:new Date().toISOString()
+      };
+      const {error}=await supabaseClient.from("tasks").insert(payload);
+      if(error) return showToast("Error al crear actividad: "+error.message);
+      e.target.reset(); closeModal("taskModal"); await loadSharedData(); showToast("Actividad guardada en Supabase");
     });
 
     function renderTimeline(){
@@ -991,8 +1124,12 @@
           <div>${statusBadge(t.status)}</div>
         </div>`).join("") : '<div class="empty">Sin actividades.</div>';
       
-      document.querySelectorAll(".timeline-start, .timeline-end").forEach(inp=>inp.addEventListener("change",()=>{
-        const t=tasks.find(x=>x.uid===inp.dataset.id); if(t) { if(inp.classList.contains("timeline-start")) t.startDate=inp.value; else t.endDate=inp.value; saveAll(); }
+      document.querySelectorAll(".timeline-start, .timeline-end").forEach(inp=>inp.addEventListener("change",async()=>{
+        const field = inp.classList.contains("timeline-start") ? "start_date" : "end_date";
+        const payload = {[field]: inp.value||null, updated_at:new Date().toISOString()};
+        const {error}=await supabaseClient.from("tasks").update(payload).eq("id",inp.dataset.id);
+        if(error) return showToast("Error al actualizar fecha: "+error.message);
+        await loadSharedData();
       }));
     }
 
@@ -1024,7 +1161,7 @@
         col.addEventListener("drop",e=>{
           e.preventDefault(); col.classList.remove("drag-over");
           const id = e.dataTransfer.getData("text/plain"), t = tasks.find(x=>x.uid===id);
-          if(t && t.status !== col.dataset.status) { t.status = col.dataset.status; saveAll(); renderAll(); }
+          if(t && t.status !== col.dataset.status) { const newStatus=col.dataset.status; t.status=newStatus; renderAll(); supabaseClient.from("tasks").update({status:newStatus,updated_at:new Date().toISOString()}).eq("id",id).then(({error})=>{ if(error){ showToast("Error al mover actividad: "+error.message); loadSharedData(); } }); }
         });
       });
     }
@@ -1044,7 +1181,12 @@
       renderSprints(); renderKanban(); renderDashboard();
     }
 
+    // Actualización manual + refresco periódico para colaboración entre equipos.
+    document.getElementById("refreshSharedDataBtn").addEventListener("click",()=>loadSharedData(true));
+
     renderAll();
+    loadSharedData();
+    setInterval(()=>loadSharedData(false), 20000);
   </script>
 </body>
 </html>
