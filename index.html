@@ -373,10 +373,93 @@
     .sprint-team-row .member-label input{width:auto}
     @media(max-width:760px){.sprint-team-row{grid-template-columns:1fr}}
 
+  
+    /* ===== Responsive / móvil ===== */
+    .mobile-menu-btn{
+      display:none; position:fixed; left:12px; top:12px; z-index:120;
+      width:44px; height:44px; border:1px solid var(--border); border-radius:12px;
+      background:white; color:var(--text); font-size:22px; box-shadow:var(--shadow);
+    }
+    .mobile-nav-backdrop{
+      display:none; position:fixed; inset:0; z-index:108;
+      background:rgba(15,23,42,.45);
+    }
+    .metric-alert{font-size:12px;font-weight:700;margin-top:7px}
+    .metric-alert.good{color:#137a4b}.metric-alert.watch{color:#9b6300}
+    .metric-alert.bad{color:#b45309}.metric-alert.critical{color:#b42318}
+    .performance-table input{min-width:92px}
+    .evm-chart-wrap{overflow-x:auto}
+    .evm-svg{width:100%;min-width:620px;height:auto;display:block}
+    .demo-note{border-left:4px solid var(--accent);padding:10px 12px;background:var(--accent-soft);border-radius:8px;margin-bottom:14px}
+    .kanban-col{scroll-snap-align:start}
+
+    @media(max-width:760px){
+      body{overflow-x:hidden}
+      .mobile-menu-btn{display:grid;place-items:center}
+      .app{display:block;min-height:100vh}
+      aside{
+        position:fixed; left:0; top:0; bottom:0; z-index:110;
+        width:min(82vw,300px); height:100%; transform:translateX(-105%);
+        transition:transform .22s ease; box-shadow:12px 0 36px rgba(15,23,42,.22);
+      }
+      .app.mobile-menu-open aside{transform:translateX(0)}
+      .mobile-nav-backdrop.show{display:block}
+      nav{grid-template-columns:1fr}
+      main{padding:72px 14px 28px}
+      .topbar{flex-direction:column;align-items:stretch;gap:12px;margin-bottom:18px}
+      .topbar h2{font-size:24px;line-height:1.15}
+      .topbar p{font-size:14px}
+      .top-actions{width:100%;align-items:stretch}
+      .top-actions > *{max-width:100%}
+      .role-simulator{border-radius:12px;justify-content:space-between;flex:1 1 100%}
+      .role-simulator select{max-width:65%}
+      .top-actions .btn{flex:1 1 auto}
+      .grid.cols-2,.grid.cols-3{grid-template-columns:1fr}
+      .grid.cols-4{grid-template-columns:repeat(2,minmax(0,1fr))}
+      .card{padding:16px;border-radius:14px}
+      .metric{font-size:25px}
+      .sub-header{font-size:17px;margin-top:28px}
+      .form-grid{grid-template-columns:1fr}
+      .field.full{grid-column:auto}
+      input,select,textarea{font-size:16px}
+      .table-wrap{
+        overflow-x:auto; -webkit-overflow-scrolling:touch;
+        border-radius:10px; position:relative;
+      }
+      table{min-width:980px}
+      th,td{padding:10px 11px}
+      .timeline{overflow-x:auto;-webkit-overflow-scrolling:touch}
+      .timeline-head,.timeline-row{min-width:850px}
+      .kanban{
+        display:grid; grid-template-columns:none; grid-auto-flow:column;
+        grid-auto-columns:minmax(84vw,1fr); overflow-x:auto;
+        scroll-snap-type:x mandatory; overscroll-behavior-x:contain;
+        padding:2px 2px 12px;
+      }
+      .kanban-col{min-height:360px}
+      .modal-backdrop{padding:8px;align-items:flex-end}
+      .modal{
+        width:100%; max-width:none; border-radius:18px 18px 0 0;
+        max-height:90vh; padding:16px;
+      }
+      .modal-head{position:sticky;top:-16px;background:white;padding:12px 0;z-index:2}
+      .sprint-team-row{grid-template-columns:1fr}
+      .discipline-row{grid-template-columns:1fr;gap:6px}
+      .discipline-row .progress{margin-top:0}
+      .evm-svg{min-width:560px}
+    }
+    @media(max-width:430px){
+      .grid.cols-4{grid-template-columns:1fr}
+      .top-actions .btn{flex:1 1 100%}
+      main{padding-left:10px;padding-right:10px}
+    }
+
   </style>
 </head>
 <body class="view-only">
-  <div class="app">
+  <button class="mobile-menu-btn" id="mobileMenuBtn" type="button" aria-label="Abrir menú">☰</button>
+  <div class="mobile-nav-backdrop" id="mobileNavBackdrop"></div>
+  <div class="app" id="appShell">
     <aside>
       <div class="brand">
         <div class="brand-mark">AB</div>
@@ -423,6 +506,7 @@
             <!-- Botón Borrar Todo (Solo Admin) -->
             <button class="btn" id="refreshSharedDataBtn">↻ Actualizar datos</button>
             <span class="badge info" id="syncStatus">Conectando…</span>
+            <button class="btn admin-only" id="loadDemoProjectsBtn">✨ Cargar ejemplos demo</button>
             <button class="btn primary admin-only" data-go="projects">+ Nuevo proyecto</button>
           </div>
         </div>
@@ -476,6 +560,7 @@
         <div class="topbar">
           <div><h2>Proyecto y Equipo</h2><p>Crea proyectos, activa uno de ellos y administra sus responsables estandarizados.</p></div>
         </div>
+        <div class="demo-note admin-only"><strong>Demo compartida:</strong> usa “✨ Cargar ejemplos demo” desde el Dashboard para crear o restablecer Torres del Sol y Hospital 20 de Julio en Supabase.</div>
 
         <div class="grid cols-2">
           <form id="projectForm" class="card admin-only">
@@ -832,6 +917,185 @@
       "BIM":"BIM",
       "Presupuestos":"PRE"
     };
+
+    const DEMO_PROJECTS = [
+      {
+        code:"TDS-DEMO", name:"Torres del Sol", client:"Constructora Primavera",
+        type:"Residencial", location:"Bogotá", sprintLength:2,
+        description:"Demo de diseño multidisciplinario para torre residencial de 15 pisos. Proyecto relativamente controlado.",
+        people:[
+          ["Laura Gómez","Líder","Arquitectura",92000],
+          ["Carlos Rojas","Especialista","Estructuras",98000],
+          ["Diana Martínez","Especialista","Hidrosanitario",88000],
+          ["Andrés Peña","Especialista","Eléctrico",90000],
+          ["Miguel Silva","Scrum Master","BIM",95000]
+        ],
+        sprints:[
+          ["Sprint 01","Definiciones base y criterios de diseño","2026-09-07","2026-09-20",[["Laura Gómez",48],["Carlos Rojas",48],["Miguel Silva",24]]],
+          ["Sprint 02","Desarrollo de diseño básico interdisciplinario","2026-09-21","2026-10-04",[["Laura Gómez",56],["Carlos Rojas",56],["Diana Martínez",40],["Andrés Peña",40],["Miguel Silva",32]]],
+          ["Sprint 03","Coordinación y cierre de entregables principales","2026-10-05","2026-10-18",[["Laura Gómez",48],["Carlos Rojas",48],["Diana Martínez",36],["Andrés Peña",36],["Miguel Silva",48]]]
+        ],
+        tasks:[
+          ["ARQ-001","Esquemas arquitectónicos","Arquitectura","Alta","Sprint 01","Laura Gómez",42,40,"Aprobado","2026-09-07","2026-09-13",100],
+          ["EST-001","Predimensionamiento estructural","Estructuras","Alta","Sprint 01","Carlos Rojas",40,42,"Aprobado","2026-09-09","2026-09-18",100],
+          ["BIM-001","Modelo base de coordinación","BIM","Media","Sprint 01","Miguel Silva",22,20,"Aprobado","2026-09-14","2026-09-20",100],
+          ["ARQ-002","Plantas y fachadas 60%","Arquitectura","Alta","Sprint 02","Laura Gómez",52,50,"Aprobado","2026-09-21","2026-10-02",100],
+          ["HSA-001","Redes hidrosanitarias básicas","Hidrosanitario","Media","Sprint 02","Diana Martínez",36,34,"En revisión","2026-09-23","2026-10-03",88],
+          ["ELE-001","Cargas y distribución eléctrica","Eléctrico","Media","Sprint 02","Andrés Peña",34,32,"En revisión","2026-09-24","2026-10-04",86],
+          ["EST-002","Modelo estructural 60%","Estructuras","Alta","Sprint 02","Carlos Rojas",50,48,"Aprobado","2026-09-21","2026-10-04",100],
+          ["BIM-002","Coordinación interdisciplinaria","BIM","Alta","Sprint 03","Miguel Silva",44,39,"En proceso","2026-10-05","2026-10-18",72]
+        ]
+      },
+      {
+        code:"H20J-DEMO", name:"Hospital 20 de Julio", client:"Red Hospitalaria Distrital",
+        type:"Hospitalario", location:"Bogotá", sprintLength:2,
+        description:"Demo hospitalaria de mayor complejidad, con presión de plazo, coordinación técnica y desviaciones de costo.",
+        people:[
+          ["Natalia Torres","Director","General / Proyecto",125000],
+          ["Felipe Vargas","Líder","Arquitectura",102000],
+          ["María Cárdenas","Especialista","Estructuras",110000],
+          ["Sebastián León","Especialista","Hidrosanitario",96000],
+          ["Camila Duarte","Especialista","Eléctrico",98000],
+          ["Jorge Bernal","Scrum Master","BIM",105000]
+        ],
+        sprints:[
+          ["Sprint 01","Criterios hospitalarios, arquitectura y estructura base","2026-10-05","2026-10-18",[["Natalia Torres",24],["Felipe Vargas",56],["María Cárdenas",52],["Jorge Bernal",28]]],
+          ["Sprint 02","Desarrollo MEP y coordinación de áreas críticas","2026-10-19","2026-11-01",[["Felipe Vargas",48],["María Cárdenas",44],["Sebastián León",52],["Camila Duarte",52],["Jorge Bernal",40]]],
+          ["Sprint 03","Coordinación avanzada y cierre de diseño básico","2026-11-02","2026-11-15",[["Natalia Torres",20],["Felipe Vargas",48],["María Cárdenas",44],["Sebastián León",48],["Camila Duarte",48],["Jorge Bernal",56]]]
+        ],
+        tasks:[
+          ["ARQ-001","Programa arquitectónico y flujos clínicos","Arquitectura","Alta","Sprint 01","Felipe Vargas",54,62,"Aprobado","2026-10-05","2026-10-15",100],
+          ["EST-001","Criterios y predimensionamiento estructural","Estructuras","Alta","Sprint 01","María Cárdenas",48,55,"Aprobado","2026-10-07","2026-10-18",100],
+          ["BIM-001","Modelo federado inicial","BIM","Alta","Sprint 01","Jorge Bernal",26,31,"Aprobado","2026-10-12","2026-10-18",100],
+          ["HSA-001","Redes sanitarias y gases - coordinación base","Hidrosanitario","Alta","Sprint 02","Sebastián León",48,57,"En revisión","2026-10-19","2026-10-31",78],
+          ["ELE-001","Cargas críticas y respaldo eléctrico","Eléctrico","Alta","Sprint 02","Camila Duarte",50,61,"En revisión","2026-10-19","2026-11-01",74],
+          ["ARQ-002","Áreas críticas y circulaciones 60%","Arquitectura","Alta","Sprint 02","Felipe Vargas",46,54,"En proceso","2026-10-20","2026-11-01",68],
+          ["EST-002","Modelo estructural de áreas técnicas","Estructuras","Alta","Sprint 03","María Cárdenas",42,39,"En proceso","2026-11-02","2026-11-13",52],
+          ["BIM-002","Clash detection áreas críticas","BIM","Alta","Sprint 03","Jorge Bernal",52,43,"Bloqueado","2026-11-03","2026-11-15",38],
+          ["ELE-002","Tableros y canalizaciones principales","Eléctrico","Media","Sprint 03","Camila Duarte",42,30,"Por iniciar","2026-11-05","2026-11-15",20],
+          ["HSA-002","Redes de agua y drenaje 60%","Hidrosanitario","Media","Sprint 03","Sebastián León",44,33,"En proceso","2026-11-04","2026-11-15",45]
+        ]
+      }
+    ];
+
+    const DEMO_GOVERNANCE = {
+      "TDS-DEMO":{
+        risks:[
+          ["Coordinación de pases en losas","2","3","Mitigar · coordinación BIM semanal y matriz de interferencias."],
+          ["Definición tardía de acabados","2","2","Aceptar con seguimiento · congelar decisiones antes del cierre del Sprint 03."]
+        ],
+        minutes:[
+          ["2026-10-06","Comité de coordinación 03","Se validó la arquitectura 60% y se priorizó la coordinación BIM del núcleo central."]
+        ],
+        changes:[
+          ["CHG-001","Ajuste de ubicación de cuartos técnicos","Aprobado","Impacto menor en Arquitectura, Eléctrico y BIM."]
+        ]
+      },
+      "H20J-DEMO":{
+        risks:[
+          ["Retraso en definición de equipos médicos","4","5","Escalar y mitigar · solicitar matriz de equipos priorizada y congelar áreas críticas."],
+          ["Interferencias MEP en cielos de áreas clínicas","4","4","Mitigar · sesiones BIM diarias durante cierre del Sprint 03."],
+          ["Incremento de horas de coordinación eléctrica","3","4","Mitigar · redistribuir capacidad y revisar alcance de respaldo eléctrico."]
+        ],
+        minutes:[
+          ["2026-11-04","Comité técnico hospitalario","Se priorizaron UCI, cirugía y urgencias. Se solicitaron ajustes en respaldo eléctrico y gases."],
+          ["2026-11-09","Coordinación interdisciplinaria","Se identificaron interferencias críticas sobre corredores técnicos y se acordó resolución por zonas."]
+        ],
+        changes:[
+          ["CHG-001","Aumento de capacidad del sistema de respaldo","En evaluación","Afecta Eléctrico, Arquitectura y BIM."],
+          ["CHG-002","Reubicación de equipos en áreas críticas","Solicitado","Afecta Arquitectura, Hidrosanitario, Eléctrico y BIM."]
+        ]
+      }
+    };
+
+
+    async function ensureDemoProject(spec){
+      let {data:found,error:findErr} = await supabaseClient
+        .from("projects").select("*").or(`code.eq.${spec.code},name.eq.${spec.name}`).limit(1);
+      if(findErr) throw findErr;
+
+      let projectId;
+      if(found && found.length){
+        projectId = found[0].id;
+        const {error:uErr}=await supabaseClient.from("projects").update({
+          name:spec.name, code:spec.code, client:spec.client, project_type:spec.type,
+          location:spec.location, sprint_length:spec.sprintLength, description:spec.description,
+          updated_at:new Date().toISOString()
+        }).eq("id",projectId);
+        if(uErr) throw uErr;
+
+        await supabaseClient.from("tasks").delete().eq("project_id",projectId);
+        await supabaseClient.from("sprints").delete().eq("project_id",projectId);
+        await supabaseClient.from("responsibles").delete().eq("project_id",projectId);
+      }else{
+        const {data:newP,error:pErr}=await supabaseClient.from("projects").insert({
+          name:spec.name, code:spec.code, client:spec.client, project_type:spec.type,
+          location:spec.location, sprint_length:spec.sprintLength, description:spec.description
+        }).select().single();
+        if(pErr) throw pErr;
+        projectId = newP.id;
+      }
+
+      const peoplePayload = spec.people.map(p=>({
+        project_id:projectId, name:p[0], role:p[1], area:p[2], hourly_rate:p[3]
+      }));
+      const {data:peopleRows,error:peopleErr}=await supabaseClient
+        .from("responsibles").insert(peoplePayload).select();
+      if(peopleErr) throw peopleErr;
+      const peopleByName = Object.fromEntries(peopleRows.map(r=>[r.name,r]));
+
+      const sprintRows = [];
+      for(const s of spec.sprints){
+        const team = s[4].map(m=>({
+          responsibleId:peopleByName[m[0]]?.id||null,
+          name:m[0],
+          hours:m[1]
+        }));
+        const {data:sp,error:spErr}=await supabaseClient.from("sprints").insert({
+          project_id:projectId,name:s[0],objective:s[1],start_date:s[2],end_date:s[3],team
+        }).select().single();
+        if(spErr) throw spErr;
+        sprintRows.push(sp);
+      }
+      const sprintByName = Object.fromEntries(sprintRows.map(s=>[s.name,s]));
+
+      const taskPayload = spec.tasks.map(t=>({
+        project_id:projectId, code:t[0], name:t[1], discipline:t[2], priority:t[3],
+        sprint_id:sprintByName[t[4]]?.id||null,
+        responsible_id:peopleByName[t[5]]?.id||null,
+        estimated_hours:t[6], real_hours:t[7], status:t[8],
+        start_date:t[9], end_date:t[10], physical_progress:t[11]
+      }));
+      const {error:tErr}=await supabaseClient.from("tasks").insert(taskPayload);
+      if(tErr) throw tErr;
+      return projectId;
+    }
+
+    async function loadDemoProjects(){
+      if(!confirm("Esto creará o restablecerá los dos proyectos demo y reemplazará sus actividades actuales. ¿Continuar?")) return;
+      const btn=document.getElementById("loadDemoProjectsBtn");
+      if(btn){btn.disabled=true;btn.textContent="Cargando demo...";}
+      setSyncStatus("Cargando demo…","warning");
+      try{
+        let lastId="";
+        for(const spec of DEMO_PROJECTS) lastId=await ensureDemoProject(spec);
+        await loadSharedData();
+        const tds=projects.find(p=>p.code==="TDS-DEMO");
+        if(tds){
+          activeProjectId=tds.id;
+          dashboardProjectFilter=tds.id;
+          localStorage.setItem(KEY.activeProject,activeProjectId);
+        }
+        renderAll();
+        showToast("Ejemplos demo cargados correctamente");
+      }catch(err){
+        console.error(err);
+        showToast("Error cargando demo: "+err.message);
+        setSyncStatus("Error de sincronización","danger");
+      }finally{
+        if(btn){btn.disabled=false;btn.textContent="✨ Cargar ejemplos demo";}
+      }
+    }
 
     function nextTaskCode(discipline){
       const prefix = DISCIPLINE_PREFIX[discipline] || "ACT";
@@ -1335,10 +1599,246 @@
       }
     });
 
+
+    function currentProjectForView(){
+      return projects.find(p=>p.id===activeProjectId)||null;
+    }
+
+    function taskCost(t){
+      const r=responsibles.find(x=>x.id===t.ownerId);
+      const rate=Number(r?.hourlyRate)||0;
+      return {
+        rate,
+        planned:(Number(t.hours)||0)*rate,
+        actual:(Number(t.realHours)||0)*rate
+      };
+    }
+
+    function renderBudget(){
+      const el=document.getElementById("budgetContent");
+      const p=currentProjectForView();
+      if(!p){el.innerHTML='<div class="empty">Selecciona un proyecto.</div>';return;}
+      const arr=projectTasks();
+      const directPlanned=arr.reduce((s,t)=>s+taskCost(t).planned,0);
+      const directActual=arr.reduce((s,t)=>s+taskCost(t).actual,0);
+
+      el.innerHTML=`
+        <div class="grid cols-4" style="margin-bottom:18px">
+          <div class="card"><div class="muted">Costo directo planificado</div><div class="metric">${money(directPlanned)}</div></div>
+          <div class="card"><div class="muted">Costo directo real</div><div class="metric">${money(directActual)}</div></div>
+          <div class="card"><div class="muted">Variación</div><div class="metric">${money(directPlanned-directActual)}</div></div>
+          <div class="card"><div class="muted">Horas reales</div><div class="metric">${arr.reduce((s,t)=>s+(Number(t.realHours)||0),0)} h</div></div>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table class="performance-table">
+              <thead><tr><th>ID</th><th>Entregable</th><th>Responsable</th><th>Tarifa/h</th><th>Horas plan</th><th>Horas reales</th><th>Costo plan</th><th>Costo real</th></tr></thead>
+              <tbody>
+                ${arr.map(t=>{
+                  const r=responsibles.find(x=>x.id===t.ownerId);
+                  const c=taskCost(t);
+                  return `<tr>
+                    <td><strong>${esc(t.id)}</strong></td><td>${esc(t.name)}</td><td>${esc(r?.name||"Por asignar")}</td>
+                    <td>${money(c.rate)}</td><td>${Number(t.hours)||0}</td>
+                    <td><input class="real-hours-editor" data-id="${t.uid}" type="number" min="0" step="1" value="${Number(t.realHours)||0}"></td>
+                    <td>${money(c.planned)}</td><td>${money(c.actual)}</td>
+                  </tr>`;
+                }).join("")||'<tr><td colspan="8">Sin entregables.</td></tr>'}
+              </tbody>
+            </table>
+          </div>
+        </div>`;
+
+      document.querySelectorAll(".real-hours-editor").forEach(inp=>inp.addEventListener("change",async()=>{
+        const val=Math.max(0,Number(inp.value)||0);
+        const {error}=await supabaseClient.from("tasks").update({real_hours:val,updated_at:new Date().toISOString()}).eq("id",inp.dataset.id);
+        if(error)return showToast("Error guardando horas reales: "+error.message);
+        await loadSharedData();
+      }));
+    }
+
+    function evmStatus(value,type){
+      if(!Number.isFinite(value)||value<=0) return ["Sin dato","watch","Aún no hay suficiente información."];
+      if(value>=1) return ["Bien","good",type==="CPI"?"Costo bajo control.":"Cronograma en línea o adelantado."];
+      if(value>=0.95) return ["Atención","watch","Desviación ligera: conviene hacer seguimiento."];
+      if(value>=0.85) return ["Alerta","bad","Desviación relevante: revisar acciones correctivas."];
+      return ["Crítico","critical","Desviación significativa: requiere acción correctiva."];
+    }
+
+    function daysBetween(a,b){
+      return Math.max(1,(b-a)/86400000);
+    }
+
+    function evmSnapshot(cutoff){
+      const arr=projectTasks();
+      let BAC=0,PV=0,EV=0,AC=0;
+      arr.forEach(t=>{
+        const c=taskCost(t); BAC+=c.planned; AC+=c.actual;
+        const s=t.startDate?new Date(t.startDate+"T00:00:00"):null;
+        const e=t.endDate?new Date(t.endDate+"T00:00:00"):null;
+        let pf=0;
+        if(s&&e){
+          if(cutoff>=e) pf=1;
+          else if(cutoff>s) pf=Math.min(1,Math.max(0,(cutoff-s)/(e-s||86400000)));
+        }
+        PV+=c.planned*pf;
+        EV+=c.planned*(Math.max(0,Math.min(100,Number(t.physicalProgress)||0))/100);
+      });
+      const CPI=AC>0?EV/AC:0, SPI=PV>0?EV/PV:0;
+      const EAC=CPI>0?BAC/CPI:0;
+      return {BAC,PV,EV,AC,CPI,SPI,EAC,ETC:Math.max(0,EAC-AC),VAC:BAC-EAC};
+    }
+
+    function buildCurveData(){
+      const arr=projectTasks().filter(t=>t.startDate&&t.endDate);
+      if(!arr.length) return [];
+      const starts=arr.map(t=>new Date(t.startDate+"T00:00:00"));
+      const ends=arr.map(t=>new Date(t.endDate+"T00:00:00"));
+      const min=new Date(Math.min(...starts)), max=new Date(Math.max(...ends));
+      const cutoff=new Date();
+      const n=7, points=[];
+      for(let i=0;i<n;i++){
+        const d=new Date(min.getTime()+(max-min)*(i/(n-1)));
+        let pv=0,ev=0,ac=0;
+        arr.forEach(t=>{
+          const c=taskCost(t);
+          const s=new Date(t.startDate+"T00:00:00"), e=new Date(t.endDate+"T00:00:00");
+          let planFrac=d<=s?0:d>=e?1:(d-s)/(e-s||86400000);
+          pv+=c.planned*Math.max(0,Math.min(1,planFrac));
+
+          const currentProg=Math.max(0,Math.min(1,(Number(t.physicalProgress)||0)/100));
+          const currentActual=c.actual;
+          if(d<=cutoff){
+            const denom=Math.max(1,cutoff-s);
+            const elapsed=Math.max(0,Math.min(1,(d-s)/denom));
+            ev+=c.planned*currentProg*elapsed;
+            ac+=currentActual*elapsed;
+          }else{
+            ev+=c.planned*currentProg; ac+=currentActual;
+          }
+        });
+        points.push({date:d,pv,ev,ac});
+      }
+      return points;
+    }
+
+    function curveSvg(points){
+      if(points.length<2) return '<div class="empty">Agrega fechas a los entregables para visualizar la Curva S.</div>';
+      const W=760,H=280,padL=62,padR=20,padT=20,padB=42;
+      const maxV=Math.max(...points.flatMap(p=>[p.pv,p.ev,p.ac]),1);
+      const x=i=>padL+(W-padL-padR)*(i/(points.length-1));
+      const y=v=>H-padB-(H-padT-padB)*(v/maxV);
+      const poly=key=>points.map((p,i)=>`${x(i)},${y(p[key])}`).join(" ");
+      const labels=points.map((p,i)=>`<text x="${x(i)}" y="${H-14}" text-anchor="middle" font-size="11" fill="#687386">${p.date.toLocaleDateString("es-CO",{month:"short",day:"numeric"})}</text>`).join("");
+      return `<div class="card evm-chart-wrap">
+        <svg class="evm-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Curva S EVM">
+          <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}" stroke="#cbd5e1"/>
+          <line x1="${padL}" y1="${H-padB}" x2="${W-padR}" y2="${H-padB}" stroke="#cbd5e1"/>
+          ${[0,.25,.5,.75,1].map(q=>`<line x1="${padL}" y1="${y(maxV*q)}" x2="${W-padR}" y2="${y(maxV*q)}" stroke="#eef2f7"/><text x="${padL-8}" y="${y(maxV*q)+4}" text-anchor="end" font-size="10" fill="#687386">${Math.round(maxV*q/1000000)}M</text>`).join("")}
+          <polyline points="${poly("pv")}" fill="none" stroke="#64748b" stroke-width="3"/>
+          <polyline points="${poly("ev")}" fill="none" stroke="#1f6feb" stroke-width="3"/>
+          <polyline points="${poly("ac")}" fill="none" stroke="#d98200" stroke-width="3"/>
+          ${labels}
+          <g transform="translate(${padL+10},12)">
+            <text x="0" y="0" font-size="11" fill="#64748b">PV</text>
+            <text x="45" y="0" font-size="11" fill="#1f6feb">EV</text>
+            <text x="90" y="0" font-size="11" fill="#d98200">AC</text>
+          </g>
+        </svg>
+      </div>`;
+    }
+
+    function renderEvm(){
+      const el=document.getElementById("evmContent");
+      const p=currentProjectForView();
+      if(!p){el.innerHTML='<div class="empty">Selecciona un proyecto.</div>';return;}
+      const s=evmSnapshot(new Date());
+      const [cpiLabel,cpiClass,cpiMsg]=evmStatus(s.CPI,"CPI");
+      const [spiLabel,spiClass,spiMsg]=evmStatus(s.SPI,"SPI");
+      el.innerHTML=`
+        <div class="grid cols-4" style="margin-bottom:18px">
+          <div class="card"><div class="muted">BAC</div><div class="metric">${money(s.BAC)}</div><div class="tiny">Presupuesto base directo</div></div>
+          <div class="card"><div class="muted">PV</div><div class="metric">${money(s.PV)}</div><div class="tiny">Valor planificado a hoy</div></div>
+          <div class="card"><div class="muted">EV</div><div class="metric">${money(s.EV)}</div><div class="tiny">Valor ganado</div></div>
+          <div class="card"><div class="muted">AC</div><div class="metric">${money(s.AC)}</div><div class="tiny">Costo real</div></div>
+        </div>
+        <div class="grid cols-4" style="margin-bottom:18px">
+          <div class="card"><div class="muted">CPI</div><div class="metric">${s.CPI?s.CPI.toFixed(2):"—"}</div><div class="metric-alert ${cpiClass}">${cpiLabel}: ${cpiMsg}</div></div>
+          <div class="card"><div class="muted">SPI</div><div class="metric">${s.SPI?s.SPI.toFixed(2):"—"}</div><div class="metric-alert ${spiClass}">${spiLabel}: ${spiMsg}</div></div>
+          <div class="card"><div class="muted">EAC</div><div class="metric">${s.EAC?money(s.EAC):"—"}</div><div class="tiny">Estimación al completar</div></div>
+          <div class="card"><div class="muted">VAC</div><div class="metric">${s.EAC?money(s.VAC):"—"}</div><div class="tiny">Variación esperada al cierre</div></div>
+        </div>
+        ${curveSvg(buildCurveData())}
+        <div class="card" style="margin-top:18px">
+          <h3>Avance físico por entregable</h3>
+          <div class="table-wrap">
+            <table><thead><tr><th>ID</th><th>Entregable</th><th>Estado</th><th>Avance físico</th></tr></thead>
+            <tbody>${projectTasks().map(t=>`<tr><td>${esc(t.id)}</td><td>${esc(t.name)}</td><td>${statusBadge(t.status)}</td><td><input class="physical-editor" data-id="${t.uid}" type="number" min="0" max="100" value="${Number(t.physicalProgress)||0}"> %</td></tr>`).join("")}</tbody>
+            </table>
+          </div>
+        </div>`;
+      document.querySelectorAll(".physical-editor").forEach(inp=>inp.addEventListener("change",async()=>{
+        const val=Math.max(0,Math.min(100,Number(inp.value)||0));
+        const {error}=await supabaseClient.from("tasks").update({physical_progress:val,updated_at:new Date().toISOString()}).eq("id",inp.dataset.id);
+        if(error)return showToast("Error guardando avance: "+error.message);
+        await loadSharedData();
+      }));
+    }
+
+    function riskLevel(p,i){
+      const score=(Number(p)||1)*(Number(i)||1);
+      if(score>=17)return ["Crítico","danger"];
+      if(score>=10)return ["Alto","warning"];
+      if(score>=5)return ["Moderado","info"];
+      return ["Bajo","success"];
+    }
+
+    function renderGovernanceDemo(){
+      const p=currentProjectForView();
+      const demo=p?DEMO_GOVERNANCE[p.code]:null;
+      const riskEl=document.getElementById("risksList");
+      const minutesEl=document.getElementById("minutesList");
+      const changesEl=document.getElementById("changesList");
+      if(!p){
+        riskEl.innerHTML=minutesEl.innerHTML=changesEl.innerHTML='<div class="empty">Selecciona un proyecto.</div>';
+        return;
+      }
+      if(!demo){
+        riskEl.innerHTML='<div class="empty">Sin riesgos demo registrados.</div>';
+        minutesEl.innerHTML='<div class="empty">Sin actas demo registradas.</div>';
+        changesEl.innerHTML='<div class="empty">Sin cambios demo registrados.</div>';
+        return;
+      }
+      riskEl.innerHTML=demo.risks.map((r,idx)=>{
+        const [lvl,cls]=riskLevel(r[1],r[2]);
+        return `<div class="card"><span class="badge ${cls}">${lvl} · ${Number(r[1])*Number(r[2])}</span><h3 style="margin-top:12px">R-${String(idx+1).padStart(3,"0")} · ${esc(r[0])}</h3><p class="muted">Probabilidad ${r[1]}/5 · Impacto ${r[2]}/5</p><p>${esc(r[3])}</p></div>`;
+      }).join("");
+      minutesEl.innerHTML=demo.minutes.map(m=>`<div class="card" style="margin-bottom:12px"><span class="badge info">${esc(m[0])}</span><h3 style="margin-top:10px">${esc(m[1])}</h3><p>${esc(m[2])}</p></div>`).join("");
+      changesEl.innerHTML=demo.changes.map(c=>`<div class="card"><span class="badge ${c[2]==="Aprobado"?"success":"warning"}">${esc(c[2])}</span><h3 style="margin-top:10px">${esc(c[0])} · ${esc(c[1])}</h3><p>${esc(c[3])}</p></div>`).join("");
+    }
+
     function renderAll(){
       renderProjects(); renderResponsibles(); renderBacklog(); renderTimeline();
       renderSprints(); renderKanban(); renderDashboard();
+      renderBudget(); renderEvm(); renderGovernanceDemo();
     }
+
+
+    document.getElementById("loadDemoProjectsBtn").addEventListener("click",loadDemoProjects);
+
+    const appShell=document.getElementById("appShell");
+    const mobileMenuBtn=document.getElementById("mobileMenuBtn");
+    const mobileNavBackdrop=document.getElementById("mobileNavBackdrop");
+    function closeMobileMenu(){
+      appShell.classList.remove("mobile-menu-open");
+      mobileNavBackdrop.classList.remove("show");
+    }
+    mobileMenuBtn.addEventListener("click",()=>{
+      appShell.classList.toggle("mobile-menu-open");
+      mobileNavBackdrop.classList.toggle("show",appShell.classList.contains("mobile-menu-open"));
+    });
+    mobileNavBackdrop.addEventListener("click",closeMobileMenu);
+    navButtons.forEach(b=>b.addEventListener("click",closeMobileMenu));
 
     // Actualización manual + refresco periódico para colaboración entre equipos.
     document.getElementById("refreshSharedDataBtn").addEventListener("click",()=>loadSharedData(true));
