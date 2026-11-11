@@ -478,6 +478,44 @@
       #dashboardMiniCurve{overflow-x:auto}
     }
 
+  
+    /* ===== v16: contexto de proyecto, EDT y ruta crítica ===== */
+    .project-context{
+      display:flex;justify-content:space-between;gap:18px;align-items:center;
+      margin-bottom:18px;padding:14px 18px;background:white;border:1px solid var(--border);
+      border-radius:14px;box-shadow:var(--shadow);
+    }
+    .project-context-name{font-size:23px;font-weight:800;line-height:1.15}
+    .project-context-meta{font-size:13px;color:var(--muted);margin-top:4px}
+    .project-selector-wrap{display:flex;align-items:center;gap:8px;min-width:250px}
+    .project-selector-wrap label{white-space:nowrap}
+    .project-selector-wrap select{min-width:190px}
+    .project-info-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+    .project-info-item{padding:14px;border:1px solid var(--border);border-radius:12px;background:#fafbfd}
+    .project-info-item .label{font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+    .project-info-item .value{font-size:16px;font-weight:700;margin-top:5px}
+    .risk-scale{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+    .risk-scale > div{padding:9px 10px;border-radius:10px;font-size:12px;font-weight:700;text-align:center}
+    .risk-low{background:#e8f7ef;color:#137a4b}.risk-moderate{background:#e9f1ff;color:#245ab7}
+    .risk-high{background:#fff4db;color:#9b6300}.risk-critical{background:#fdecec;color:#ad2c2c}
+    .edt-tree{display:grid;gap:12px}
+    .edt-requirement{border:1px solid var(--border);border-radius:14px;background:white;padding:14px}
+    .edt-control{margin:10px 0 0 24px;border-left:3px solid #94a3b8;padding-left:14px}
+    .edt-work{margin:8px 0 0 24px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:#fafbfd}
+    .edt-row-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+    .critical-badge{display:inline-flex;padding:4px 8px;border-radius:999px;background:#fdecec;color:#b42318;font-size:11px;font-weight:800}
+    .timeline-row.critical-row{background:#fff7f7;border-color:#f4b8b8}
+    .timeline-row.critical-row .gantt-bar{background:#fecaca;outline:2px solid #dc2626}
+    .timeline-row.critical-row .gantt-progress{background:#dc2626}
+    .change-extra{margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+    .section-project-title{font-size:14px;color:var(--muted);font-weight:700;margin-top:4px}
+    @media(max-width:900px){
+      .project-info-grid{grid-template-columns:1fr}
+      .project-context{flex-direction:column;align-items:stretch}
+      .project-selector-wrap{min-width:0}
+      .project-selector-wrap select{min-width:0}
+    }
+
   </style>
 </head>
 <body class="view-only">
@@ -513,12 +551,6 @@
             <p id="project-subtitle">Sin proyecto activo</p>
           </div>
           <div class="top-actions">
-            <div class="role-simulator">
-              <label>Proyecto:</label>
-              <select id="dashboardProjectSelector">
-                <option value="__all__">Todos los proyectos</option>
-              </select>
-            </div>
             <!-- Selector de Roles -->
             <div class="role-simulator">
               <label>Vista:</label>
@@ -531,9 +563,10 @@
             <button class="btn" id="refreshSharedDataBtn">↻ Actualizar datos</button>
             <span class="badge info" id="syncStatus">Conectando…</span>
             <button class="btn admin-only" id="loadDemoProjectsBtn">✨ Cargar ejemplos demo</button>
-            <button class="btn primary admin-only" data-go="projects">+ Nuevo proyecto</button>
           </div>
         </div>
+
+        <div class="card" id="dashboardProjectInfo" style="margin-bottom:18px"></div>
 
         <div class="grid cols-4">
           <div class="card">
@@ -594,6 +627,7 @@
       <section id="projects" class="section">
         <div class="topbar">
           <div><h2>Proyecto y Equipo</h2><p>Crea proyectos, activa uno de ellos y administra sus responsables estandarizados.</p></div>
+          <button class="btn primary admin-only" id="newProjectBtn">+ Nuevo proyecto</button>
         </div>
         <div class="demo-note admin-only"><strong>Demo compartida:</strong> usa “✨ Cargar ejemplos demo” desde el Dashboard para crear o restablecer Torres del Sol y Hospital 20 de Julio en Supabase.</div>
 
@@ -605,10 +639,11 @@
               <div class="field"><label>Nombre del proyecto</label><input id="projectName" required /></div>
               <div class="field"><label>Código</label><input id="projectCode" /></div>
               <div class="field"><label>Cliente</label><input id="projectClient" /></div>
+              <div class="field"><label>No. de contrato</label><input id="projectContractNumber" placeholder="Ej. C-2026-045" /></div>
               <div class="field"><label>Tipo de edificación</label><select id="projectType"><option>Administrativo</option><option>Hospitalario</option><option>Educativo</option><option>Residencial</option><option>Industrial</option><option>Comercial</option><option>Infraestructura</option></select></div>
               <div class="field"><label>Ubicación</label><input id="projectLocation" /></div>
               <div class="field"><label>Duración preferida sprint</label><select id="sprintLength"><option value="1">1 semana</option><option value="2" selected>2 semanas</option><option value="3">3 semanas</option><option value="4">4 semanas</option></select></div>
-              <div class="field full"><label>Descripción</label><textarea id="projectDescription"></textarea></div>
+              <div class="field full"><label>Alcance contractual</label><textarea id="projectDescription" placeholder="Describe el alcance contractual del proyecto"></textarea></div>
             </div>
             <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px"><button class="btn" type="button" id="clearProjectForm">Limpiar</button><button class="btn primary" type="submit">Guardar proyecto</button></div>
           </form>
@@ -672,6 +707,18 @@
         <div class="topbar">
           <div><h2>Alcance y Cronograma</h2><p>Gestiona el Backlog de actividades y fechas.</p></div>
           <button class="btn primary admin-only" id="openTaskModal">+ Nueva actividad</button>
+        </div>
+
+        <h3 class="sub-header">🧱 EDT Contractual</h3>
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px">
+            <div>
+              <strong>Requisitos contractuales → Lotes de control → Lotes de trabajo</strong>
+              <div class="tiny">Estructura el alcance contractual y asigna responsables.</div>
+            </div>
+            <button class="btn primary admin-only" id="openEdtModal">+ Añadir elemento EDT</button>
+          </div>
+          <div id="edtTree" class="edt-tree"></div>
         </div>
 
         <h3 class="sub-header">📋 Backlog de Actividades</h3>
@@ -770,6 +817,7 @@
           <div class="field"><label>Estado</label><select id="taskStatus"><option>Backlog</option><option>Por iniciar</option><option>En proceso</option><option>En revisión</option><option>Bloqueado</option><option>Aprobado</option></select></div>
           <div class="field"><label>Fecha inicio</label><input type="date" id="taskStartDate" /></div>
           <div class="field"><label>Fecha fin</label><input type="date" id="taskEndDate" /></div>
+          <div class="field full"><label class="check"><input type="checkbox" id="taskCritical"> Actividad perteneciente a la ruta crítica</label><div class="tiny">Se resalta en el cronograma. El cálculo CPM automático se incorporará cuando se registren dependencias.</div></div>
         </div>
         <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px"><button class="btn" type="button" data-close="taskModal">Cancelar</button><button class="btn primary" type="submit">Guardar</button></div>
       </form>
@@ -803,6 +851,16 @@
           <div class="field full"><label>Consecuencias</label><textarea id="riskConsequences" required></textarea></div>
           <div class="field"><label>Probabilidad (1-5)</label><input type="number" id="riskProbability" min="1" max="5" value="3"></div>
           <div class="field"><label>Impacto (1-5)</label><input type="number" id="riskImpact" min="1" max="5" value="3"></div>
+          <div class="field full">
+            <label>Escala de nivel de riesgo (Probabilidad × Impacto)</label>
+            <div class="risk-scale">
+              <div class="risk-low">1–4 · Bajo</div>
+              <div class="risk-moderate">5–9 · Moderado</div>
+              <div class="risk-high">10–16 · Alto</div>
+              <div class="risk-critical">17–25 · Crítico</div>
+            </div>
+          </div>
+          <div class="field full"><label>Responsable de gestión del riesgo</label><select id="riskResponsible"></select></div>
           <div class="field full"><label>Respuesta / tratamiento</label><select id="riskTreatment"><option>Mitigar</option><option>Evitar</option><option>Transferir</option><option>Escalar</option><option>Aceptar</option><option>Compartir</option></select></div>
           <div class="field full"><label>Medidas de control</label><textarea id="riskControls" required></textarea></div>
           <div class="field full"><div id="riskPreview" class="risk-preview"></div></div>
@@ -828,6 +886,37 @@
         <div id="clientChangesBuilder"></div>
         <button class="btn small" type="button" id="addClientChange" style="margin-top:10px">+ Añadir cambio solicitado</button>
         <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px"><button class="btn" type="button" data-close="minutesModal">Cancelar</button><button class="btn primary" type="submit">Guardar acta</button></div>
+      </form>
+    </div>
+  </div>
+
+
+  <div class="modal-backdrop" id="edtModal">
+    <div class="modal">
+      <div class="modal-head"><h3>Añadir elemento EDT</h3><button class="close" type="button" data-close="edtModal">✕</button></div>
+      <form id="edtForm">
+        <div class="form-grid">
+          <div class="field">
+            <label>Tipo de elemento</label>
+            <select id="edtType">
+              <option value="requirement">Requisito contractual</option>
+              <option value="control">Lote de control</option>
+              <option value="work">Lote de trabajo</option>
+            </select>
+          </div>
+          <div class="field"><label>Código</label><input id="edtCode" required placeholder="Ej. RC-01 / LC-01 / LT-01"></div>
+          <div class="field full"><label>Nombre</label><input id="edtName" required></div>
+          <div class="field full"><label>Descripción / criterio contractual</label><textarea id="edtDescription"></textarea></div>
+          <div class="field full" id="edtRequirementParentField" style="display:none"><label>Requisito contractual padre</label><select id="edtRequirementParent"></select></div>
+          <div class="field full" id="edtControlParentField" style="display:none"><label>Lote de control padre</label><select id="edtControlParent"></select></div>
+          <div class="field full" id="edtResponsibleField" style="display:none"><label>Responsable</label><select id="edtResponsible"></select></div>
+          <div class="field" id="edtStartField" style="display:none"><label>Inicio planeado</label><input id="edtStart" type="date"></div>
+          <div class="field" id="edtEndField" style="display:none"><label>Fin planeado</label><input id="edtEnd" type="date"></div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px">
+          <button class="btn" type="button" data-close="edtModal">Cancelar</button>
+          <button class="btn primary" type="submit">Guardar elemento EDT</button>
+        </div>
       </form>
     </div>
   </div>
@@ -858,8 +947,8 @@
     function projectFromDb(p){
       return {
         id:p.id, name:p.name||"", code:p.code||"", client:p.client||"",
-        type:p.project_type||"Administrativo", location:p.location||"",
-        sprintLength:String(p.sprint_length||2), description:p.description||""
+        contractNumber:p.contract_number||"", type:p.project_type||"Administrativo", location:p.location||"",
+        sprintLength:String(p.sprint_length||2), scope:p.scope||p.description||"", description:p.scope||p.description||""
       };
     }
     function responsibleFromDb(r){
@@ -875,7 +964,7 @@
         sprintId:t.sprint_id||"", ownerId:t.responsible_id||"",
         hours:Number(t.estimated_hours)||0, realHours:Number(t.real_hours)||0,
         status:t.status||"Backlog", startDate:t.start_date||"", endDate:t.end_date||"",
-        physicalProgress:Number(t.physical_progress)||0
+        physicalProgress:Number(t.physical_progress)||0, critical:!!t.is_critical
       };
     }
 
@@ -888,28 +977,34 @@
     }
 
     function riskFromDb(r){
-      return {id:r.id,projectId:r.project_id,description:r.description||"",causes:r.causes||"",consequences:r.consequences||"",probability:Number(r.probability)||1,impact:Number(r.impact)||1,treatment:r.treatment||"Mitigar",controls:r.controls||"",status:r.status||"Abierto"};
+      return {id:r.id,projectId:r.project_id,description:r.description||"",causes:r.causes||"",consequences:r.consequences||"",probability:Number(r.probability)||1,impact:Number(r.impact)||1,treatment:r.treatment||"Mitigar",controls:r.controls||"",status:r.status||"Abierto",responsibleId:r.responsible_id||""};
     }
     function minuteFromDb(m){
       return {id:m.id,projectId:m.project_id,date:m.meeting_date||"",title:m.title||"",topics:m.topics||"",commitments:Array.isArray(m.commitments)?m.commitments:[]};
     }
     function changeFromDb(c){
-      return {id:c.id,projectId:c.project_id,minuteId:c.minute_id||"",code:c.code||"",description:c.description||"",status:c.status||"Solicitado",approved:!!c.approved,affectedTaskIds:Array.isArray(c.affected_task_ids)?c.affected_task_ids:[]};
+      return {id:c.id,projectId:c.project_id,minuteId:c.minute_id||"",code:c.code||"",description:c.description||"",impactDescription:c.impact_description||"",alternatives:c.alternatives||"",status:c.status||"Solicitado",approved:!!c.approved,affectedTaskIds:Array.isArray(c.affected_task_ids)?c.affected_task_ids:[]};
     }
+    function requirementFromDb(r){ return {id:r.id,projectId:r.project_id,code:r.code||"",name:r.name||"",description:r.description||""}; }
+    function controlLotFromDb(r){ return {id:r.id,projectId:r.project_id,requirementId:r.requirement_id||"",code:r.code||"",name:r.name||"",description:r.description||"",responsibleId:r.responsible_id||""}; }
+    function workPackageFromDb(r){ return {id:r.id,projectId:r.project_id,controlLotId:r.control_lot_id||"",code:r.code||"",name:r.name||"",description:r.description||"",responsibleId:r.responsible_id||"",startDate:r.start_date||"",endDate:r.end_date||""}; }
 
     async function loadSharedData(showMessage=false){
       if (sharedDataLoading) return;
       sharedDataLoading = true;
       setSyncStatus("Actualizando…", "warning");
       try {
-        const [pRes, rRes, tRes, sRes, riskRes, minRes, chgRes] = await Promise.all([
+        const [pRes, rRes, tRes, sRes, riskRes, minRes, chgRes, reqRes, ctlRes, wpRes] = await Promise.all([
           supabaseClient.from("projects").select("*").order("created_at", {ascending:true}),
           supabaseClient.from("responsibles").select("*").order("created_at", {ascending:true}),
           supabaseClient.from("tasks").select("*").order("created_at", {ascending:true}),
           supabaseClient.from("sprints").select("*").order("created_at", {ascending:true}),
           supabaseClient.from("risks").select("*").order("created_at", {ascending:true}),
           supabaseClient.from("minutes").select("*").order("meeting_date", {ascending:false}),
-          supabaseClient.from("changes").select("*").order("created_at", {ascending:true})
+          supabaseClient.from("changes").select("*").order("created_at", {ascending:true}),
+          supabaseClient.from("edt_requirements").select("*").order("created_at", {ascending:true}),
+          supabaseClient.from("control_lots").select("*").order("created_at", {ascending:true}),
+          supabaseClient.from("work_packages").select("*").order("created_at", {ascending:true})
         ]);
         if (pRes.error) throw pRes.error;
         if (rRes.error) throw rRes.error;
@@ -918,6 +1013,9 @@
         if (riskRes.error) throw riskRes.error;
         if (minRes.error) throw minRes.error;
         if (chgRes.error) throw chgRes.error;
+        if (reqRes.error) throw reqRes.error;
+        if (ctlRes.error) throw ctlRes.error;
+        if (wpRes.error) throw wpRes.error;
 
         projects = (pRes.data||[]).map(projectFromDb);
         responsibles = (rRes.data||[]).map(responsibleFromDb);
@@ -926,10 +1024,13 @@
         risks = (riskRes.data||[]).map(riskFromDb);
         minutes = (minRes.data||[]).map(minuteFromDb);
         changes = (chgRes.data||[]).map(changeFromDb);
+        edtRequirements = (reqRes.data||[]).map(requirementFromDb);
+        controlLots = (ctlRes.data||[]).map(controlLotFromDb);
+        workPackages = (wpRes.data||[]).map(workPackageFromDb);
 
         if (!projects.some(p=>p.id===activeProjectId)) activeProjectId = projects[0]?.id || "";
-        if (dashboardProjectFilter !== "__all__" && !projects.some(p=>p.id===dashboardProjectFilter)) {
-          dashboardProjectFilter = activeProjectId || "__all__";
+        if (!projects.some(p=>p.id===dashboardProjectFilter)) {
+          dashboardProjectFilter = activeProjectId || "";
         }
         localStorage.setItem(KEY.activeProject, activeProjectId);
         // Caché local de respaldo; Supabase sigue siendo la fuente compartida.
@@ -967,9 +1068,12 @@
     let risks = JSON.parse(localStorage.getItem(KEY.risks)||"[]");
     let minutes = JSON.parse(localStorage.getItem(KEY.minutes)||"[]");
     let changes = JSON.parse(localStorage.getItem(KEY.changes)||"[]");
+    let edtRequirements = [];
+    let controlLots = [];
+    let workPackages = [];
     let budgetSettings = JSON.parse(localStorage.getItem(KEY.budget)||"{}");
     let evmSettings = JSON.parse(localStorage.getItem(KEY.evm)||"{}");
-    let dashboardProjectFilter = activeProjectId || "__all__";
+    let dashboardProjectFilter = activeProjectId || "";
 
     const DISCIPLINE_PREFIX = {
       "General / Proyecto":"GEN",
@@ -986,9 +1090,9 @@
 
     const DEMO_PROJECTS = [
       {
-        code:"TDS-DEMO", name:"Torres del Sol", client:"Constructora Primavera",
+        code:"TDS-DEMO", name:"Torres del Sol", client:"Constructora Primavera", contractNumber:"CP-2026-014",
         type:"Residencial", location:"Bogotá", sprintLength:2,
-        description:"Demo de diseño multidisciplinario para torre residencial de 15 pisos. Proyecto relativamente controlado.",
+        description:"Diseño multidisciplinario de torre residencial de 15 pisos, coordinación BIM y entregables de diseño básico.",
         people:[
           ["Laura Gómez","Líder","Arquitectura",92000],
           ["Carlos Rojas","Especialista","Estructuras",98000],
@@ -1013,9 +1117,9 @@
         ]
       },
       {
-        code:"H20J-DEMO", name:"Hospital 20 de Julio", client:"Red Hospitalaria Distrital",
+        code:"H20J-DEMO", name:"Hospital 20 de Julio", client:"Red Hospitalaria Distrital", contractNumber:"RHD-2026-020J",
         type:"Hospitalario", location:"Bogotá", sprintLength:2,
-        description:"Demo hospitalaria de mayor complejidad, con presión de plazo, coordinación técnica y desviaciones de costo.",
+        description:"Diseño básico multidisciplinario del Hospital 20 de Julio, incluyendo áreas clínicas, estructuras, redes técnicas, respaldo eléctrico y coordinación BIM.",
         people:[
           ["Natalia Torres","Director","General / Proyecto",125000],
           ["Felipe Vargas","Líder","Arquitectura",102000],
@@ -1084,19 +1188,22 @@
       if(found && found.length){
         projectId = found[0].id;
         const {error:uErr}=await supabaseClient.from("projects").update({
-          name:spec.name, code:spec.code, client:spec.client, project_type:spec.type,
-          location:spec.location, sprint_length:spec.sprintLength, description:spec.description,
+          name:spec.name, code:spec.code, client:spec.client, contract_number:spec.contractNumber||null, project_type:spec.type,
+          location:spec.location, sprint_length:spec.sprintLength, scope:spec.description, description:spec.description,
           updated_at:new Date().toISOString()
         }).eq("id",projectId);
         if(uErr) throw uErr;
 
+        await supabaseClient.from("work_packages").delete().eq("project_id",projectId);
+        await supabaseClient.from("control_lots").delete().eq("project_id",projectId);
+        await supabaseClient.from("edt_requirements").delete().eq("project_id",projectId);
         await supabaseClient.from("tasks").delete().eq("project_id",projectId);
         await supabaseClient.from("sprints").delete().eq("project_id",projectId);
         await supabaseClient.from("responsibles").delete().eq("project_id",projectId);
       }else{
         const {data:newP,error:pErr}=await supabaseClient.from("projects").insert({
-          name:spec.name, code:spec.code, client:spec.client, project_type:spec.type,
-          location:spec.location, sprint_length:spec.sprintLength, description:spec.description
+          name:spec.name, code:spec.code, client:spec.client, contract_number:spec.contractNumber||null, project_type:spec.type,
+          location:spec.location, sprint_length:spec.sprintLength, scope:spec.description, description:spec.description
         }).select().single();
         if(pErr) throw pErr;
         projectId = newP.id;
@@ -1130,10 +1237,34 @@
         sprint_id:sprintByName[t[4]]?.id||null,
         responsible_id:peopleByName[t[5]]?.id||null,
         estimated_hours:t[6], real_hours:t[7], status:t[8],
-        start_date:t[9], end_date:t[10], physical_progress:t[11]
+        start_date:t[9], end_date:t[10], physical_progress:t[11],
+        is_critical:(t[3]==="Alta" && ["Bloqueado","En proceso","Por iniciar"].includes(t[8]))
       }));
       const {error:tErr}=await supabaseClient.from("tasks").insert(taskPayload);
       if(tErr) throw tErr;
+
+      const reqPayload = [
+        {project_id:projectId,code:"RC-01",name:"Diseño y coordinación interdisciplinaria",description:"Cumplimiento del alcance contractual de diseño básico y coordinación técnica."},
+        {project_id:projectId,code:"RC-02",name:"Entregables y aprobaciones",description:"Producción, revisión y aprobación de entregables contractuales."}
+      ];
+      const {data:reqRows,error:reqErr}=await supabaseClient.from("edt_requirements").insert(reqPayload).select();
+      if(reqErr) throw reqErr;
+      const req1=reqRows[0], req2=reqRows[1];
+      const lead=peopleRows[0]?.id||null, bim=peopleRows[peopleRows.length-1]?.id||lead;
+      const {data:ctlRows,error:ctlErr}=await supabaseClient.from("control_lots").insert([
+        {project_id:projectId,requirement_id:req1.id,code:"LC-01",name:"Diseño disciplinar",description:"Control del desarrollo de diseños por disciplina.",responsible_id:lead},
+        {project_id:projectId,requirement_id:req1.id,code:"LC-02",name:"Coordinación interdisciplinaria",description:"Control de coordinación y resolución de interferencias.",responsible_id:bim},
+        {project_id:projectId,requirement_id:req2.id,code:"LC-03",name:"Control de entregables",description:"Seguimiento a emisión, revisión y aprobación.",responsible_id:lead}
+      ]).select();
+      if(ctlErr) throw ctlErr;
+      const minStart=spec.tasks.map(t=>t[9]).filter(Boolean).sort()[0]||null;
+      const maxEnd=spec.tasks.map(t=>t[10]).filter(Boolean).sort().slice(-1)[0]||null;
+      const {error:wpErr}=await supabaseClient.from("work_packages").insert([
+        {project_id:projectId,control_lot_id:ctlRows[0].id,code:"LT-01",name:"Desarrollo de diseños",description:"Producción de entregables disciplinares.",responsible_id:lead,start_date:minStart,end_date:maxEnd},
+        {project_id:projectId,control_lot_id:ctlRows[1].id,code:"LT-02",name:"Coordinación BIM",description:"Federación, revisión y cierre de interferencias.",responsible_id:bim,start_date:minStart,end_date:maxEnd},
+        {project_id:projectId,control_lot_id:ctlRows[2].id,code:"LT-03",name:"Revisión y aprobación",description:"Gestión de revisiones y cierre de observaciones.",responsible_id:lead,start_date:minStart,end_date:maxEnd}
+      ]);
+      if(wpErr) throw wpErr;
       return projectId;
     }
 
@@ -1145,7 +1276,9 @@
       await supabaseClient.from("minutes").delete().eq("project_id",projectId);
       await supabaseClient.from("risks").delete().eq("project_id",projectId);
 
-      const riskRows=demo.risks.map(r=>({project_id:projectId,description:r[0],probability:Number(r[1]),impact:Number(r[2]),treatment:String(r[3]).split("·")[0].trim(),controls:String(r[3]).split("·").slice(1).join("·").trim(),causes:"Condición identificada durante la coordinación del proyecto.",consequences:"Puede afectar plazo, costo o coordinación interdisciplinaria."}));
+      const demoPeople=responsibles.filter(r=>r.projectId===projectId);
+      const demoRiskOwner=demoPeople[0]?.id||null;
+      const riskRows=demo.risks.map(r=>({project_id:projectId,description:r[0],probability:Number(r[1]),impact:Number(r[2]),treatment:String(r[3]).split("·")[0].trim(),controls:String(r[3]).split("·").slice(1).join("·").trim(),causes:"Condición identificada durante la coordinación del proyecto.",consequences:"Puede afectar plazo, costo o coordinación interdisciplinaria.",responsible_id:demoRiskOwner}));
       if(riskRows.length){const {error}=await supabaseClient.from("risks").insert(riskRows);if(error)throw error;}
 
       const minuteMap={};
@@ -1155,7 +1288,7 @@
         minuteMap[m[0]]=data;
       }
       const taskIds=tasks.filter(t=>t.projectId===projectId).map(t=>t.uid);
-      const changeRows=demo.changes.map((c,i)=>({project_id:projectId,code:c[0],description:c[1],status:c[2],approved:c[2]==="Aprobado",affected_task_ids:taskIds.slice(0,Math.min(3,taskIds.length))}));
+      const changeRows=demo.changes.map((c,i)=>({project_id:projectId,code:c[0],description:c[1],impact_description:c[3]||"Impacto por evaluar en plazo, costo y coordinación.",alternatives:"Mantener la solución actual; ajustar el diseño; implementar el cambio con plan de mitigación.",status:c[2],approved:c[2]==="Aprobado",affected_task_ids:taskIds.slice(0,Math.min(3,taskIds.length))}));
       if(changeRows.length){const {error}=await supabaseClient.from("changes").insert(changeRows);if(error)throw error;}
     }
 
@@ -1258,7 +1391,7 @@
       el.innerHTML = projects.length ? projects.map(p => `
         <div class="project-row ${p.id===activeProjectId?"active":""}">
           <div style="display:flex;justify-content:space-between;gap:12px;align-items:start">
-            <div><strong>${esc(p.name)}</strong><div class="tiny">${esc(p.code)} · ${esc(p.client)}</div></div>
+            <div><strong>${esc(p.name)}</strong><div class="tiny">${esc(p.code)} · ${esc(p.client)}${p.contractNumber?` · Contrato ${esc(p.contractNumber)}`:""}</div></div>
             ${p.id===activeProjectId?'<span class="badge info">Activo</span>':''}
           </div>
           <div style="display:flex;gap:8px;margin-top:10px" class="admin-only">
@@ -1280,10 +1413,11 @@
         document.getElementById("projectName").value = p.name||"";
         document.getElementById("projectCode").value = p.code||"";
         document.getElementById("projectClient").value = p.client||"";
+        document.getElementById("projectContractNumber").value = p.contractNumber||"";
         document.getElementById("projectType").value = p.type||"Administrativo";
         document.getElementById("projectLocation").value = p.location||"";
         document.getElementById("sprintLength").value = p.sprintLength||"2";
-        document.getElementById("projectDescription").value = p.description||"";
+        document.getElementById("projectDescription").value = p.scope||p.description||"";
       }));
       document.querySelectorAll(".delete-project").forEach(b=>b.addEventListener("click",async()=>{
         if(!confirm("¿Eliminar este proyecto compartido y sus datos asociados?")) return;
@@ -1294,6 +1428,14 @@
       }));
     }
 
+    document.getElementById("newProjectBtn").addEventListener("click",()=>{
+      document.getElementById("projectForm").reset();
+      document.getElementById("projectId").value="";
+      document.getElementById("projectContractNumber").value="";
+      document.getElementById("projectDescription").value="";
+      document.getElementById("projectName").focus();
+    });
+
     document.getElementById("projectForm").addEventListener("submit", async e => {
       e.preventDefault();
       const existingId = document.getElementById("projectId").value;
@@ -1301,9 +1443,11 @@
         name: document.getElementById("projectName").value.trim(),
         code: document.getElementById("projectCode").value.trim() || null,
         client: document.getElementById("projectClient").value.trim() || null,
+        contract_number: document.getElementById("projectContractNumber").value.trim() || null,
         project_type: document.getElementById("projectType").value,
         location: document.getElementById("projectLocation").value.trim() || null,
         sprint_length: Number(document.getElementById("sprintLength").value)||2,
+        scope: document.getElementById("projectDescription").value.trim() || null,
         description: document.getElementById("projectDescription").value.trim() || null,
         updated_at: new Date().toISOString()
       };
@@ -1385,6 +1529,59 @@
       if(ownerSel) ownerSel.innerHTML = '<option value="">Por asignar</option>' + projectResponsibles().map(r=>`<option value="${r.id}">${r.name} (${r.role})</option>`).join("");
       if(sprintSel) sprintSel.innerHTML = '<option value="">Sin sprint</option>' + projectSprints().map(sp=>`<option value="${sp.id}">${sp.name}</option>`).join("");
     }
+
+
+    const projectRequirements=()=>edtRequirements.filter(x=>x.projectId===activeProjectId);
+    const projectControlLots=()=>controlLots.filter(x=>x.projectId===activeProjectId);
+    const projectWorkPackages=()=>workPackages.filter(x=>x.projectId===activeProjectId);
+
+    function renderEdt(){
+      const el=document.getElementById("edtTree");
+      if(!activeProjectId){el.innerHTML='<div class="empty">Selecciona un proyecto.</div>';return;}
+      const reqs=projectRequirements();
+      const owners=Object.fromEntries(projectResponsibles().map(r=>[r.id,r]));
+      el.innerHTML=reqs.length?reqs.map(req=>{
+        const lots=projectControlLots().filter(c=>c.requirementId===req.id);
+        return `<div class="edt-requirement">
+          <div class="edt-row-head"><div><span class="badge info">${esc(req.code)}</span><h3 style="margin-top:8px">${esc(req.name)}</h3><div class="muted">${esc(req.description)}</div></div><button class="btn small danger admin-only delete-edt-requirement" data-id="${req.id}">Eliminar</button></div>
+          ${lots.map(lot=>{
+            const wps=projectWorkPackages().filter(w=>w.controlLotId===lot.id);
+            return `<div class="edt-control"><div class="edt-row-head"><div><strong>${esc(lot.code)} · ${esc(lot.name)}</strong><div class="tiny">Responsable: ${esc(owners[lot.responsibleId]?.name||"Por asignar")}</div><div class="muted">${esc(lot.description)}</div></div><button class="btn small danger admin-only delete-control-lot" data-id="${lot.id}">Eliminar</button></div>
+              ${wps.map(w=>`<div class="edt-work"><div class="edt-row-head"><div><strong>${esc(w.code)} · ${esc(w.name)}</strong><div class="tiny">Responsable: ${esc(owners[w.responsibleId]?.name||"Por asignar")} · ${esc(w.startDate||"Sin inicio")} → ${esc(w.endDate||"Sin fin")}</div><div class="muted">${esc(w.description)}</div></div><button class="btn small danger admin-only delete-work-package" data-id="${w.id}">Eliminar</button></div></div>`).join("")}
+            </div>`;
+          }).join("")}
+        </div>`;
+      }).join(""):'<div class="empty">Aún no hay EDT. Registra primero los requisitos contractuales.</div>';
+
+      document.querySelectorAll(".delete-work-package").forEach(b=>b.addEventListener("click",async()=>{const {error}=await supabaseClient.from("work_packages").delete().eq("id",b.dataset.id);if(error)return showToast(error.message);await loadSharedData();}));
+      document.querySelectorAll(".delete-control-lot").forEach(b=>b.addEventListener("click",async()=>{const {error}=await supabaseClient.from("control_lots").delete().eq("id",b.dataset.id);if(error)return showToast(error.message);await loadSharedData();}));
+      document.querySelectorAll(".delete-edt-requirement").forEach(b=>b.addEventListener("click",async()=>{const {error}=await supabaseClient.from("edt_requirements").delete().eq("id",b.dataset.id);if(error)return showToast(error.message);await loadSharedData();}));
+    }
+
+    function refreshEdtModal(){
+      const type=document.getElementById("edtType").value;
+      document.getElementById("edtRequirementParentField").style.display=type==="control"?"grid":"none";
+      document.getElementById("edtControlParentField").style.display=type==="work"?"grid":"none";
+      document.getElementById("edtResponsibleField").style.display=(type==="control"||type==="work")?"grid":"none";
+      document.getElementById("edtStartField").style.display=type==="work"?"grid":"none";
+      document.getElementById("edtEndField").style.display=type==="work"?"grid":"none";
+      document.getElementById("edtRequirementParent").innerHTML=projectRequirements().map(r=>`<option value="${r.id}">${esc(r.code)} · ${esc(r.name)}</option>`).join("");
+      document.getElementById("edtControlParent").innerHTML=projectControlLots().map(r=>`<option value="${r.id}">${esc(r.code)} · ${esc(r.name)}</option>`).join("");
+      document.getElementById("edtResponsible").innerHTML=responsibleOptions();
+    }
+    document.getElementById("openEdtModal").addEventListener("click",()=>{if(!activeProjectId)return showToast("Selecciona un proyecto primero.");document.getElementById("edtForm").reset();refreshEdtModal();openModal("edtModal");});
+    document.getElementById("edtType").addEventListener("change",refreshEdtModal);
+    document.getElementById("edtForm").addEventListener("submit",async e=>{
+      e.preventDefault();
+      const type=document.getElementById("edtType").value;
+      const common={project_id:activeProjectId,code:document.getElementById("edtCode").value.trim(),name:document.getElementById("edtName").value.trim(),description:document.getElementById("edtDescription").value.trim()||null,updated_at:new Date().toISOString()};
+      let q;
+      if(type==="requirement") q=supabaseClient.from("edt_requirements").insert(common);
+      else if(type==="control") q=supabaseClient.from("control_lots").insert({...common,requirement_id:document.getElementById("edtRequirementParent").value,responsible_id:document.getElementById("edtResponsible").value||null});
+      else q=supabaseClient.from("work_packages").insert({...common,control_lot_id:document.getElementById("edtControlParent").value,responsible_id:document.getElementById("edtResponsible").value||null,start_date:document.getElementById("edtStart").value||null,end_date:document.getElementById("edtEnd").value||null});
+      const {error}=await q;if(error)return showToast("Error guardando EDT: "+error.message);
+      closeModal("edtModal");await loadSharedData();showToast("Elemento EDT guardado");
+    });
 
     function renderBacklog(){
       const arr = projectTasks(), body = document.getElementById("backlogBody");
@@ -1523,8 +1720,8 @@
           const progress=Math.max(0,Math.min(100,Number(t.physicalProgress)||0));
           bar=`<div class="gantt-track" title="${esc(t.id)} · ${progress}% de avance"><div class="gantt-bar" style="left:${left}%;width:${width}%"><div class="gantt-progress" style="width:${progress}%"></div></div>${today>=minDate&&today<=maxDate?`<div class="gantt-today" style="left:${todayPct}%" title="Hoy"></div>`:""}</div>`;
         } else bar='<div class="gantt-track"></div>';
-        return `<div class="timeline-row">
-          <div><strong>${esc(t.id)}</strong><div class="tiny">${esc(t.discipline)}</div></div>
+        return `<div class="timeline-row ${t.critical?"critical-row":""}">
+          <div><strong>${esc(t.id)}</strong>${t.critical?'<div class="critical-badge">Ruta crítica</div>':""}<div class="tiny">${esc(t.discipline)}</div></div>
           <div>${esc(t.name)}<div class="tiny">Avance físico: ${Number(t.physicalProgress)||0}%</div></div>
           <div><input type="date" class="timeline-start" data-id="${t.uid}" value="${t.startDate||""}"></div>
           <div><input type="date" class="timeline-end" data-id="${t.uid}" value="${t.endDate||""}"></div>
@@ -1663,23 +1860,24 @@
     function renderDashboardProjectSelector(){
       const sel = document.getElementById("dashboardProjectSelector");
       if(!sel) return;
-      const current = dashboardProjectFilter || activeProjectId || "__all__";
-      sel.innerHTML = '<option value="__all__">Todos los proyectos</option>' +
-        projects.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join("");
-      sel.value = projects.some(p=>p.id===current) ? current : "__all__";
+      sel.innerHTML = projects.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join("");
+      if(activeProjectId && projects.some(p=>p.id===activeProjectId)) sel.value=activeProjectId;
     }
 
     function renderDashboard(){
       renderDashboardProjectSelector();
-      const allMode = dashboardProjectFilter === "__all__";
-      const p = allMode ? null : projects.find(x=>x.id===dashboardProjectFilter);
-      const arr = allMode ? tasks : tasks.filter(t=>t.projectId===dashboardProjectFilter);
-      const sprintArr = allMode ? sprints : sprints.filter(sp=>sp.projectId===dashboardProjectFilter);
-      const riskArr = allMode ? risks : risks.filter(r=>r.projectId===dashboardProjectFilter);
+      const p = projects.find(x=>x.id===activeProjectId) || null;
+      const arr = projectTasks();
+      const sprintArr = projectSprints();
+      const riskArr = projectRisks();
 
-      document.getElementById("project-subtitle").textContent = allMode
-        ? `Resumen consolidado · ${projects.length} proyecto(s)`
-        : (p ? `${p.name}` : "Sin proyecto activo");
+      document.getElementById("project-subtitle").textContent = p ? "Resumen ejecutivo del proyecto" : "Sin proyecto activo";
+      const info=document.getElementById("dashboardProjectInfo");
+      info.innerHTML=p?`<div class="project-info-grid">
+        <div class="project-info-item"><div class="label">Cliente</div><div class="value">${esc(p.client||"—")}</div></div>
+        <div class="project-info-item"><div class="label">No. de contrato</div><div class="value">${esc(p.contractNumber||"—")}</div></div>
+        <div class="project-info-item"><div class="label">Ubicación</div><div class="value">${esc(p.location||"—")}</div></div>
+      </div>`:'<div class="empty">Selecciona un proyecto.</div>';
 
       const avgProgress=arr.length?Math.round(arr.reduce((s,t)=>s+(Number(t.physicalProgress)||0),0)/arr.length):0;
       document.getElementById("metric-progress").textContent = avgProgress+"%";
@@ -1739,15 +1937,11 @@
     }
 
     document.getElementById("dashboardProjectSelector").addEventListener("change", e=>{
-      dashboardProjectFilter = e.target.value;
-      if(dashboardProjectFilter !== "__all__"){
-        activeProjectId = dashboardProjectFilter;
-        localStorage.setItem(KEY.activeProject, activeProjectId);
-        renderAll();
-        showToast("Proyecto activo actualizado");
-      } else {
-        renderDashboard();
-      }
+      activeProjectId=e.target.value;
+      dashboardProjectFilter=activeProjectId;
+      localStorage.setItem(KEY.activeProject,activeProjectId);
+      renderAll();
+      showToast("Proyecto activo actualizado");
     });
 
 
@@ -1965,7 +2159,8 @@
       const pr=projectRisks();
       riskEl.innerHTML=pr.length?pr.map((r,idx)=>{
         const [lvl,cls]=riskLevel(r.probability,r.impact);
-        return `<div class="card"><div style="display:flex;justify-content:space-between;gap:10px"><span class="badge ${cls}">${lvl} · ${r.probability*r.impact}</span><button class="btn small danger delete-risk admin-only" data-id="${r.id}">Eliminar</button></div><h3 style="margin-top:12px">R-${String(idx+1).padStart(3,"0")} · ${esc(r.description)}</h3><div class="risk-card-grid"><div><span class="tiny">Probabilidad</span><br><strong>${r.probability}/5</strong></div><div><span class="tiny">Impacto</span><br><strong>${r.impact}/5</strong></div><div><span class="tiny">Tratamiento</span><br><strong>${esc(r.treatment)}</strong></div></div>${r.causes?`<p><strong>Causas:</strong> ${esc(r.causes)}</p>`:""}${r.consequences?`<p><strong>Consecuencias:</strong> ${esc(r.consequences)}</p>`:""}<p><strong>Controles:</strong> ${esc(r.controls)}</p></div>`;
+        const rr=projectResponsibles().find(x=>x.id===r.responsibleId);
+        return `<div class="card"><div style="display:flex;justify-content:space-between;gap:10px"><span class="badge ${cls}">${lvl} · ${r.probability*r.impact}</span><button class="btn small danger delete-risk admin-only" data-id="${r.id}">Eliminar</button></div><h3 style="margin-top:12px">R-${String(idx+1).padStart(3,"0")} · ${esc(r.description)}</h3><div class="risk-card-grid"><div><span class="tiny">Probabilidad</span><br><strong>${r.probability}/5</strong></div><div><span class="tiny">Impacto</span><br><strong>${r.impact}/5</strong></div><div><span class="tiny">Tratamiento</span><br><strong>${esc(r.treatment)}</strong></div></div><p><strong>Responsable:</strong> ${esc(rr?.name||"Por asignar")}</p>${r.causes?`<p><strong>Causas:</strong> ${esc(r.causes)}</p>`:""}${r.consequences?`<p><strong>Consecuencias:</strong> ${esc(r.consequences)}</p>`:""}<p><strong>Controles:</strong> ${esc(r.controls)}</p></div>`;
       }).join(""):'<div class="empty">No hay riesgos registrados.</div>';
 
       const pm=projectMinutes();
@@ -1974,7 +2169,7 @@
       const pc=projectChanges();
       changesEl.innerHTML=pc.length?pc.map(c=>{
         const affected=c.affectedTaskIds.map(id=>projectTasks().find(t=>t.uid===id)).filter(Boolean);
-        return `<div class="card"><span class="badge ${c.approved?"success":"warning"}">${c.approved?"Aprobado":"No aprobado"}</span><h3 style="margin-top:10px">${esc(c.code)} · ${esc(c.description)}</h3><div class="tiny">Entregables afectados: ${affected.length?affected.map(t=>esc(t.id)).join(", "):"Ninguno"}</div><div class="change-controls admin-only"><div class="field"><label>Cambio aprobado</label><select class="change-approved" data-id="${c.id}"><option value="false" ${!c.approved?"selected":""}>No</option><option value="true" ${c.approved?"selected":""}>Sí</option></select></div><div class="field"><label>Estado</label><select class="change-status" data-id="${c.id}">${["Solicitado","En evaluación","Aprobado","Rechazado","En implementación","Implementado"].map(s=>`<option ${s===c.status?"selected":""}>${s}</option>`).join("")}</select></div></div></div>`;
+        return `<div class="card"><span class="badge ${c.approved?"success":"warning"}">${c.approved?"Aprobado":"No aprobado"}</span><h3 style="margin-top:10px">${esc(c.code)} · ${esc(c.description)}</h3><div class="tiny">Entregables afectados: ${affected.length?affected.map(t=>esc(t.id)).join(", "):"Ninguno"}</div>${c.impactDescription?`<div class="change-extra"><strong>Impacto:</strong> ${esc(c.impactDescription)}</div>`:""}${c.alternatives?`<div class="change-extra"><strong>Alternativas:</strong> ${esc(c.alternatives)}</div>`:""}<div class="change-controls admin-only"><div class="field"><label>Cambio aprobado</label><select class="change-approved" data-id="${c.id}"><option value="false" ${!c.approved?"selected":""}>No</option><option value="true" ${c.approved?"selected":""}>Sí</option></select></div><div class="field"><label>Estado</label><select class="change-status" data-id="${c.id}">${["Solicitado","En evaluación","Aprobado","Rechazado","En implementación","Implementado"].map(s=>`<option ${s===c.status?"selected":""}>${s}</option>`).join("")}</select></div></div></div>`;
       }).join(""):'<div class="empty">No hay cambios registrados.</div>';
 
       document.querySelectorAll(".delete-risk").forEach(b=>b.addEventListener("click",async()=>{const {error}=await supabaseClient.from("risks").delete().eq("id",b.dataset.id);if(error)return showToast(error.message);await loadSharedData();}));
@@ -1989,8 +2184,8 @@
     }
     document.getElementById("riskProbability").addEventListener("input",updateRiskPreview);
     document.getElementById("riskImpact").addEventListener("input",updateRiskPreview);
-    document.getElementById("openRiskModal").addEventListener("click",()=>{if(!activeProjectId)return showToast("Selecciona un proyecto primero.");document.getElementById("riskForm").reset();document.getElementById("riskProbability").value=3;document.getElementById("riskImpact").value=3;updateRiskPreview();openModal("riskModal");});
-    document.getElementById("riskForm").addEventListener("submit",async e=>{e.preventDefault();const payload={project_id:activeProjectId,description:document.getElementById("riskDescription").value.trim(),causes:document.getElementById("riskCauses").value.trim(),consequences:document.getElementById("riskConsequences").value.trim(),probability:Number(document.getElementById("riskProbability").value)||1,impact:Number(document.getElementById("riskImpact").value)||1,treatment:document.getElementById("riskTreatment").value,controls:document.getElementById("riskControls").value.trim(),updated_at:new Date().toISOString()};const {error}=await supabaseClient.from("risks").insert(payload);if(error)return showToast("Error guardando riesgo: "+error.message);closeModal("riskModal");await loadSharedData();showToast("Riesgo guardado");});
+    document.getElementById("openRiskModal").addEventListener("click",()=>{if(!activeProjectId)return showToast("Selecciona un proyecto primero.");document.getElementById("riskForm").reset();document.getElementById("riskProbability").value=3;document.getElementById("riskImpact").value=3;document.getElementById("riskResponsible").innerHTML=responsibleOptions();updateRiskPreview();openModal("riskModal");});
+    document.getElementById("riskForm").addEventListener("submit",async e=>{e.preventDefault();const payload={project_id:activeProjectId,description:document.getElementById("riskDescription").value.trim(),causes:document.getElementById("riskCauses").value.trim(),consequences:document.getElementById("riskConsequences").value.trim(),probability:Number(document.getElementById("riskProbability").value)||1,impact:Number(document.getElementById("riskImpact").value)||1,treatment:document.getElementById("riskTreatment").value,responsible_id:document.getElementById("riskResponsible").value||null,controls:document.getElementById("riskControls").value.trim(),updated_at:new Date().toISOString()};const {error}=await supabaseClient.from("risks").insert(payload);if(error)return showToast("Error guardando riesgo: "+error.message);closeModal("riskModal");await loadSharedData();showToast("Riesgo guardado");});
 
     let commitmentCounter=0,clientChangeCounter=0;
     function responsibleOptions(){return '<option value="">Por asignar</option>'+projectResponsibles().map(r=>`<option value="${r.id}">${esc(r.name)}</option>`).join("");}
@@ -1998,15 +2193,30 @@
       const idx=commitmentCounter++;const box=document.createElement("div");box.className="builder-card commitment-row";box.dataset.index=idx;box.innerHTML=`<div class="form-grid"><div class="field full"><label>Compromiso</label><input class="commitment-text" placeholder="Actividad acordada"></div><div class="field"><label>Responsable</label><select class="commitment-responsible">${responsibleOptions()}</select></div><div class="field"><label>Fecha de entrega</label><input type="date" class="commitment-date"></div></div><button class="btn small danger remove-builder" type="button" style="margin-top:8px">Eliminar compromiso</button>`;box.querySelector(".remove-builder").addEventListener("click",()=>box.remove());document.getElementById("commitmentsBuilder").appendChild(box);
     }
     function addClientChangeRow(){
-      const idx=clientChangeCounter++;const box=document.createElement("div");box.className="builder-card client-change-row";box.dataset.index=idx;box.innerHTML=`<div class="field"><label>Descripción del cambio</label><textarea class="client-change-description"></textarea></div><div class="field" style="margin-top:10px"><label>Entregables afectados</label><div class="affected-tasks">${projectTasks().map(t=>`<label><input type="checkbox" class="affected-task" value="${t.uid}"><span><strong>${esc(t.id)}</strong> · ${esc(t.name)}</span></label>`).join("")||'<span class="tiny">No hay entregables.</span>'}</div></div><div class="field" style="margin-top:10px"><label>Cambio aprobado</label><select class="client-change-approved"><option value="false">No</option><option value="true">Sí</option></select></div><button class="btn small danger remove-builder" type="button" style="margin-top:8px">Eliminar cambio</button>`;box.querySelector(".remove-builder").addEventListener("click",()=>box.remove());document.getElementById("clientChangesBuilder").appendChild(box);
+      const idx=clientChangeCounter++;const box=document.createElement("div");box.className="builder-card client-change-row";box.dataset.index=idx;box.innerHTML=`<div class="field"><label>Descripción del cambio</label><textarea class="client-change-description"></textarea></div><div class="field" style="margin-top:10px"><label>Impacto esperado del cambio</label><textarea class="client-change-impact" placeholder="Impacto en plazo, costo, alcance, coordinación, calidad..."></textarea></div><div class="field" style="margin-top:10px"><label>Alternativas evaluadas</label><textarea class="client-change-alternatives" placeholder="Alternativas consideradas antes de aprobar el cambio"></textarea></div><div class="field" style="margin-top:10px"><label>Entregables afectados</label><div class="affected-tasks">${projectTasks().map(t=>`<label><input type="checkbox" class="affected-task" value="${t.uid}"><span><strong>${esc(t.id)}</strong> · ${esc(t.name)}</span></label>`).join("")||'<span class="tiny">No hay entregables.</span>'}</div></div><div class="field" style="margin-top:10px"><label>Cambio aprobado</label><select class="client-change-approved"><option value="false">No</option><option value="true">Sí</option></select></div><button class="btn small danger remove-builder" type="button" style="margin-top:8px">Eliminar cambio</button>`;box.querySelector(".remove-builder").addEventListener("click",()=>box.remove());document.getElementById("clientChangesBuilder").appendChild(box);
     }
     document.getElementById("addCommitment").addEventListener("click",addCommitmentRow);
     document.getElementById("addClientChange").addEventListener("click",addClientChangeRow);
     document.getElementById("openMinutesModal").addEventListener("click",()=>{if(!activeProjectId)return showToast("Selecciona un proyecto primero.");document.getElementById("minutesForm").reset();document.getElementById("commitmentsBuilder").innerHTML="";document.getElementById("clientChangesBuilder").innerHTML="";commitmentCounter=clientChangeCounter=0;addCommitmentRow();openModal("minutesModal");});
-    document.getElementById("minutesForm").addEventListener("submit",async e=>{e.preventDefault();const commitments=[...document.querySelectorAll(".commitment-row")].map(row=>{const rid=row.querySelector(".commitment-responsible").value;const r=projectResponsibles().find(x=>x.id===rid);return {text:row.querySelector(".commitment-text").value.trim(),responsibleId:rid,responsibleName:r?.name||"",dueDate:row.querySelector(".commitment-date").value};}).filter(c=>c.text);const {data:minute,error:mErr}=await supabaseClient.from("minutes").insert({project_id:activeProjectId,meeting_date:document.getElementById("minutesDate").value,title:document.getElementById("minutesTitle").value.trim(),topics:document.getElementById("minutesTopics").value.trim(),commitments,updated_at:new Date().toISOString()}).select().single();if(mErr)return showToast("Error guardando acta: "+mErr.message);const changeRows=[...document.querySelectorAll(".client-change-row")].map(row=>{const desc=row.querySelector(".client-change-description").value.trim();const affected=[...row.querySelectorAll(".affected-task:checked")].map(x=>x.value);const approved=row.querySelector(".client-change-approved").value==="true";return desc?{project_id:activeProjectId,minute_id:minute.id,code:nextChangeCode(),description:desc,status:approved?"Aprobado":"Solicitado",approved,affected_task_ids:affected}:null;}).filter(Boolean);for(let i=0;i<changeRows.length;i++)changeRows[i].code=`CHG-${String((Number(nextChangeCode().split("-")[1])||1)+i).padStart(3,"0")}`;if(changeRows.length){const {error:cErr}=await supabaseClient.from("changes").insert(changeRows);if(cErr)return showToast("Acta guardada, pero fallaron cambios: "+cErr.message);}closeModal("minutesModal");await loadSharedData();showToast("Acta guardada");});
+    document.getElementById("minutesForm").addEventListener("submit",async e=>{e.preventDefault();const commitments=[...document.querySelectorAll(".commitment-row")].map(row=>{const rid=row.querySelector(".commitment-responsible").value;const r=projectResponsibles().find(x=>x.id===rid);return {text:row.querySelector(".commitment-text").value.trim(),responsibleId:rid,responsibleName:r?.name||"",dueDate:row.querySelector(".commitment-date").value};}).filter(c=>c.text);const {data:minute,error:mErr}=await supabaseClient.from("minutes").insert({project_id:activeProjectId,meeting_date:document.getElementById("minutesDate").value,title:document.getElementById("minutesTitle").value.trim(),topics:document.getElementById("minutesTopics").value.trim(),commitments,updated_at:new Date().toISOString()}).select().single();if(mErr)return showToast("Error guardando acta: "+mErr.message);const changeRows=[...document.querySelectorAll(".client-change-row")].map(row=>{const desc=row.querySelector(".client-change-description").value.trim();const affected=[...row.querySelectorAll(".affected-task:checked")].map(x=>x.value);const approved=row.querySelector(".client-change-approved").value==="true";const impact=row.querySelector(".client-change-impact").value.trim();const alternatives=row.querySelector(".client-change-alternatives").value.trim();return desc?{project_id:activeProjectId,minute_id:minute.id,code:nextChangeCode(),description:desc,impact_description:impact,alternatives,status:approved?"Aprobado":"Solicitado",approved,affected_task_ids:affected}:null;}).filter(Boolean);for(let i=0;i<changeRows.length;i++)changeRows[i].code=`CHG-${String((Number(nextChangeCode().split("-")[1])||1)+i).padStart(3,"0")}`;if(changeRows.length){const {error:cErr}=await supabaseClient.from("changes").insert(changeRows);if(cErr)return showToast("Acta guardada, pero fallaron cambios: "+cErr.message);}closeModal("minutesModal");await loadSharedData();showToast("Acta guardada");});
+
+
+    function renderGlobalProjectContext(){
+      const p=activeProject();
+      const name=document.getElementById("globalProjectName");
+      const meta=document.getElementById("globalProjectMeta");
+      if(!p){
+        name.textContent="Sin proyecto activo";
+        meta.textContent="Selecciona un proyecto.";
+        return;
+      }
+      name.textContent=p.name;
+      meta.textContent=[p.client,p.contractNumber?`Contrato ${p.contractNumber}`:"",p.location].filter(Boolean).join(" · ");
+    }
 
     function renderAll(){
-      renderProjects(); renderResponsibles(); renderBacklog(); renderTimeline();
+      renderGlobalProjectContext(); renderDashboardProjectSelector();
+      renderProjects(); renderResponsibles(); renderEdt(); renderBacklog(); renderTimeline();
       renderSprints(); renderKanban(); renderDashboard();
       renderBudget(); renderEvm(); renderGovernanceShared();
     }
