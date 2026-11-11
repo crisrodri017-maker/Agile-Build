@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AgileBuild - Gestión Ágil de Diseño</title>
+  <!-- Librería para comprimir los datos en el Link -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
+  <style>
+    :root{
+      --bg:#f5f7fb;
+      --panel:#ffffff;
+      --text:#18202a;
+      --muted:#687386;
+      --border:#dfe5ec;
+      --accent:#1f6feb;
+      --accent-soft:#eaf2ff;
+      --success:#1f9d63;
+      --warning:#d98200;
+      --danger:#d64545;
+      --sidebar:#111827;
+      --sidebar-text:#e5e7eb;
+      --shadow:0 8px 30px rgba(31,42,55,.08);
+      --radius:16px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      color:var(--text);
+      background:var(--bg);
+    }
+
+    /* MODO LECTOR (VIEW-ONLY) CSS */
+    body.view-only .admin-only {
+      display: none !important;
+    }
+    body.view-only input:not([type="search"]), 
+    body.view-only select:not(#roleSimulator):not(#filterDiscipline):not(#filterStatus), 
+    body.view-only textarea {
+      pointer-events: none;
+      background-color: #f8fafc;
+      border-color: transparent;
+    }
+    body.view-only .kanban-col { pointer-events: none; }
+    body.view-only .kanban-col * { pointer-events: none; }
+
+    button,input,select,textarea{font:inherit}
+    button{cursor:pointer}
+
+    .app{
+      min-height:100vh;
+      display:grid;
+      grid-template-columns:260px 1fr;
+    }
+
+    aside{
+      background:var(--sidebar);
+      color:var(--sidebar-text);
+      padding:24px 18px;
+      position:sticky;
+      top:0;
+      height:100vh;
+      overflow:auto;
+    }
+
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      margin-bottom:28px;
+      padding:0 8px;
+    }
+
+    .brand-mark{
+      width:42px;height:42px;border-radius:12px;
+      display:grid;place-items:center;
+      background:linear-gradient(135deg,#2563eb,#22c55e);
+      font-weight:800;color:white;
+    }
+
+    .brand h1{font-size:18px;margin:0}
+    .brand p{font-size:12px;margin:2px 0 0;color:#94a3b8}
+
+    nav{display:grid;gap:8px}
+    .nav-btn{
+      border:0;
+      background:transparent;
+      color:#cbd5e1;
+      text-align:left;
+      padding:12px 14px;
+      border-radius:10px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .nav-btn:hover,.nav-btn.active{background:#1f2937;color:white}
+    .nav-btn.active{box-shadow:inset 3px 0 0 #3b82f6}
+
+    main{padding:28px;min-width:0;position:relative;}
+    
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      gap:16px;
+      align-items:center;
+      margin-bottom:24px;
+    }
+    .topbar h2{margin:0;font-size:28px}
+    .topbar p{margin:6px 0 0;color:var(--muted)}
+    .top-actions{display:flex;gap:10px;flex-wrap:wrap; align-items:center;}
+
+    /* Simulador de roles */
+    .role-simulator {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #eef2f7;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+    }
+    .role-simulator label { font-size: 12px; color: var(--muted); margin:0; }
+    .role-simulator select { border:none; background:transparent; font-weight:700; font-size:13px; outline:none; padding:0; width:auto; cursor:pointer; }
+
+    .sub-header {
+      margin: 36px 0 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--border);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn{
+      border:1px solid var(--border);
+      background:white;
+      color:var(--text);
+      padding:10px 14px;
+      border-radius:10px;
+      font-weight:600;
+    }
+    .btn.primary{
+      background:var(--accent);
+      color:white;
+      border-color:var(--accent);
+    }
+    .btn.ghost{background:transparent}
+    .btn.danger{color:var(--danger); border-color:#fad4d4; background:#fffafa}
+
+    .grid{
+      display:grid;
+      gap:18px;
+    }
+    .grid.cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}
+    .grid.cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .grid.cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+
+    .card{
+      background:var(--panel);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:20px;
+      box-shadow:var(--shadow);
+      min-width:0;
+    }
+    .card h3{margin:0 0 14px;font-size:17px}
+    .metric{
+      font-size:30px;
+      font-weight:800;
+      margin-top:8px;
+    }
+    .muted{color:var(--muted)}
+    .tiny{font-size:12px;color:var(--muted)}
+    .section{display:none}
+    .section.active{display:block}
+
+    .progress{
+      height:10px;border-radius:999px;background:#edf1f5;overflow:hidden;margin-top:10px;
+    }
+    .progress span{display:block;height:100%;background:var(--accent);border-radius:999px}
+
+    .discipline-row{
+      display:grid;
+      grid-template-columns:1.2fr 2fr 60px;
+      gap:12px;
+      align-items:center;
+      margin:12px 0;
+    }
+
+    .badge{
+      display:inline-flex;align-items:center;
+      border-radius:999px;
+      padding:5px 9px;
+      background:#eef2f7;
+      color:#475569;
+      font-size:12px;
+      font-weight:700;
+      white-space:nowrap;
+    }
+    .badge.success{background:#e8f7ef;color:#137a4b}
+    .badge.warning{background:#fff4db;color:#9b6300}
+    .badge.danger{background:#fdecec;color:#ad2c2c}
+    .badge.info{background:#e9f1ff;color:#245ab7}
+
+    .table-wrap{
+      overflow:auto;
+      border:1px solid var(--border);
+      border-radius:12px;
+    }
+    table{
+      width:100%;
+      border-collapse:collapse;
+      min-width:920px;
+      background:white;
+    }
+    th,td{
+      padding:12px 14px;
+      border-bottom:1px solid var(--border);
+      text-align:left;
+      vertical-align:middle;
+      font-size:14px;
+    }
+    th{
+      background:#f8fafc;
+      color:#526070;
+      font-size:12px;
+      text-transform:uppercase;
+      letter-spacing:.04em;
+    }
+    tr:last-child td{border-bottom:none}
+
+    .form-grid{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:16px;
+    }
+    .field{display:grid;gap:7px}
+    .field.full{grid-column:1/-1}
+    label{font-size:13px;font-weight:700;color:#445064}
+    input,select,textarea{
+      width:100%;
+      border:1px solid #cfd8e3;
+      border-radius:10px;
+      padding:11px 12px;
+      background:white;
+      color:var(--text);
+      outline:none;
+    }
+    input:focus,select:focus,textarea:focus{
+      border-color:#6ea4ff;
+      box-shadow:0 0 0 3px rgba(31,111,235,.12)
+    }
+    textarea{min-height:95px;resize:vertical}
+
+    .kanban{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(240px,1fr));
+      gap:14px;
+      overflow-x:auto;
+      padding-bottom:6px;
+    }
+    .kanban-col{
+      background:#eef2f6;
+      border-radius:14px;
+      padding:12px;
+      min-height:420px;
+    }
+    .kanban-head{
+      display:flex;justify-content:space-between;align-items:center;
+      margin-bottom:10px;
+      font-weight:800;
+      font-size:14px;
+    }
+    .task-card{
+      background:white;
+      border:1px solid var(--border);
+      border-radius:12px;
+      padding:12px;
+      margin-bottom:10px;
+      box-shadow:0 3px 12px rgba(15,23,42,.05);
+    }
+    .task-card h4{margin:0 0 8px;font-size:14px}
+    .task-meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+
+    .empty{
+      padding:24px;
+      border:1px dashed #cbd5e1;
+      border-radius:12px;
+      color:var(--muted);
+      text-align:center;
+    }
+
+    .modal-backdrop{
+      display:none;
+      position:fixed;
+      inset:0;
+      background:rgba(15,23,42,.52);
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+      z-index:50;
+    }
+    .modal-backdrop.show{display:flex}
+    .modal{
+      width:min(680px,100%);
+      background:white;
+      border-radius:16px;
+      box-shadow:0 30px 80px rgba(0,0,0,.25);
+      padding:20px;
+      max-height:90vh;
+      overflow:auto;
+    }
+    .modal-head{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;
+    }
+    .modal-head h3{margin:0}
+    .close{
+      border:0;background:#eef2f7;border-radius:8px;width:36px;height:36px;
+    }
+
+    .toast{
+      position:fixed;
+      right:20px;
+      bottom:20px;
+      background:#111827;
+      color:white;
+      padding:12px 16px;
+      border-radius:10px;
+      opacity:0;
+      pointer-events:none;
+      transform:translateY(10px);
+      transition:.2s ease;
+      z-index:80;
+    }
+    .toast.show{opacity:1;transform:translateY(0)}
+
+    .list-row{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)}
+    .list-row:last-child{border-bottom:0}
+    .project-row{padding:12px;border-radius:12px;border:1px solid var(--border);margin-bottom:10px;background:#fff}
+    .project-row.active{background:var(--accent-soft);border-color:#b9d2ff}
+    .timeline{display:grid;gap:10px}
+    .timeline-head,.timeline-row{display:grid;grid-template-columns:110px minmax(220px,1.4fr) 145px 145px minmax(180px,1fr) 115px;gap:10px;align-items:center}
+    .timeline-head{font-size:12px;text-transform:uppercase;color:var(--muted);font-weight:800;padding:0 8px}
+    .timeline-row{padding:12px;border:1px solid var(--border);border-radius:12px;background:#fff}
+    .timeline-track{height:14px;background:#eef2f7;border-radius:999px;overflow:hidden;position:relative}
+    .timeline-bar{height:100%;background:var(--accent);border-radius:999px;min-width:8px}
+    
+    .csv-upload-box {
+      border: 2px dashed var(--accent);
+      background: var(--accent-soft);
+      padding: 16px;
+      border-radius: 12px;
+      text-align: center;
+      margin-bottom: 18px;
+    }
+    
+    /* Panel de herramientas de Backup (solo admin) */
+    .backup-tools {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside>
+      <div class="brand">
+        <div class="brand-mark">AB</div>
+        <div>
+          <h1>AgileBuild</h1>
+          <p>Gestión ágil de diseño</p>
+        </div>
+      </div>
+
+      <nav>
+        <button class="nav-btn active" data-section="dashboard">📊 Dashboard</button>
+        <button class="nav-btn" data-section="projects">🏢 Proyecto y Equipo</button>
+        <button class="nav-btn" data-section="scope">📋 Alcance y Plazo</button>
+        <button class="nav-btn" data-section="execution">⚡ Ejecución Ágil</button>
+        <button class="nav-btn" data-section="performance">📈 Desempeño</button>
+        <button class="nav-btn" data-section="governance">🛡️ Gobernanza</button>
+      </nav>
+    </aside>
+
+    <main>
+      
+      <!-- MÓDULO 1: DASHBOARD -->
+      <section id="dashboard" class="section active">
+        <div class="topbar">
+          <div>
+            <h2>Dashboard del proyecto</h2>
+            <p id="project-subtitle">Sin proyecto activo</p>
+          </div>
+          <div class="top-actions">
+            <!-- Selector de Roles -->
+            <div class="role-simulator">
+              <label>Vista:</label>
+              <select id="roleSimulator">
+                <option value="admin">👤 Administrador (Edición)</option>
+                <option value="lector">👁️ Lector / Cliente</option>
+              </select>
+            </div>
+            <!-- Botón Borrar Todo (Solo Admin) -->
+            <button class="btn danger admin-only" id="clearAllDataBtn">Borrar datos</button>
+            <button class="btn primary admin-only" data-go="projects">+ Nuevo proyecto</button>
+          </div>
+        </div>
+
+        <div class="grid cols-4">
+          <div class="card">
+            <div class="muted">Avance general</div>
+            <div class="metric" id="metric-progress">0%</div>
+            <div class="progress"><span id="progress-bar" style="width:0%"></span></div>
+          </div>
+          <div class="card">
+            <div class="muted">Actividades</div>
+            <div class="metric" id="metric-total">0</div>
+            <div class="tiny">Backlog total del proyecto</div>
+          </div>
+          <div class="card">
+            <div class="muted">Bloqueadas</div>
+            <div class="metric" id="metric-blocked">0</div>
+            <div class="tiny">Requieren intervención</div>
+          </div>
+          <div class="card">
+            <div class="muted">Sprint actual</div>
+            <div class="metric" id="metric-sprints">0</div>
+            <div class="tiny">Sprints creados</div>
+          </div>
+        </div>
+
+        <div class="grid cols-2" style="margin-top:18px">
+          <div class="card">
+            <h3>Avance por disciplina</h3>
+            <div id="discipline-progress-list">
+              <div class="empty">Agrega entregables y actualiza su estado.</div>
+            </div>
+          </div>
+          <div class="card">
+            <h3>Estado de actividades</h3>
+            <div id="status-summary"></div>
+          </div>
+        </div>
+
+        <div class="grid cols-2" style="margin-top:18px">
+          <div class="card">
+            <h3>Riesgos principales</h3>
+            <div id="dashboard-risks"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MÓDULO 2: PROYECTO Y EQUIPO -->
+      <section id="projects" class="section">
+        <div class="topbar">
+          <div><h2>Proyecto y Equipo</h2><p>Crea proyectos, activa uno de ellos y administra sus responsables estandarizados.</p></div>
+        </div>
+
+        <div class="grid cols-2">
+          <form id="projectForm" class="card admin-only">
+            <h3>Crear / editar proyecto</h3>
+            <input type="hidden" id="projectId" />
+            <div class="form-grid">
+              <div class="field"><label>Nombre del proyecto</label><input id="projectName" required /></div>
+              <div class="field"><label>Código</label><input id="projectCode" /></div>
+              <div class="field"><label>Cliente</label><input id="projectClient" /></div>
+              <div class="field"><label>Tipo de edificación</label><select id="projectType"><option>Administrativo</option><option>Hospitalario</option><option>Educativo</option><option>Residencial</option><option>Industrial</option><option>Comercial</option><option>Infraestructura</option></select></div>
+              <div class="field"><label>Ubicación</label><input id="projectLocation" /></div>
+              <div class="field"><label>Duración preferida sprint</label><select id="sprintLength"><option value="1">1 semana</option><option value="2" selected>2 semanas</option><option value="3">3 semanas</option><option value="4">4 semanas</option></select></div>
+              <div class="field full"><label>Descripción</label><textarea id="projectDescription"></textarea></div>
+            </div>
+            <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px"><button class="btn" type="button" id="clearProjectForm">Limpiar</button><button class="btn primary" type="submit">Guardar proyecto</button></div>
+          </form>
+
+          <div class="card">
+            <h3>Proyectos guardados</h3>
+            <div id="projectsList"></div>
+            
+            <div class="backup-tools admin-only">
+              <div style="flex:1">
+                <strong>🔗 Compartir Ejemplo</strong>
+                <p class="tiny">Crea un link único con todos tus datos. Envíalo y la persona verá exactamente este mismo ejemplo.</p>
+              </div>
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <button class="btn small primary" id="generateShareLinkBtn">🔗 Copiar Link para Cliente</button>
+                <button class="btn small" onclick="document.getElementById('importDataInput').click()">Importar .JSON</button>
+                <input type="file" id="importDataInput" accept=".json" style="display:none" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="sub-header">👥 Equipo de Trabajo y Tarifas</h3>
+        
+        <div class="csv-upload-box admin-only">
+          <strong>📥 Carga Masiva de Personal (CSV)</strong>
+          <p class="tiny">Sube un archivo Excel guardado como CSV. Formato esperado de columnas (sin encabezados obligatorios):<br><b>Nombre Completo, Rol, Área, Tarifa (número sin puntos)</b></p>
+          <input type="file" id="csvFileInput" accept=".csv" style="display:none" />
+          <button class="btn primary small" onclick="document.getElementById('csvFileInput').click()">Seleccionar archivo .CSV</button>
+        </div>
+
+        <div class="grid cols-2">
+          <div class="card admin-only">
+            <h3>Añadir responsable manualmente</h3>
+            <form id="responsibleForm" class="form-grid">
+              <div class="field full"><label>Nombre Completo</label><input id="responsibleName" required placeholder="Ej. Juan Pérez" /></div>
+              <div class="field">
+                <label>Rol Estandarizado</label>
+                <select id="responsibleRole">
+                  <option>Director</option>
+                  <option>Scrum Master</option>
+                  <option>Líder</option>
+                  <option>Especialista</option>
+                  <option>Ingeniero Auxiliar</option>
+                  <option>Dibujante</option>
+                </select>
+              </div>
+              <div class="field">
+                <label>Área / Disciplina</label>
+                <select id="responsibleArea">
+                  <option>General / Proyecto</option>
+                  <option>Arquitectura</option>
+                  <option>Estructuras</option>
+                  <option>Geotecnia</option>
+                  <option>Geología</option>
+                  <option>Hidrología</option>
+                  <option>Eléctrico</option>
+                  <option>Hidrosanitario</option>
+                  <option>BIM</option>
+                  <option>Presupuestos</option>
+                </select>
+              </div>
+              <div class="field full"><label>Costo por hora (COP)</label><input id="responsibleHourlyRate" type="number" min="0" step="1000" value="0" placeholder="Ej. 85000" /></div>
+              <div class="field full"><button class="btn primary" type="submit">+ Añadir responsable</button></div>
+            </form>
+          </div>
+          <div class="card"><h3>Listado de responsables</h3><div id="responsiblesList"></div></div>
+        </div>
+      </section>
+
+      <!-- MÓDULO 3: ALCANCE Y PLAZO -->
+      <section id="scope" class="section">
+        <div class="topbar">
+          <div><h2>Alcance y Cronograma</h2><p>Gestiona el Backlog de actividades y fechas.</p></div>
+          <button class="btn primary admin-only" id="openTaskModal">+ Nueva actividad</button>
+        </div>
+
+        <h3 class="sub-header">📋 Backlog de Actividades</h3>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Actividad</th>
+                  <th>Disciplina</th>
+                  <th>Prioridad</th>
+                  <th>Sprint</th>
+                  <th>Responsable</th>
+                  <th>Horas</th>
+                  <th>Estado</th>
+                  <th class="admin-only"></th>
+                </tr>
+              </thead>
+              <tbody id="backlogBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <h3 class="sub-header">📅 Cronograma de Entregables</h3>
+        <div class="card">
+          <div class="timeline">
+            <div class="timeline-head"><div>ID</div><div>Actividad</div><div>Inicio</div><div>Fin</div><div>Cronograma</div><div>Estado</div></div>
+            <div id="timelineBody"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MÓDULO 4: EJECUCIÓN ÁGIL -->
+      <section id="execution" class="section">
+        <div class="topbar">
+          <div><h2>Ejecución Ágil</h2><p>Planifica Sprints y gestiona el flujo de trabajo Kanban.</p></div>
+          <button class="btn primary admin-only" id="openSprintModal">+ Crear sprint</button>
+        </div>
+
+        <h3 class="sub-header">⚡ Sprints Planificados</h3>
+        <div id="sprintsList" class="grid cols-2"></div>
+
+        <h3 class="sub-header">🧩 Tablero Kanban Operativo</h3>
+        <div id="kanbanBoard" class="kanban"></div>
+      </section>
+
+      <!-- MÓDULO 5: DESEMPEÑO -->
+      <section id="performance" class="section">
+        <div class="topbar">
+          <div><h2>Control Financiero y Desempeño</h2><p>Presupuesto y Análisis de Valor Ganado (EVM).</p></div>
+        </div>
+        <h3 class="sub-header">💰 Presupuesto de Costos</h3>
+        <div id="budgetContent"></div>
+        <h3 class="sub-header">📈 Análisis de Valor Ganado (EVM)</h3>
+        <div id="evmContent"></div>
+      </section>
+
+      <!-- MÓDULO 6: GOBERNANZA -->
+      <section id="governance" class="section">
+        <div class="topbar">
+          <div><h2>Gobernanza del Proyecto</h2><p>Riesgos, decisiones y control de cambios.</p></div>
+          <div class="top-actions admin-only">
+            <button class="btn primary" id="openRiskModal">+ Crear riesgo</button>
+            <button class="btn primary" id="openMinutesModal">+ Crear acta</button>
+          </div>
+        </div>
+
+        <h3 class="sub-header">⚠️ Riesgos y Bloqueos</h3>
+        <div id="risksList" class="risk-grid"></div>
+
+        <h3 class="sub-header">🧠 Actas y Decisiones</h3>
+        <div id="minutesList" class="minutes-list"></div>
+
+        <h3 class="sub-header">🔁 Control de Cambios</h3>
+        <div id="changesList" class="grid cols-2"></div>
+      </section>
+    </main>
+  </div>
+
+  <!-- MODALES -->
+  <div class="modal-backdrop" id="taskModal">
+    <div class="modal">
+      <div class="modal-head"><h3>Nueva actividad del backlog</h3><button class="close" type="button" data-close="taskModal">✕</button></div>
+      <form id="taskForm">
+        <div class="form-grid">
+          <div class="field"><label>ID</label><input id="taskId" required placeholder="ARQ-009" /></div>
+          <div class="field"><label>Disciplina</label><select id="taskDiscipline"><option>General / Proyecto</option><option>Arquitectura</option><option>Estructuras</option><option>Geotecnia</option><option>Geología</option><option>Hidrología</option><option>Eléctrico</option><option>Hidrosanitario</option><option>BIM</option><option>Presupuestos</option></select></div>
+          <div class="field full"><label>Actividad / entregable</label><input id="taskName" required /></div>
+          <div class="field"><label>Prioridad</label><select id="taskPriority"><option>Alta</option><option selected>Media</option><option>Baja</option></select></div>
+          <div class="field"><label>Sprint</label><select id="taskSprint"></select></div>
+          <div class="field"><label>Responsable</label><select id="taskOwner"></select></div>
+          <div class="field"><label>Horas estimadas</label><input type="number" min="0" id="taskHours" value="16" /></div>
+          <div class="field"><label>Estado</label><select id="taskStatus"><option>Backlog</option><option>Por iniciar</option><option>En proceso</option><option>En revisión</option><option>Bloqueado</option><option>Aprobado</option></select></div>
+          <div class="field"><label>Fecha inicio</label><input type="date" id="taskStartDate" /></div>
+          <div class="field"><label>Fecha fin</label><input type="date" id="taskEndDate" /></div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px"><button class="btn" type="button" data-close="taskModal">Cancelar</button><button class="btn primary" type="submit">Guardar</button></div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="sprintModal">
+    <div class="modal">
+      <div class="modal-head"><h3>Crear sprint</h3><button class="close" type="button" data-close="sprintModal">✕</button></div>
+      <form id="sprintForm">
+        <div class="form-grid">
+          <div class="field"><label>Nombre / número</label><input id="sprintName" required placeholder="Sprint 01" /></div>
+          <div class="field"><label>Fecha inicio</label><input id="sprintStart" type="date" required /></div>
+          <div class="field"><label>Fecha fin</label><input id="sprintEnd" type="date" required /></div>
+          <div class="field full"><label>Objetivo</label><textarea id="sprintObjective" required></textarea></div>
+          <div class="field full"><label>Equipo y dedicación</label><div id="sprintTeamList" class="sprint-team-list"></div></div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px"><button class="btn" type="button" data-close="sprintModal">Cancelar</button><button class="btn primary" type="submit">Crear sprint</button></div>
+      </form>
+    </div>
+  </div>
+  
+  <div class="modal-backdrop" id="riskModal">
+    <div class="modal">
+      <div class="modal-head"><h3>Crear riesgo</h3><button class="close" type="button" data-close="riskModal">✕</button></div>
+      <form id="riskForm">
+        <div class="form-grid">
+          <div class="field full"><label>Descripción</label><textarea id="riskDescription" required></textarea></div>
+          <div class="field"><label>Probabilidad (1-5)</label><input type="number" id="riskProbability" min="1" max="5" value="3"></div>
+          <div class="field"><label>Impacto (1-5)</label><input type="number" id="riskImpact" min="1" max="5" value="3"></div>
+          <div class="field full"><label>Tratamiento y controles</label><textarea id="riskControls" required></textarea></div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px"><button class="btn" type="button" data-close="riskModal">Cancelar</button><button class="btn primary" type="submit">Guardar riesgo</button></div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="minutesModal">
+    <div class="modal">
+      <div class="modal-head"><h3>Crear acta / Decisión</h3><button class="close" type="button" data-close="minutesModal">✕</button></div>
+      <form id="minutesForm">
+        <div class="form-grid">
+          <div class="field"><label>Fecha</label><input id="minutesDate" type="date" required /></div>
+          <div class="field"><label>Asunto</label><input id="minutesTitle" required /></div>
+          <div class="field full"><label>Temas y Decisiones</label><textarea id="minutesTopics" required></textarea></div>
+        </div>
+        <div id="commitmentsBuilder" style="margin-top:15px"></div>
+        <button class="btn small" type="button" id="addCommitment" style="margin-top:10px">+ Añadir compromiso</button>
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px"><button class="btn" type="button" data-close="minutesModal">Cancelar</button><button class="btn primary" type="submit">Guardar acta</button></div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // --------------------------------------------------------
+    // SISTEMA DE RECEPCIÓN DE DATOS POR LINK (COMPRESIÓN)
+    // --------------------------------------------------------
+    const KEY = { projects:"ab_v8_proj", activeProject:"ab_v8_act", tasks:"ab_v8_task", responsibles:"ab_v8_resp", sprints:"ab_v8_spr", risks:"ab_v8_risk", minutes:"ab_v8_min", changes:"ab_v8_chg", budget:"ab_v8_budg", evm:"ab_v8_evm" };
+    
+    const urlParams = new URLSearchParams(window.location.search);
+    const demoDataFromUrl = urlParams.get('demo');
+
+    if (demoDataFromUrl && typeof LZString !== "undefined") {
+      try {
+        const decoded = LZString.decompressFromEncodedURIComponent(demoDataFromUrl);
+        const importedData = JSON.parse(decoded);
+        if (importedData && importedData.projects) {
+          localStorage.setItem(KEY.projects, JSON.stringify(importedData.projects));
+          localStorage.setItem(KEY.activeProject, importedData.activeProjectId || "");
+          localStorage.setItem(KEY.tasks, JSON.stringify(importedData.tasks || []));
+          localStorage.setItem(KEY.responsibles, JSON.stringify(importedData.responsibles || []));
+          localStorage.setItem(KEY.sprints, JSON.stringify(importedData.sprints || []));
+          localStorage.setItem(KEY.risks, JSON.stringify(importedData.risks || []));
+          localStorage.setItem(KEY.minutes, JSON.stringify(importedData.minutes || []));
+          localStorage.setItem(KEY.changes, JSON.stringify(importedData.changes || []));
+          localStorage.setItem(KEY.budget, JSON.stringify(importedData.budgetSettings || {}));
+          localStorage.setItem(KEY.evm, JSON.stringify(importedData.evmSettings || {}));
+          
+          // Limpiamos la URL para no ensuciar, pero mantenemos mode=lector
+          let cleanUrl = window.location.href.split('?')[0];
+          if(urlParams.get('mode') === 'lector') cleanUrl += '?mode=lector';
+          window.history.replaceState({}, document.title, cleanUrl);
+          
+          // Recargamos para aplicar los datos nuevos
+          window.location.reload();
+        }
+      } catch (err) {
+        console.error("Error al cargar datos del link", err);
+      }
+    }
+
+    // APLICAR MODO LECTOR AUTOMÁTICO SI VIENE EN LA URL
+    if (urlParams.get('mode') === 'lector') {
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById("roleSimulator").value = "lector";
+            document.body.classList.add("view-only");
+        });
+    }
+
+
+    // --------------------------------------------------------
+    // CÓDIGO NORMAL DE LA APLICACIÓN
+    // --------------------------------------------------------
+    function money(v){return new Intl.NumberFormat("es-CO",{style:"currency",currency:"COP",maximumFractionDigits:0}).format(Number(v)||0)}
+    const uid = () => crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2);
+    
+    let projects = JSON.parse(localStorage.getItem(KEY.projects)||"[]");
+    let activeProjectId = localStorage.getItem(KEY.activeProject)||"";
+    let tasks = JSON.parse(localStorage.getItem(KEY.tasks)||"[]");
+    let responsibles = JSON.parse(localStorage.getItem(KEY.responsibles)||"[]");
+    let sprints = JSON.parse(localStorage.getItem(KEY.sprints)||"[]");
+    let risks = JSON.parse(localStorage.getItem(KEY.risks)||"[]");
+    let minutes = JSON.parse(localStorage.getItem(KEY.minutes)||"[]");
+    let changes = JSON.parse(localStorage.getItem(KEY.changes)||"[]");
+    let budgetSettings = JSON.parse(localStorage.getItem(KEY.budget)||"{}");
+    let evmSettings = JSON.parse(localStorage.getItem(KEY.evm)||"{}");
+
+    document.getElementById("roleSimulator").addEventListener("change", (e) => {
+      document.body.classList.toggle("view-only", e.target.value === "lector");
+      showToast(e.target.value === "lector" ? "Vista de Lector activada" : "Vista de Administrador activada");
+    });
+
+    document.getElementById("clearAllDataBtn").addEventListener("click", () => {
+      if(confirm("¿Estás seguro de borrar todos los datos de todos los proyectos? Esto no se puede deshacer.")){
+        localStorage.clear(); location.href = window.location.href.split('?')[0];
+      }
+    });
+
+    // GENERAR LINK PARA COMPARTIR
+    document.getElementById("generateShareLinkBtn").addEventListener("click", () => {
+      const allData = { projects, activeProjectId, tasks, responsibles, sprints, risks, minutes, changes, budgetSettings, evmSettings };
+      const jsonStr = JSON.stringify(allData);
+      
+      if (typeof LZString === "undefined") {
+          return showToast("Error: No se pudo cargar el compresor de enlaces.");
+      }
+      
+      const encoded = LZString.compressToEncodedURIComponent(jsonStr);
+      const baseUrl = window.location.href.split('?')[0];
+      const shareUrl = baseUrl + "?mode=lector&demo=" + encoded;
+      
+      // Copiar al portapapeles
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        showToast("¡Link de Lector copiado al portapapeles!");
+      }).catch(err => {
+        prompt("Copia este enlace manualmente:", shareUrl);
+      });
+    });
+
+    document.getElementById("importDataInput").addEventListener("change", function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(ev) {
+        try {
+          const importedData = JSON.parse(ev.target.result);
+          if (importedData.projects) {
+            projects = importedData.projects || []; activeProjectId = importedData.activeProjectId || ""; tasks = importedData.tasks || []; responsibles = importedData.responsibles || []; sprints = importedData.sprints || []; risks = importedData.risks || []; minutes = importedData.minutes || []; changes = importedData.changes || []; budgetSettings = importedData.budgetSettings || {}; evmSettings = importedData.evmSettings || {};
+            saveAll(); renderAll(); showToast("Backup importado con éxito");
+          } else { showToast("Archivo JSON no válido para AgileBuild"); }
+        } catch (err) { showToast("Error al leer el archivo"); }
+      };
+      reader.readAsText(file); e.target.value = '';
+    });
+
+    const activeProject = () => projects.find(p => p.id === activeProjectId) || null;
+    const projectTasks = () => tasks.filter(t => t.projectId === activeProjectId);
+    const projectResponsibles = () => responsibles.filter(r => r.projectId === activeProjectId);
+    const projectSprints = () => sprints.filter(sp => sp.projectId === activeProjectId);
+    const projectRisks = () => risks.filter(r => r.projectId === activeProjectId);
+    const projectMinutes = () => minutes.filter(m => m.projectId === activeProjectId);
+    const projectChanges = () => changes.filter(c => c.projectId === activeProjectId);
+    const projectBudget = () => budgetSettings[activeProjectId] || {adminPct:0, utilityPct:0, contingencyPct:0};
+    const projectEvm = () => evmSettings[activeProjectId] || {};
+    const esc = v => String(v??"").replace(/[&<>"']/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+    
+    function saveAll(){
+      localStorage.setItem(KEY.projects, JSON.stringify(projects)); localStorage.setItem(KEY.activeProject, activeProjectId); localStorage.setItem(KEY.tasks, JSON.stringify(tasks)); localStorage.setItem(KEY.responsibles, JSON.stringify(responsibles)); localStorage.setItem(KEY.sprints, JSON.stringify(sprints)); localStorage.setItem(KEY.risks, JSON.stringify(risks)); localStorage.setItem(KEY.minutes, JSON.stringify(minutes)); localStorage.setItem(KEY.changes, JSON.stringify(changes)); localStorage.setItem(KEY.budget, JSON.stringify(budgetSettings)); localStorage.setItem(KEY.evm, JSON.stringify(evmSettings));
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById("toast"); t.textContent = msg; t.classList.add("show");
+      clearTimeout(window.__toastTimer); window.__toastTimer = setTimeout(() => t.classList.remove("show"), 3000);
+    }
+
+    function statusBadge(s){
+      const m = {Aprobado:"success", "En revisión":"warning", Bloqueado:"danger", "En proceso":"info"};
+      return `<span class="badge ${m[s]||""}">${s}</span>`;
+    }
+
+    const sections = document.querySelectorAll(".section"), navButtons = document.querySelectorAll(".nav-btn");
+    function goToSection(id){
+      sections.forEach(s => s.classList.toggle("active", s.id===id));
+      navButtons.forEach(b => b.classList.toggle("active", b.dataset.section===id));
+      window.scrollTo({top:0, behavior:"smooth"});
+    }
+    navButtons.forEach(b => b.addEventListener("click", () => goToSection(b.dataset.section)));
+    document.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => goToSection(b.dataset.go)));
+    function openModal(id){ document.getElementById(id).classList.add("show"); }
+    function closeModal(id){ document.getElementById(id).classList.remove("show"); }
+    document.querySelectorAll("[data-close]").forEach(b => b.addEventListener("click", () => closeModal(b.dataset.close)));
+
+    function renderProjects(){
+      const el = document.getElementById("projectsList");
+      el.innerHTML = projects.length ? projects.map(p => `
+        <div class="project-row ${p.id===activeProjectId?"active":""}">
+          <div style="display:flex;justify-content:space-between;gap:12px;align-items:start">
+            <div><strong>${esc(p.name)}</strong><div class="tiny">${esc(p.code)} · ${esc(p.client)}</div></div>
+            ${p.id===activeProjectId?'<span class="badge info">Activo</span>':''}
+          </div>
+          <div style="display:flex;gap:8px;margin-top:10px" class="admin-only">
+            <button class="btn small activate-project" data-id="${p.id}">Activar</button>
+            <button class="btn small edit-project" data-id="${p.id}">Editar</button>
+            <button class="btn small danger delete-project" data-id="${p.id}">Eliminar</button>
+          </div>
+        </div>`).join("") : '<div class="empty">Aún no hay proyectos. Crea uno nuevo.</div>';
+      
+      document.querySelectorAll(".activate-project").forEach(b=>b.addEventListener("click",()=>{activeProjectId=b.dataset.id;saveAll();renderAll();showToast("Proyecto activado")}));
+      document.querySelectorAll(".edit-project").forEach(b=>b.addEventListener("click",()=>{
+        const p = projects.find(x=>x.id===b.dataset.id);
+        if(!p) return;
+        ["Id","Name","Code","Client","Type","Location","Description"].forEach(k => {
+          const el = document.getElementById("project"+k); if(el && p[k.toLowerCase()]) el.value = p[k.toLowerCase()];
+        });
+      }));
+      document.querySelectorAll(".delete-project").forEach(b=>b.addEventListener("click",()=>{
+        const id=b.dataset.id;
+        projects = projects.filter(p=>p.id!==id); tasks = tasks.filter(t=>t.projectId!==id); responsibles = responsibles.filter(r=>r.projectId!==id);
+        if(activeProjectId===id) activeProjectId = projects[0]?.id||"";
+        saveAll(); renderAll(); showToast("Proyecto eliminado");
+      }));
+    }
+
+    document.getElementById("projectForm").addEventListener("submit", e => {
+      e.preventDefault();
+      const id = document.getElementById("projectId").value || uid();
+      const p = {
+        id, name: document.getElementById("projectName").value.trim(), code: document.getElementById("projectCode").value.trim(),
+        client: document.getElementById("projectClient").value.trim(), type: document.getElementById("projectType").value,
+        location: document.getElementById("projectLocation").value.trim(), sprintLength: document.getElementById("sprintLength").value,
+        description: document.getElementById("projectDescription").value.trim()
+      };
+      const i = projects.findIndex(x=>x.id===id);
+      if(i>=0) projects[i] = p; else projects.push(p);
+      activeProjectId = id; saveAll(); document.getElementById("projectForm").reset(); renderAll(); showToast("Proyecto guardado");
+    });
+
+    function renderResponsibles(){
+      const arr = projectResponsibles(), el = document.getElementById("responsiblesList");
+      if(!activeProjectId){ el.innerHTML='<div class="empty">Activa un proyecto primero.</div>'; return; }
+      el.innerHTML = arr.length ? arr.map(r => `
+        <div class="list-row">
+          <div><strong>${esc(r.name)}</strong><div class="tiny">${esc(r.role)} · ${esc(r.area)}</div>
+            <div class="tiny" style="margin-top:4px">Tarifa: <strong>${money(r.hourlyRate||0)} / hora</strong></div>
+          </div>
+          <button class="btn small danger delete-responsible admin-only" data-id="${r.id}">Eliminar</button>
+        </div>`).join("") : '<div class="empty">No hay responsables agregados.</div>';
+      
+      document.querySelectorAll(".delete-responsible").forEach(b=>b.addEventListener("click",()=>{ responsibles=responsibles.filter(r=>r.id!==b.dataset.id); saveAll(); renderAll(); }));
+      updateDropdowns();
+    }
+
+    document.getElementById("responsibleForm").addEventListener("submit", e => {
+      e.preventDefault();
+      if(!activeProjectId) return showToast("Activa un proyecto primero.");
+      responsibles.push({
+        id: uid(), projectId: activeProjectId, name: document.getElementById("responsibleName").value.trim(),
+        role: document.getElementById("responsibleRole").value, area: document.getElementById("responsibleArea").value,
+        hourlyRate: Number(document.getElementById("responsibleHourlyRate").value)||0
+      });
+      e.target.reset(); saveAll(); renderAll(); showToast("Responsable agregado");
+    });
+
+    document.getElementById("csvFileInput").addEventListener("change", function(e) {
+      if(!activeProjectId) return showToast("Activa un proyecto primero.");
+      const file = e.target.files[0]; if(!file) return;
+      const reader = new FileReader();
+      reader.onload = function(ev) {
+        const lines = ev.target.result.split('
+'); let count = 0;
+        for(let i=0; i<lines.length; i++) {
+          const cols = lines[i].split(',');
+          if(cols.length >= 3 && cols[0].trim() !== "" && cols[0].toLowerCase() !== "nombre") { 
+            responsibles.push({
+              id: uid(), projectId: activeProjectId, name: cols[0].trim(),
+              role: cols[1]?cols[1].trim():"Especialista", area: cols[2]?cols[2].trim():"General",
+              hourlyRate: cols[3] ? (Number(cols[3].trim())||0) : 0
+            }); count++;
+          }
+        }
+        e.target.value = ''; saveAll(); renderAll(); showToast(`Carga masiva completa: ${count} agregados`);
+      }; reader.readAsText(file);
+    });
+
+    function updateDropdowns(){
+      const ownerSel = document.getElementById("taskOwner"), sprintSel = document.getElementById("taskSprint");
+      if(ownerSel) ownerSel.innerHTML = '<option value="">Por asignar</option>' + projectResponsibles().map(r=>`<option value="${r.id}">${r.name} (${r.role})</option>`).join("");
+      if(sprintSel) sprintSel.innerHTML = '<option value="">Sin sprint</option>' + projectSprints().map(sp=>`<option value="${sp.id}">${sp.name}</option>`).join("");
+    }
+
+    function renderBacklog(){
+      const arr = projectTasks(), body = document.getElementById("backlogBody");
+      const spMap = Object.fromEntries(projectSprints().map(x=>[x.id,x]));
+      
+      body.innerHTML = arr.length ? arr.map(t => `
+        <tr>
+          <td><strong>${t.id}</strong></td><td>${esc(t.name)}</td><td>${t.discipline}</td>
+          <td>${priorityBadge(t.priority)}</td><td>${spMap[t.sprintId]?.name||"—"}</td>
+          <td><select class="owner-editor" data-id="${t.uid}"><option value="">Por asignar</option>${projectResponsibles().map(r=>`<option value="${r.id}" ${r.id===t.ownerId?"selected":""}>${r.name}</option>`).join("")}</select></td>
+          <td>${t.hours||0} h</td>
+          <td><select class="status-editor" data-id="${t.uid}">${["Backlog","Por iniciar","En proceso","En revisión","Bloqueado","Aprobado"].map(x=>`<option ${x===t.status?"selected":""}>${x}</option>`).join("")}</select></td>
+          <td class="admin-only"><button class="btn small danger delete-task" data-id="${t.uid}">X</button></td>
+        </tr>`).join("") : '<tr><td colspan="9"><div class="empty">No hay actividades.</div></td></tr>';
+
+      document.querySelectorAll(".owner-editor").forEach(x=>x.addEventListener("change",()=>{ const t=tasks.find(a=>a.uid===x.dataset.id); if(t) t.ownerId=x.value; saveAll(); renderKanban(); }));
+      document.querySelectorAll(".status-editor").forEach(x=>x.addEventListener("change",()=>{ const t=tasks.find(a=>a.uid===x.dataset.id); if(t) t.status=x.value; saveAll(); renderDashboard(); renderKanban(); }));
+      document.querySelectorAll(".delete-task").forEach(b=>b.addEventListener("click",()=>{ tasks=tasks.filter(t=>t.uid!==b.dataset.id); saveAll(); renderAll(); }));
+    }
+
+    document.getElementById("taskForm").addEventListener("submit", e => {
+      e.preventDefault();
+      tasks.push({
+        uid: uid(), projectId: activeProjectId, id: document.getElementById("taskId").value,
+        name: document.getElementById("taskName").value, discipline: document.getElementById("taskDiscipline").value,
+        priority: document.getElementById("taskPriority").value, sprintId: document.getElementById("taskSprint").value,
+        ownerId: document.getElementById("taskOwner").value, hours: Number(document.getElementById("taskHours").value)||0,
+        status: document.getElementById("taskStatus").value, startDate: document.getElementById("taskStartDate").value, endDate: document.getElementById("taskEndDate").value
+      });
+      e.target.reset(); saveAll(); closeModal("taskModal"); renderAll(); showToast("Actividad creada");
+    });
+
+    function renderTimeline(){
+      const arr = projectTasks(), body = document.getElementById("timelineBody");
+      body.innerHTML = arr.length ? arr.map(t => `
+        <div class="timeline-row">
+          <div><strong>${t.id}</strong><div class="tiny">${t.discipline}</div></div>
+          <div>${esc(t.name)}</div>
+          <div><input type="date" class="timeline-start" data-id="${t.uid}" value="${t.startDate||""}"></div>
+          <div><input type="date" class="timeline-end" data-id="${t.uid}" value="${t.endDate||""}"></div>
+          <div class="timeline-track">${t.startDate&&t.endDate?`<div class="timeline-bar" style="width:100%"></div>`:""}</div>
+          <div>${statusBadge(t.status)}</div>
+        </div>`).join("") : '<div class="empty">Sin actividades.</div>';
+      
+      document.querySelectorAll(".timeline-start, .timeline-end").forEach(inp=>inp.addEventListener("change",()=>{
+        const t=tasks.find(x=>x.uid===inp.dataset.id); if(t) { if(inp.classList.contains("timeline-start")) t.startDate=inp.value; else t.endDate=inp.value; saveAll(); }
+      }));
+    }
+
+    function renderSprints(){
+      const el = document.getElementById("sprintsList");
+      el.innerHTML = projectSprints().map(sp => `
+        <div class="card">
+          <div class="sprint-card">
+            <div><span class="badge info">${esc(sp.name)}</span><h3 style="margin-top:10px">${esc(sp.objective)}</h3></div>
+          </div>
+        </div>`).join("") || '<div class="empty">No hay sprints.</div>';
+    }
+
+    function renderKanban(){
+      const sts = ["Backlog","Por iniciar","En proceso","En revisión","Bloqueado","Aprobado"], board = document.getElementById("kanbanBoard");
+      board.innerHTML = sts.map(st => {
+        const items = projectTasks().filter(t=>t.status===st);
+        return `<div class="kanban-col" data-status="${st}"><div class="kanban-head"><span>${st}</span><span class="badge">${items.length}</span></div>
+          ${items.map(t=>`<div class="task-card" draggable="true" data-task-id="${t.uid}"><div class="tiny">${t.id}</div><h4>${esc(t.name)}</h4></div>`).join("")}</div>`;
+      }).join("");
+      
+      board.querySelectorAll('.task-card[draggable="true"]').forEach(card=>{
+        card.addEventListener("dragstart",e=>{ card.classList.add("dragging"); e.dataTransfer.setData("text/plain",card.dataset.taskId); });
+        card.addEventListener("dragend",()=>{ card.classList.remove("dragging"); board.querySelectorAll(".kanban-col").forEach(c=>c.classList.remove("drag-over")); });
+      });
+      board.querySelectorAll(".kanban-col").forEach(col=>{
+        col.addEventListener("dragover",e=>{ e.preventDefault(); col.classList.add("drag-over"); });
+        col.addEventListener("dragleave",e=>{ col.classList.remove("drag-over"); });
+        col.addEventListener("drop",e=>{
+          e.preventDefault(); col.classList.remove("drag-over");
+          const id = e.dataTransfer.getData("text/plain"), t = tasks.find(x=>x.uid===id);
+          if(t && t.status !== col.dataset.status) { t.status = col.dataset.status; saveAll(); renderAll(); }
+        });
+      });
+    }
+
+    function renderDashboard(){
+      const p = activeProject(), arr = projectTasks();
+      document.getElementById("project-subtitle").textContent = p ? `${p.name}` : "Sin proyecto activo";
+      document.getElementById("metric-total").textContent = arr.length;
+      document.getElementById("metric-blocked").textContent = arr.filter(t=>t.status==="Bloqueado").length;
+      
+      const counts = {}; arr.forEach(t => counts[t.status] = (counts[t.status]||0)+1);
+      document.getElementById("status-summary").innerHTML = Object.entries(counts).map(([st,n])=>`<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">${statusBadge(st)}<strong>${n}</strong></div>`).join("") || '<div class="empty">Sin datos</div>';
+    }
+
+    function renderAll(){
+      renderProjects(); renderResponsibles(); renderBacklog(); renderTimeline();
+      renderSprints(); renderKanban(); renderDashboard();
+    }
+
+    renderAll();
+  </script>
+</body>
+</html>
