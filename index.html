@@ -927,8 +927,7 @@
       const file = e.target.files[0]; if(!file) return;
       const reader = new FileReader();
       reader.onload = function(ev) {
-        const lines = ev.target.result.split('
-'); let count = 0;
+        const lines = ev.target.result.split('\n'); let count = 0;
         for(let i=0; i<lines.length; i++) {
           const cols = lines[i].split(',');
           if(cols.length >= 3 && cols[0].trim() !== "" && cols[0].toLowerCase() !== "nombre") { 
