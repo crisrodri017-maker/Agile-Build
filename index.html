@@ -454,6 +454,30 @@
       main{padding-left:10px;padding-right:10px}
     }
 
+  
+    /* ===== Dashboard ejecutivo / Gantt / Gobernanza ===== */
+    .dashboard-kpi .metric{font-size:24px}
+    .dashboard-kpi .tiny{margin-top:6px}
+    .dashboard-mini-svg{width:100%;height:auto;display:block;max-height:220px}
+    .gantt-scale{display:flex;justify-content:space-between;color:var(--muted);font-size:11px;padding:0 2px}
+    .gantt-scale-row{padding-top:4px;padding-bottom:4px;background:transparent;border-style:dashed;box-shadow:none}
+    .gantt-track{height:22px;background:#eef2f7;border-radius:6px;position:relative;overflow:hidden;min-width:160px}
+    .gantt-bar{position:absolute;top:3px;height:16px;border-radius:5px;background:#cfe0ff;overflow:hidden;min-width:5px}
+    .gantt-progress{height:100%;background:var(--accent);border-radius:5px 0 0 5px}
+    .gantt-today{position:absolute;top:0;bottom:0;width:2px;background:var(--danger);opacity:.65;z-index:3}
+    .risk-preview{padding:12px;border-radius:10px;background:#f8fafc;border:1px solid var(--border);font-weight:700}
+    .risk-card-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}
+    .builder-card{padding:14px;border:1px solid var(--border);border-radius:12px;background:#fafbfd;margin-top:10px}
+    .affected-tasks{max-height:150px;overflow:auto;border:1px solid var(--border);border-radius:10px;padding:9px;background:white;display:grid;gap:6px}
+    .affected-tasks label{display:flex;gap:8px;align-items:flex-start;font-weight:500}
+    .affected-tasks input{width:auto;margin-top:3px}
+    .change-controls{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    @media(max-width:760px){
+      .risk-card-grid{grid-template-columns:1fr}
+      .dashboard-mini-svg{min-width:520px}
+      #dashboardMiniCurve{overflow-x:auto}
+    }
+
   </style>
 </head>
 <body class="view-only">
@@ -532,6 +556,17 @@
             <div class="metric" id="metric-sprints">0</div>
             <div class="tiny">Sprints creados</div>
           </div>
+        </div>
+
+        <h3 class="sub-header">📅 Plazo y desempeño</h3>
+        <div id="dashboardScheduleSummary" class="grid cols-4"></div>
+        <div id="dashboardEvmSummary" class="grid cols-4" style="margin-top:18px"></div>
+        <div class="card" style="margin-top:18px">
+          <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap">
+            <h3 style="margin:0">Curva S resumida</h3>
+            <span class="tiny">PV · EV · AC</span>
+          </div>
+          <div id="dashboardMiniCurve" style="margin-top:10px"></div>
         </div>
 
         <div class="grid cols-2" style="margin-top:18px">
@@ -665,7 +700,8 @@
         <h3 class="sub-header">📅 Cronograma de Entregables</h3>
         <div class="card">
           <div class="timeline">
-            <div class="timeline-head"><div>ID</div><div>Actividad</div><div>Inicio</div><div>Fin</div><div>Cronograma</div><div>Estado</div></div>
+            <div class="timeline-head"><div>ID</div><div>Actividad</div><div>Inicio</div><div>Fin</div><div>Cronograma / avance</div><div>Estado</div></div>
+            <div class="timeline-row gantt-scale-row" id="ganttScaleRow" style="display:none"><div></div><div></div><div></div><div></div><div id="ganttScale" class="gantt-scale"></div><div></div></div>
             <div id="timelineBody"></div>
           </div>
         </div>
@@ -763,9 +799,13 @@
       <form id="riskForm">
         <div class="form-grid">
           <div class="field full"><label>Descripción</label><textarea id="riskDescription" required></textarea></div>
+          <div class="field full"><label>Causas</label><textarea id="riskCauses" required></textarea></div>
+          <div class="field full"><label>Consecuencias</label><textarea id="riskConsequences" required></textarea></div>
           <div class="field"><label>Probabilidad (1-5)</label><input type="number" id="riskProbability" min="1" max="5" value="3"></div>
           <div class="field"><label>Impacto (1-5)</label><input type="number" id="riskImpact" min="1" max="5" value="3"></div>
-          <div class="field full"><label>Tratamiento y controles</label><textarea id="riskControls" required></textarea></div>
+          <div class="field full"><label>Respuesta / tratamiento</label><select id="riskTreatment"><option>Mitigar</option><option>Evitar</option><option>Transferir</option><option>Escalar</option><option>Aceptar</option><option>Compartir</option></select></div>
+          <div class="field full"><label>Medidas de control</label><textarea id="riskControls" required></textarea></div>
+          <div class="field full"><div id="riskPreview" class="risk-preview"></div></div>
         </div>
         <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px"><button class="btn" type="button" data-close="riskModal">Cancelar</button><button class="btn primary" type="submit">Guardar riesgo</button></div>
       </form>
@@ -781,8 +821,12 @@
           <div class="field"><label>Asunto</label><input id="minutesTitle" required /></div>
           <div class="field full"><label>Temas y Decisiones</label><textarea id="minutesTopics" required></textarea></div>
         </div>
-        <div id="commitmentsBuilder" style="margin-top:15px"></div>
+        <h3 class="sub-header" style="margin-top:18px">Compromisos</h3>
+        <div id="commitmentsBuilder"></div>
         <button class="btn small" type="button" id="addCommitment" style="margin-top:10px">+ Añadir compromiso</button>
+        <h3 class="sub-header" style="margin-top:22px">Cambios solicitados por el cliente</h3>
+        <div id="clientChangesBuilder"></div>
+        <button class="btn small" type="button" id="addClientChange" style="margin-top:10px">+ Añadir cambio solicitado</button>
         <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px"><button class="btn" type="button" data-close="minutesModal">Cancelar</button><button class="btn primary" type="submit">Guardar acta</button></div>
       </form>
     </div>
@@ -843,26 +887,45 @@
       };
     }
 
+    function riskFromDb(r){
+      return {id:r.id,projectId:r.project_id,description:r.description||"",causes:r.causes||"",consequences:r.consequences||"",probability:Number(r.probability)||1,impact:Number(r.impact)||1,treatment:r.treatment||"Mitigar",controls:r.controls||"",status:r.status||"Abierto"};
+    }
+    function minuteFromDb(m){
+      return {id:m.id,projectId:m.project_id,date:m.meeting_date||"",title:m.title||"",topics:m.topics||"",commitments:Array.isArray(m.commitments)?m.commitments:[]};
+    }
+    function changeFromDb(c){
+      return {id:c.id,projectId:c.project_id,minuteId:c.minute_id||"",code:c.code||"",description:c.description||"",status:c.status||"Solicitado",approved:!!c.approved,affectedTaskIds:Array.isArray(c.affected_task_ids)?c.affected_task_ids:[]};
+    }
+
     async function loadSharedData(showMessage=false){
       if (sharedDataLoading) return;
       sharedDataLoading = true;
       setSyncStatus("Actualizando…", "warning");
       try {
-        const [pRes, rRes, tRes, sRes] = await Promise.all([
+        const [pRes, rRes, tRes, sRes, riskRes, minRes, chgRes] = await Promise.all([
           supabaseClient.from("projects").select("*").order("created_at", {ascending:true}),
           supabaseClient.from("responsibles").select("*").order("created_at", {ascending:true}),
           supabaseClient.from("tasks").select("*").order("created_at", {ascending:true}),
-          supabaseClient.from("sprints").select("*").order("created_at", {ascending:true})
+          supabaseClient.from("sprints").select("*").order("created_at", {ascending:true}),
+          supabaseClient.from("risks").select("*").order("created_at", {ascending:true}),
+          supabaseClient.from("minutes").select("*").order("meeting_date", {ascending:false}),
+          supabaseClient.from("changes").select("*").order("created_at", {ascending:true})
         ]);
         if (pRes.error) throw pRes.error;
         if (rRes.error) throw rRes.error;
         if (tRes.error) throw tRes.error;
         if (sRes.error) throw sRes.error;
+        if (riskRes.error) throw riskRes.error;
+        if (minRes.error) throw minRes.error;
+        if (chgRes.error) throw chgRes.error;
 
         projects = (pRes.data||[]).map(projectFromDb);
         responsibles = (rRes.data||[]).map(responsibleFromDb);
         tasks = (tRes.data||[]).map(taskFromDb);
         sprints = (sRes.data||[]).map(sprintFromDb);
+        risks = (riskRes.data||[]).map(riskFromDb);
+        minutes = (minRes.data||[]).map(minuteFromDb);
+        changes = (chgRes.data||[]).map(changeFromDb);
 
         if (!projects.some(p=>p.id===activeProjectId)) activeProjectId = projects[0]?.id || "";
         if (dashboardProjectFilter !== "__all__" && !projects.some(p=>p.id===dashboardProjectFilter)) {
@@ -874,6 +937,9 @@
         localStorage.setItem(KEY.responsibles, JSON.stringify(responsibles));
         localStorage.setItem(KEY.tasks, JSON.stringify(tasks));
         localStorage.setItem(KEY.sprints, JSON.stringify(sprints));
+        localStorage.setItem(KEY.risks, JSON.stringify(risks));
+        localStorage.setItem(KEY.minutes, JSON.stringify(minutes));
+        localStorage.setItem(KEY.changes, JSON.stringify(changes));
 
         renderAll();
         setSyncStatus("Datos compartidos ✓", "success");
@@ -1071,14 +1137,41 @@
       return projectId;
     }
 
+
+    async function seedDemoGovernance(projectId, code){
+      const demo=DEMO_GOVERNANCE[code];
+      if(!demo) return;
+      await supabaseClient.from("changes").delete().eq("project_id",projectId);
+      await supabaseClient.from("minutes").delete().eq("project_id",projectId);
+      await supabaseClient.from("risks").delete().eq("project_id",projectId);
+
+      const riskRows=demo.risks.map(r=>({project_id:projectId,description:r[0],probability:Number(r[1]),impact:Number(r[2]),treatment:String(r[3]).split("·")[0].trim(),controls:String(r[3]).split("·").slice(1).join("·").trim(),causes:"Condición identificada durante la coordinación del proyecto.",consequences:"Puede afectar plazo, costo o coordinación interdisciplinaria."}));
+      if(riskRows.length){const {error}=await supabaseClient.from("risks").insert(riskRows);if(error)throw error;}
+
+      const minuteMap={};
+      for(const m of demo.minutes){
+        const {data,rowError,error}=await supabaseClient.from("minutes").insert({project_id:projectId,meeting_date:m[0],title:m[1],topics:m[2],commitments:[]}).select().single();
+        if(error)throw error;
+        minuteMap[m[0]]=data;
+      }
+      const taskIds=tasks.filter(t=>t.projectId===projectId).map(t=>t.uid);
+      const changeRows=demo.changes.map((c,i)=>({project_id:projectId,code:c[0],description:c[1],status:c[2],approved:c[2]==="Aprobado",affected_task_ids:taskIds.slice(0,Math.min(3,taskIds.length))}));
+      if(changeRows.length){const {error}=await supabaseClient.from("changes").insert(changeRows);if(error)throw error;}
+    }
+
     async function loadDemoProjects(){
       if(!confirm("Esto creará o restablecerá los dos proyectos demo y reemplazará sus actividades actuales. ¿Continuar?")) return;
       const btn=document.getElementById("loadDemoProjectsBtn");
       if(btn){btn.disabled=true;btn.textContent="Cargando demo...";}
       setSyncStatus("Cargando demo…","warning");
       try{
-        let lastId="";
-        for(const spec of DEMO_PROJECTS) lastId=await ensureDemoProject(spec);
+        const seeded=[];
+        for(const spec of DEMO_PROJECTS){
+          const pid=await ensureDemoProject(spec);
+          seeded.push([pid,spec.code]);
+        }
+        await loadSharedData();
+        for(const [pid,code] of seeded) await seedDemoGovernance(pid,code);
         await loadSharedData();
         const tds=projects.find(p=>p.code==="TDS-DEMO");
         if(tds){
@@ -1399,16 +1492,47 @@
 
     function renderTimeline(){
       const arr = projectTasks(), body = document.getElementById("timelineBody");
-      body.innerHTML = arr.length ? arr.map(t => `
-        <div class="timeline-row">
-          <div><strong>${t.id}</strong><div class="tiny">${t.discipline}</div></div>
-          <div>${esc(t.name)}</div>
+      const dated=arr.filter(t=>t.startDate&&t.endDate);
+      const scaleRow=document.getElementById("ganttScaleRow");
+      const scale=document.getElementById("ganttScale");
+      if(!arr.length){
+        body.innerHTML='<div class="empty">Sin actividades.</div>';
+        if(scaleRow) scaleRow.style.display="none";
+        return;
+      }
+      let minDate=null,maxDate=null;
+      dated.forEach(t=>{
+        const s=new Date(t.startDate+"T00:00:00"),e=new Date(t.endDate+"T00:00:00");
+        if(!minDate||s<minDate)minDate=s;if(!maxDate||e>maxDate)maxDate=e;
+      });
+      const oneDay=86400000;
+      const span=minDate&&maxDate?Math.max(oneDay,(maxDate-minDate)+oneDay):oneDay;
+      if(scaleRow&&scale){
+        scaleRow.style.display=dated.length?"grid":"none";
+        scale.innerHTML=dated.length?`<span>${minDate.toLocaleDateString("es-CO")}</span><span>${maxDate.toLocaleDateString("es-CO")}</span>`:"";
+      }
+      const today=new Date(); today.setHours(0,0,0,0);
+      const todayPct=minDate&&maxDate?Math.max(0,Math.min(100,((today-minDate)/span)*100)):0;
+
+      body.innerHTML = arr.map(t => {
+        let bar="";
+        if(t.startDate&&t.endDate&&minDate){
+          const s=new Date(t.startDate+"T00:00:00"),e=new Date(t.endDate+"T00:00:00");
+          const left=Math.max(0,Math.min(100,((s-minDate)/span)*100));
+          const width=Math.max(1,Math.min(100-left,(((e-s)+oneDay)/span)*100));
+          const progress=Math.max(0,Math.min(100,Number(t.physicalProgress)||0));
+          bar=`<div class="gantt-track" title="${esc(t.id)} · ${progress}% de avance"><div class="gantt-bar" style="left:${left}%;width:${width}%"><div class="gantt-progress" style="width:${progress}%"></div></div>${today>=minDate&&today<=maxDate?`<div class="gantt-today" style="left:${todayPct}%" title="Hoy"></div>`:""}</div>`;
+        } else bar='<div class="gantt-track"></div>';
+        return `<div class="timeline-row">
+          <div><strong>${esc(t.id)}</strong><div class="tiny">${esc(t.discipline)}</div></div>
+          <div>${esc(t.name)}<div class="tiny">Avance físico: ${Number(t.physicalProgress)||0}%</div></div>
           <div><input type="date" class="timeline-start" data-id="${t.uid}" value="${t.startDate||""}"></div>
           <div><input type="date" class="timeline-end" data-id="${t.uid}" value="${t.endDate||""}"></div>
-          <div class="timeline-track">${t.startDate&&t.endDate?`<div class="timeline-bar" style="width:100%"></div>`:""}</div>
+          <div>${bar}</div>
           <div>${statusBadge(t.status)}</div>
-        </div>`).join("") : '<div class="empty">Sin actividades.</div>';
-      
+        </div>`;
+      }).join("");
+
       document.querySelectorAll(".timeline-start, .timeline-end").forEach(inp=>inp.addEventListener("change",async()=>{
         const field = inp.classList.contains("timeline-start") ? "start_date" : "end_date";
         const payload = {[field]: inp.value||null, updated_at:new Date().toISOString()};
@@ -1547,20 +1671,19 @@
 
     function renderDashboard(){
       renderDashboardProjectSelector();
-
       const allMode = dashboardProjectFilter === "__all__";
       const p = allMode ? null : projects.find(x=>x.id===dashboardProjectFilter);
       const arr = allMode ? tasks : tasks.filter(t=>t.projectId===dashboardProjectFilter);
       const sprintArr = allMode ? sprints : sprints.filter(sp=>sp.projectId===dashboardProjectFilter);
+      const riskArr = allMode ? risks : risks.filter(r=>r.projectId===dashboardProjectFilter);
 
       document.getElementById("project-subtitle").textContent = allMode
         ? `Resumen consolidado · ${projects.length} proyecto(s)`
         : (p ? `${p.name}` : "Sin proyecto activo");
 
-      const approved = arr.filter(t=>t.status==="Aprobado").length;
-      const progress = arr.length ? Math.round((approved/arr.length)*100) : 0;
-      document.getElementById("metric-progress").textContent = progress+"%";
-      document.getElementById("progress-bar").style.width = progress+"%";
+      const avgProgress=arr.length?Math.round(arr.reduce((s,t)=>s+(Number(t.physicalProgress)||0),0)/arr.length):0;
+      document.getElementById("metric-progress").textContent = avgProgress+"%";
+      document.getElementById("progress-bar").style.width = avgProgress+"%";
       document.getElementById("metric-total").textContent = arr.length;
       document.getElementById("metric-blocked").textContent = arr.filter(t=>t.status==="Bloqueado").length;
       document.getElementById("metric-sprints").textContent = sprintArr.length;
@@ -1574,17 +1697,45 @@
       const disciplines = {};
       arr.forEach(t=>{
         const d=t.discipline||"Sin disciplina";
-        if(!disciplines[d]) disciplines[d]={total:0,done:0};
+        if(!disciplines[d]) disciplines[d]={total:0,progress:0};
         disciplines[d].total++;
-        if(t.status==="Aprobado") disciplines[d].done++;
+        disciplines[d].progress+=Number(t.physicalProgress)||0;
       });
       const dEl=document.getElementById("discipline-progress-list");
       dEl.innerHTML = Object.keys(disciplines).length
         ? Object.entries(disciplines).map(([d,v])=>{
-            const pct=v.total?Math.round(v.done/v.total*100):0;
+            const pct=v.total?Math.round(v.progress/v.total):0;
             return `<div class="discipline-row"><span>${esc(d)}</span><div class="progress"><span style="width:${pct}%"></span></div><strong>${pct}%</strong></div>`;
           }).join("")
-        : '<div class="empty">Agrega entregables y actualiza su estado.</div>';
+        : '<div class="empty">Agrega entregables y actualiza su avance.</div>';
+
+      const dated=arr.filter(t=>t.startDate&&t.endDate);
+      let minDate=null,maxDate=null;
+      dated.forEach(t=>{const s=new Date(t.startDate+"T00:00:00"),e=new Date(t.endDate+"T00:00:00");if(!minDate||s<minDate)minDate=s;if(!maxDate||e>maxDate)maxDate=e;});
+      const duration=minDate&&maxDate?Math.round((maxDate-minDate)/86400000)+1:0;
+      const dateFmt=d=>d?d.toLocaleDateString("es-CO",{year:"numeric",month:"short",day:"numeric"}):"—";
+      document.getElementById("dashboardScheduleSummary").innerHTML=`
+        <div class="card dashboard-kpi"><div class="muted">Inicio planeado</div><div class="metric">${dateFmt(minDate)}</div></div>
+        <div class="card dashboard-kpi"><div class="muted">Fin planeado</div><div class="metric">${dateFmt(maxDate)}</div></div>
+        <div class="card dashboard-kpi"><div class="muted">Duración planeada</div><div class="metric">${duration?duration+" días":"—"}</div></div>
+        <div class="card dashboard-kpi"><div class="muted">Avance físico promedio</div><div class="metric">${avgProgress}%</div></div>`;
+
+      const evm=evmSnapshot(new Date(),arr);
+      const [cpiLabel,cpiClass,cpiMsg]=evmStatus(evm.CPI,"CPI");
+      const [spiLabel,spiClass,spiMsg]=evmStatus(evm.SPI,"SPI");
+      document.getElementById("dashboardEvmSummary").innerHTML=`
+        <div class="card dashboard-kpi"><div class="muted">Costo planeado (BAC)</div><div class="metric">${money(evm.BAC)}</div></div>
+        <div class="card dashboard-kpi"><div class="muted">Costo real (AC)</div><div class="metric">${money(evm.AC)}</div></div>
+        <div class="card dashboard-kpi"><div class="muted">CPI</div><div class="metric">${evm.CPI?evm.CPI.toFixed(2):"—"}</div><div class="metric-alert ${cpiClass}">${cpiLabel}: ${cpiMsg}</div></div>
+        <div class="card dashboard-kpi"><div class="muted">SPI</div><div class="metric">${evm.SPI?evm.SPI.toFixed(2):"—"}</div><div class="metric-alert ${spiClass}">${spiLabel}: ${spiMsg}</div></div>`;
+      document.getElementById("dashboardMiniCurve").innerHTML=miniCurveSvg(buildCurveData(arr));
+
+      const riskEl=document.getElementById("dashboard-risks");
+      const sorted=[...riskArr].sort((a,b)=>(b.probability*b.impact)-(a.probability*a.impact)).slice(0,3);
+      riskEl.innerHTML=sorted.length?sorted.map((r,idx)=>{
+        const [lvl,cls]=riskLevel(r.probability,r.impact);
+        return `<div class="task-card"><div style="display:flex;justify-content:space-between;gap:8px;align-items:start"><strong>${esc(r.description)}</strong><span class="badge ${cls}">${lvl} · ${r.probability*r.impact}</span></div><div class="tiny" style="margin-top:7px">${esc(r.treatment)} · ${esc(r.controls)}</div></div>`;
+      }).join(""):'<div class="empty">Sin riesgos registrados.</div>';
     }
 
     document.getElementById("dashboardProjectSelector").addEventListener("change", e=>{
@@ -1669,8 +1820,7 @@
       return Math.max(1,(b-a)/86400000);
     }
 
-    function evmSnapshot(cutoff){
-      const arr=projectTasks();
+    function evmSnapshot(cutoff, arr=projectTasks()){
       let BAC=0,PV=0,EV=0,AC=0;
       arr.forEach(t=>{
         const c=taskCost(t); BAC+=c.planned; AC+=c.actual;
@@ -1689,8 +1839,8 @@
       return {BAC,PV,EV,AC,CPI,SPI,EAC,ETC:Math.max(0,EAC-AC),VAC:BAC-EAC};
     }
 
-    function buildCurveData(){
-      const arr=projectTasks().filter(t=>t.startDate&&t.endDate);
+    function buildCurveData(sourceTasks=projectTasks()){
+      const arr=sourceTasks.filter(t=>t.startDate&&t.endDate);
       if(!arr.length) return [];
       const starts=arr.map(t=>new Date(t.startDate+"T00:00:00"));
       const ends=arr.map(t=>new Date(t.endDate+"T00:00:00"));
@@ -1748,6 +1898,17 @@
       </div>`;
     }
 
+
+    function miniCurveSvg(points){
+      if(points.length<2) return '<div class="empty">Agrega fechas para visualizar la curva.</div>';
+      const W=720,H=170,pad=18;
+      const maxV=Math.max(...points.flatMap(p=>[p.pv,p.ev,p.ac]),1);
+      const x=i=>pad+(W-pad*2)*(i/(points.length-1));
+      const y=v=>H-pad-(H-pad*2)*(v/maxV);
+      const poly=k=>points.map((p,i)=>`${x(i)},${y(p[k])}`).join(" ");
+      return `<svg class="dashboard-mini-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Curva S resumida"><line x1="${pad}" y1="${H-pad}" x2="${W-pad}" y2="${H-pad}" stroke="#dfe5ec"/><polyline points="${poly("pv")}" fill="none" stroke="#64748b" stroke-width="3"/><polyline points="${poly("ev")}" fill="none" stroke="#1f6feb" stroke-width="3"/><polyline points="${poly("ac")}" fill="none" stroke="#d98200" stroke-width="3"/><text x="${pad}" y="14" font-size="11" fill="#64748b">PV</text><text x="${pad+38}" y="14" font-size="11" fill="#1f6feb">EV</text><text x="${pad+76}" y="14" font-size="11" fill="#d98200">AC</text></svg>`;
+    }
+
     function renderEvm(){
       const el=document.getElementById("evmContent");
       const p=currentProjectForView();
@@ -1793,34 +1954,61 @@
       return ["Bajo","success"];
     }
 
-    function renderGovernanceDemo(){
-      const p=currentProjectForView();
-      const demo=p?DEMO_GOVERNANCE[p.code]:null;
-      const riskEl=document.getElementById("risksList");
-      const minutesEl=document.getElementById("minutesList");
-      const changesEl=document.getElementById("changesList");
-      if(!p){
-        riskEl.innerHTML=minutesEl.innerHTML=changesEl.innerHTML='<div class="empty">Selecciona un proyecto.</div>';
-        return;
-      }
-      if(!demo){
-        riskEl.innerHTML='<div class="empty">Sin riesgos demo registrados.</div>';
-        minutesEl.innerHTML='<div class="empty">Sin actas demo registradas.</div>';
-        changesEl.innerHTML='<div class="empty">Sin cambios demo registrados.</div>';
-        return;
-      }
-      riskEl.innerHTML=demo.risks.map((r,idx)=>{
-        const [lvl,cls]=riskLevel(r[1],r[2]);
-        return `<div class="card"><span class="badge ${cls}">${lvl} · ${Number(r[1])*Number(r[2])}</span><h3 style="margin-top:12px">R-${String(idx+1).padStart(3,"0")} · ${esc(r[0])}</h3><p class="muted">Probabilidad ${r[1]}/5 · Impacto ${r[2]}/5</p><p>${esc(r[3])}</p></div>`;
-      }).join("");
-      minutesEl.innerHTML=demo.minutes.map(m=>`<div class="card" style="margin-bottom:12px"><span class="badge info">${esc(m[0])}</span><h3 style="margin-top:10px">${esc(m[1])}</h3><p>${esc(m[2])}</p></div>`).join("");
-      changesEl.innerHTML=demo.changes.map(c=>`<div class="card"><span class="badge ${c[2]==="Aprobado"?"success":"warning"}">${esc(c[2])}</span><h3 style="margin-top:10px">${esc(c[0])} · ${esc(c[1])}</h3><p>${esc(c[3])}</p></div>`).join("");
+    function nextChangeCode(){
+      const nums=projectChanges().map(c=>Number(String(c.code||"").split("-").pop())).filter(Number.isFinite);
+      return `CHG-${String((nums.length?Math.max(...nums):0)+1).padStart(3,"0")}`;
     }
+
+    function renderGovernanceShared(){
+      const riskEl=document.getElementById("risksList"),minutesEl=document.getElementById("minutesList"),changesEl=document.getElementById("changesList");
+      if(!activeProjectId){riskEl.innerHTML=minutesEl.innerHTML=changesEl.innerHTML='<div class="empty">Selecciona un proyecto.</div>';return;}
+      const pr=projectRisks();
+      riskEl.innerHTML=pr.length?pr.map((r,idx)=>{
+        const [lvl,cls]=riskLevel(r.probability,r.impact);
+        return `<div class="card"><div style="display:flex;justify-content:space-between;gap:10px"><span class="badge ${cls}">${lvl} · ${r.probability*r.impact}</span><button class="btn small danger delete-risk admin-only" data-id="${r.id}">Eliminar</button></div><h3 style="margin-top:12px">R-${String(idx+1).padStart(3,"0")} · ${esc(r.description)}</h3><div class="risk-card-grid"><div><span class="tiny">Probabilidad</span><br><strong>${r.probability}/5</strong></div><div><span class="tiny">Impacto</span><br><strong>${r.impact}/5</strong></div><div><span class="tiny">Tratamiento</span><br><strong>${esc(r.treatment)}</strong></div></div>${r.causes?`<p><strong>Causas:</strong> ${esc(r.causes)}</p>`:""}${r.consequences?`<p><strong>Consecuencias:</strong> ${esc(r.consequences)}</p>`:""}<p><strong>Controles:</strong> ${esc(r.controls)}</p></div>`;
+      }).join(""):'<div class="empty">No hay riesgos registrados.</div>';
+
+      const pm=projectMinutes();
+      minutesEl.innerHTML=pm.length?pm.map(m=>`<div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;gap:10px"><span class="badge info">${esc(m.date)}</span><button class="btn small danger delete-minute admin-only" data-id="${m.id}">Eliminar</button></div><h3 style="margin-top:10px">${esc(m.title)}</h3><p>${esc(m.topics)}</p>${m.commitments.length?`<h4>Compromisos</h4><div>${m.commitments.map(c=>`<div class="task-card"><strong>${esc(c.text||"")}</strong><div class="tiny">${esc(c.responsibleName||"Por asignar")} · Entrega: ${esc(c.dueDate||"Sin fecha")}</div></div>`).join("")}</div>`:""}</div>`).join(""):'<div class="empty">No hay actas registradas.</div>';
+
+      const pc=projectChanges();
+      changesEl.innerHTML=pc.length?pc.map(c=>{
+        const affected=c.affectedTaskIds.map(id=>projectTasks().find(t=>t.uid===id)).filter(Boolean);
+        return `<div class="card"><span class="badge ${c.approved?"success":"warning"}">${c.approved?"Aprobado":"No aprobado"}</span><h3 style="margin-top:10px">${esc(c.code)} · ${esc(c.description)}</h3><div class="tiny">Entregables afectados: ${affected.length?affected.map(t=>esc(t.id)).join(", "):"Ninguno"}</div><div class="change-controls admin-only"><div class="field"><label>Cambio aprobado</label><select class="change-approved" data-id="${c.id}"><option value="false" ${!c.approved?"selected":""}>No</option><option value="true" ${c.approved?"selected":""}>Sí</option></select></div><div class="field"><label>Estado</label><select class="change-status" data-id="${c.id}">${["Solicitado","En evaluación","Aprobado","Rechazado","En implementación","Implementado"].map(s=>`<option ${s===c.status?"selected":""}>${s}</option>`).join("")}</select></div></div></div>`;
+      }).join(""):'<div class="empty">No hay cambios registrados.</div>';
+
+      document.querySelectorAll(".delete-risk").forEach(b=>b.addEventListener("click",async()=>{const {error}=await supabaseClient.from("risks").delete().eq("id",b.dataset.id);if(error)return showToast(error.message);await loadSharedData();}));
+      document.querySelectorAll(".delete-minute").forEach(b=>b.addEventListener("click",async()=>{const {error}=await supabaseClient.from("minutes").delete().eq("id",b.dataset.id);if(error)return showToast(error.message);await loadSharedData();}));
+      document.querySelectorAll(".change-approved").forEach(s=>s.addEventListener("change",async()=>{const approved=s.value==="true";const {error}=await supabaseClient.from("changes").update({approved,status:approved?"Aprobado":"Solicitado",updated_at:new Date().toISOString()}).eq("id",s.dataset.id);if(error)return showToast(error.message);await loadSharedData();}));
+      document.querySelectorAll(".change-status").forEach(s=>s.addEventListener("change",async()=>{const {error}=await supabaseClient.from("changes").update({status:s.value,approved:s.value==="Aprobado",updated_at:new Date().toISOString()}).eq("id",s.dataset.id);if(error)return showToast(error.message);await loadSharedData();}));
+    }
+
+    function updateRiskPreview(){
+      const p=Number(document.getElementById("riskProbability").value)||1,i=Number(document.getElementById("riskImpact").value)||1;
+      const [lvl,cls]=riskLevel(p,i);const el=document.getElementById("riskPreview");el.innerHTML=`Nivel calculado: <span class="badge ${cls}">${lvl} · ${p*i}/25</span>`;
+    }
+    document.getElementById("riskProbability").addEventListener("input",updateRiskPreview);
+    document.getElementById("riskImpact").addEventListener("input",updateRiskPreview);
+    document.getElementById("openRiskModal").addEventListener("click",()=>{if(!activeProjectId)return showToast("Selecciona un proyecto primero.");document.getElementById("riskForm").reset();document.getElementById("riskProbability").value=3;document.getElementById("riskImpact").value=3;updateRiskPreview();openModal("riskModal");});
+    document.getElementById("riskForm").addEventListener("submit",async e=>{e.preventDefault();const payload={project_id:activeProjectId,description:document.getElementById("riskDescription").value.trim(),causes:document.getElementById("riskCauses").value.trim(),consequences:document.getElementById("riskConsequences").value.trim(),probability:Number(document.getElementById("riskProbability").value)||1,impact:Number(document.getElementById("riskImpact").value)||1,treatment:document.getElementById("riskTreatment").value,controls:document.getElementById("riskControls").value.trim(),updated_at:new Date().toISOString()};const {error}=await supabaseClient.from("risks").insert(payload);if(error)return showToast("Error guardando riesgo: "+error.message);closeModal("riskModal");await loadSharedData();showToast("Riesgo guardado");});
+
+    let commitmentCounter=0,clientChangeCounter=0;
+    function responsibleOptions(){return '<option value="">Por asignar</option>'+projectResponsibles().map(r=>`<option value="${r.id}">${esc(r.name)}</option>`).join("");}
+    function addCommitmentRow(){
+      const idx=commitmentCounter++;const box=document.createElement("div");box.className="builder-card commitment-row";box.dataset.index=idx;box.innerHTML=`<div class="form-grid"><div class="field full"><label>Compromiso</label><input class="commitment-text" placeholder="Actividad acordada"></div><div class="field"><label>Responsable</label><select class="commitment-responsible">${responsibleOptions()}</select></div><div class="field"><label>Fecha de entrega</label><input type="date" class="commitment-date"></div></div><button class="btn small danger remove-builder" type="button" style="margin-top:8px">Eliminar compromiso</button>`;box.querySelector(".remove-builder").addEventListener("click",()=>box.remove());document.getElementById("commitmentsBuilder").appendChild(box);
+    }
+    function addClientChangeRow(){
+      const idx=clientChangeCounter++;const box=document.createElement("div");box.className="builder-card client-change-row";box.dataset.index=idx;box.innerHTML=`<div class="field"><label>Descripción del cambio</label><textarea class="client-change-description"></textarea></div><div class="field" style="margin-top:10px"><label>Entregables afectados</label><div class="affected-tasks">${projectTasks().map(t=>`<label><input type="checkbox" class="affected-task" value="${t.uid}"><span><strong>${esc(t.id)}</strong> · ${esc(t.name)}</span></label>`).join("")||'<span class="tiny">No hay entregables.</span>'}</div></div><div class="field" style="margin-top:10px"><label>Cambio aprobado</label><select class="client-change-approved"><option value="false">No</option><option value="true">Sí</option></select></div><button class="btn small danger remove-builder" type="button" style="margin-top:8px">Eliminar cambio</button>`;box.querySelector(".remove-builder").addEventListener("click",()=>box.remove());document.getElementById("clientChangesBuilder").appendChild(box);
+    }
+    document.getElementById("addCommitment").addEventListener("click",addCommitmentRow);
+    document.getElementById("addClientChange").addEventListener("click",addClientChangeRow);
+    document.getElementById("openMinutesModal").addEventListener("click",()=>{if(!activeProjectId)return showToast("Selecciona un proyecto primero.");document.getElementById("minutesForm").reset();document.getElementById("commitmentsBuilder").innerHTML="";document.getElementById("clientChangesBuilder").innerHTML="";commitmentCounter=clientChangeCounter=0;addCommitmentRow();openModal("minutesModal");});
+    document.getElementById("minutesForm").addEventListener("submit",async e=>{e.preventDefault();const commitments=[...document.querySelectorAll(".commitment-row")].map(row=>{const rid=row.querySelector(".commitment-responsible").value;const r=projectResponsibles().find(x=>x.id===rid);return {text:row.querySelector(".commitment-text").value.trim(),responsibleId:rid,responsibleName:r?.name||"",dueDate:row.querySelector(".commitment-date").value};}).filter(c=>c.text);const {data:minute,error:mErr}=await supabaseClient.from("minutes").insert({project_id:activeProjectId,meeting_date:document.getElementById("minutesDate").value,title:document.getElementById("minutesTitle").value.trim(),topics:document.getElementById("minutesTopics").value.trim(),commitments,updated_at:new Date().toISOString()}).select().single();if(mErr)return showToast("Error guardando acta: "+mErr.message);const changeRows=[...document.querySelectorAll(".client-change-row")].map(row=>{const desc=row.querySelector(".client-change-description").value.trim();const affected=[...row.querySelectorAll(".affected-task:checked")].map(x=>x.value);const approved=row.querySelector(".client-change-approved").value==="true";return desc?{project_id:activeProjectId,minute_id:minute.id,code:nextChangeCode(),description:desc,status:approved?"Aprobado":"Solicitado",approved,affected_task_ids:affected}:null;}).filter(Boolean);for(let i=0;i<changeRows.length;i++)changeRows[i].code=`CHG-${String((Number(nextChangeCode().split("-")[1])||1)+i).padStart(3,"0")}`;if(changeRows.length){const {error:cErr}=await supabaseClient.from("changes").insert(changeRows);if(cErr)return showToast("Acta guardada, pero fallaron cambios: "+cErr.message);}closeModal("minutesModal");await loadSharedData();showToast("Acta guardada");});
 
     function renderAll(){
       renderProjects(); renderResponsibles(); renderBacklog(); renderTimeline();
       renderSprints(); renderKanban(); renderDashboard();
-      renderBudget(); renderEvm(); renderGovernanceDemo();
+      renderBudget(); renderEvm(); renderGovernanceShared();
     }
 
 
