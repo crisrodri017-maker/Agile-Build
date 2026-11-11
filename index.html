@@ -4,8 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AgileBuild - Gestión Ágil de Diseño</title>
-  <!-- Librería para comprimir los datos en el Link -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root{
@@ -38,7 +36,7 @@
       display: none !important;
     }
     body.view-only input:not([type="search"]), 
-    body.view-only select:not(#roleSimulator):not(#filterDiscipline):not(#filterStatus), 
+    body.view-only select:not(#roleSimulator):not(#dashboardProjectSelector):not(#filterDiscipline):not(#filterStatus), 
     body.view-only textarea {
       pointer-events: none;
       background-color: #f8fafc;
@@ -368,9 +366,16 @@
       padding-top: 15px;
       border-top: 1px solid var(--border);
     }
+
+    .sprint-team-list{display:grid;gap:10px}
+    .sprint-team-row{display:grid;grid-template-columns:minmax(220px,1fr) 150px;gap:12px;align-items:center;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:#fafbfd}
+    .sprint-team-row .member-label{display:flex;align-items:center;gap:9px;font-weight:600}
+    .sprint-team-row .member-label input{width:auto}
+    @media(max-width:760px){.sprint-team-row{grid-template-columns:1fr}}
+
   </style>
 </head>
-<body>
+<body class="view-only">
   <div class="app">
     <aside>
       <div class="brand">
@@ -401,18 +406,23 @@
             <p id="project-subtitle">Sin proyecto activo</p>
           </div>
           <div class="top-actions">
+            <div class="role-simulator">
+              <label>Proyecto:</label>
+              <select id="dashboardProjectSelector">
+                <option value="__all__">Todos los proyectos</option>
+              </select>
+            </div>
             <!-- Selector de Roles -->
             <div class="role-simulator">
               <label>Vista:</label>
               <select id="roleSimulator">
                 <option value="admin">👤 Administrador (Edición)</option>
-                <option value="lector">👁️ Lector / Cliente</option>
+                <option value="lector" selected>👁️ Lector / Cliente</option>
               </select>
             </div>
             <!-- Botón Borrar Todo (Solo Admin) -->
             <button class="btn" id="refreshSharedDataBtn">↻ Actualizar datos</button>
             <span class="badge info" id="syncStatus">Conectando…</span>
-            <button class="btn danger admin-only" id="clearAllDataBtn">Limpiar datos locales</button>
             <button class="btn primary admin-only" data-go="projects">+ Nuevo proyecto</button>
           </div>
         </div>
@@ -486,18 +496,6 @@
           <div class="card">
             <h3>Proyectos guardados</h3>
             <div id="projectsList"></div>
-            
-            <div class="backup-tools admin-only">
-              <div style="flex:1">
-                <strong>🔗 Compartir Ejemplo</strong>
-                <p class="tiny">Crea un link único con todos tus datos. Envíalo y la persona verá exactamente este mismo ejemplo.</p>
-              </div>
-              <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                <button class="btn small primary" id="generateShareLinkBtn">🔗 Copiar Link para Cliente</button>
-                <button class="btn small" onclick="document.getElementById('importDataInput').click()">Importar .JSON</button>
-                <input type="file" id="importDataInput" accept=".json" style="display:none" />
-              </div>
-            </div>
           </div>
         </div>
 
@@ -569,6 +567,7 @@
                   <th>Sprint</th>
                   <th>Responsable</th>
                   <th>Horas</th>
+                  <th>Fecha entrega</th>
                   <th>Estado</th>
                   <th class="admin-only"></th>
                 </tr>
@@ -640,7 +639,7 @@
       <div class="modal-head"><h3>Nueva actividad del backlog</h3><button class="close" type="button" data-close="taskModal">✕</button></div>
       <form id="taskForm">
         <div class="form-grid">
-          <div class="field"><label>ID</label><input id="taskId" required placeholder="ARQ-009" /></div>
+          <div class="field"><label>ID automático</label><input id="taskId" required readonly placeholder="ARQ-001" /><div class="tiny">Se genera según la disciplina y el consecutivo del proyecto.</div></div>
           <div class="field"><label>Disciplina</label><select id="taskDiscipline"><option>General / Proyecto</option><option>Arquitectura</option><option>Estructuras</option><option>Geotecnia</option><option>Geología</option><option>Hidrología</option><option>Eléctrico</option><option>Hidrosanitario</option><option>BIM</option><option>Presupuestos</option></select></div>
           <div class="field full"><label>Actividad / entregable</label><input id="taskName" required /></div>
           <div class="field"><label>Prioridad</label><select id="taskPriority"><option>Alta</option><option selected>Media</option><option>Baja</option></select></div>
@@ -666,6 +665,7 @@
           <div class="field"><label>Fecha fin</label><input id="sprintEnd" type="date" required /></div>
           <div class="field full"><label>Objetivo</label><textarea id="sprintObjective" required></textarea></div>
           <div class="field full"><label>Equipo y dedicación</label><div id="sprintTeamList" class="sprint-team-list"></div></div>
+          <div class="field full"><div class="card" style="padding:12px;box-shadow:none"><strong>Capacidad total del sprint: <span id="sprintCapacityTotal">0</span> h</strong></div></div>
         </div>
         <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px"><button class="btn" type="button" data-close="sprintModal">Cancelar</button><button class="btn primary" type="submit">Crear sprint</button></div>
       </form>
@@ -750,30 +750,45 @@
       };
     }
 
+    function sprintFromDb(sp){
+      return {
+        id:sp.id, projectId:sp.project_id, name:sp.name||"", objective:sp.objective||"",
+        start:sp.start_date||"", end:sp.end_date||"",
+        team:Array.isArray(sp.team) ? sp.team : []
+      };
+    }
+
     async function loadSharedData(showMessage=false){
       if (sharedDataLoading) return;
       sharedDataLoading = true;
       setSyncStatus("Actualizando…", "warning");
       try {
-        const [pRes, rRes, tRes] = await Promise.all([
+        const [pRes, rRes, tRes, sRes] = await Promise.all([
           supabaseClient.from("projects").select("*").order("created_at", {ascending:true}),
           supabaseClient.from("responsibles").select("*").order("created_at", {ascending:true}),
-          supabaseClient.from("tasks").select("*").order("created_at", {ascending:true})
+          supabaseClient.from("tasks").select("*").order("created_at", {ascending:true}),
+          supabaseClient.from("sprints").select("*").order("created_at", {ascending:true})
         ]);
         if (pRes.error) throw pRes.error;
         if (rRes.error) throw rRes.error;
         if (tRes.error) throw tRes.error;
+        if (sRes.error) throw sRes.error;
 
         projects = (pRes.data||[]).map(projectFromDb);
         responsibles = (rRes.data||[]).map(responsibleFromDb);
         tasks = (tRes.data||[]).map(taskFromDb);
+        sprints = (sRes.data||[]).map(sprintFromDb);
 
         if (!projects.some(p=>p.id===activeProjectId)) activeProjectId = projects[0]?.id || "";
+        if (dashboardProjectFilter !== "__all__" && !projects.some(p=>p.id===dashboardProjectFilter)) {
+          dashboardProjectFilter = activeProjectId || "__all__";
+        }
         localStorage.setItem(KEY.activeProject, activeProjectId);
         // Caché local de respaldo; Supabase sigue siendo la fuente compartida.
         localStorage.setItem(KEY.projects, JSON.stringify(projects));
         localStorage.setItem(KEY.responsibles, JSON.stringify(responsibles));
         localStorage.setItem(KEY.tasks, JSON.stringify(tasks));
+        localStorage.setItem(KEY.sprints, JSON.stringify(sprints));
 
         renderAll();
         setSyncStatus("Datos compartidos ✓", "success");
@@ -786,48 +801,6 @@
         sharedDataLoading = false;
       }
     }
-
-    
-    const urlParams = new URLSearchParams(window.location.search);
-    const demoDataFromUrl = urlParams.get('demo');
-
-    if (demoDataFromUrl && typeof LZString !== "undefined") {
-      try {
-        const decoded = LZString.decompressFromEncodedURIComponent(demoDataFromUrl);
-        const importedData = JSON.parse(decoded);
-        if (importedData && importedData.projects) {
-          localStorage.setItem(KEY.projects, JSON.stringify(importedData.projects));
-          localStorage.setItem(KEY.activeProject, importedData.activeProjectId || "");
-          localStorage.setItem(KEY.tasks, JSON.stringify(importedData.tasks || []));
-          localStorage.setItem(KEY.responsibles, JSON.stringify(importedData.responsibles || []));
-          localStorage.setItem(KEY.sprints, JSON.stringify(importedData.sprints || []));
-          localStorage.setItem(KEY.risks, JSON.stringify(importedData.risks || []));
-          localStorage.setItem(KEY.minutes, JSON.stringify(importedData.minutes || []));
-          localStorage.setItem(KEY.changes, JSON.stringify(importedData.changes || []));
-          localStorage.setItem(KEY.budget, JSON.stringify(importedData.budgetSettings || {}));
-          localStorage.setItem(KEY.evm, JSON.stringify(importedData.evmSettings || {}));
-          
-          // Limpiamos la URL para no ensuciar, pero mantenemos mode=lector
-          let cleanUrl = window.location.href.split('?')[0];
-          if(urlParams.get('mode') === 'lector') cleanUrl += '?mode=lector';
-          window.history.replaceState({}, document.title, cleanUrl);
-          
-          // Recargamos para aplicar los datos nuevos
-          window.location.reload();
-        }
-      } catch (err) {
-        console.error("Error al cargar datos del link", err);
-      }
-    }
-
-    // APLICAR MODO LECTOR AUTOMÁTICO SI VIENE EN LA URL
-    if (urlParams.get('mode') === 'lector') {
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById("roleSimulator").value = "lector";
-            document.body.classList.add("view-only");
-        });
-    }
-
 
     // --------------------------------------------------------
     // CÓDIGO NORMAL DE LA APLICACIÓN
@@ -845,46 +818,45 @@
     let changes = JSON.parse(localStorage.getItem(KEY.changes)||"[]");
     let budgetSettings = JSON.parse(localStorage.getItem(KEY.budget)||"{}");
     let evmSettings = JSON.parse(localStorage.getItem(KEY.evm)||"{}");
+    let dashboardProjectFilter = activeProjectId || "__all__";
+
+    const DISCIPLINE_PREFIX = {
+      "General / Proyecto":"GEN",
+      "Arquitectura":"ARQ",
+      "Estructuras":"EST",
+      "Geotecnia":"GTC",
+      "Geología":"GEO",
+      "Hidrología":"HID",
+      "Eléctrico":"ELE",
+      "Hidrosanitario":"HSA",
+      "BIM":"BIM",
+      "Presupuestos":"PRE"
+    };
+
+    function nextTaskCode(discipline){
+      const prefix = DISCIPLINE_PREFIX[discipline] || "ACT";
+      const nums = projectTasks()
+        .map(t => String(t.id||""))
+        .filter(code => code.startsWith(prefix+"-"))
+        .map(code => Number(code.split("-").pop()))
+        .filter(Number.isFinite);
+      const next = (nums.length ? Math.max(...nums) : 0) + 1;
+      return `${prefix}-${String(next).padStart(3,"0")}`;
+    }
+
+    function updateAutoTaskCode(){
+      const discipline = document.getElementById("taskDiscipline")?.value || "General / Proyecto";
+      const idInput = document.getElementById("taskId");
+      if(idInput) idInput.value = nextTaskCode(discipline);
+    }
+
+
+    document.getElementById("roleSimulator").value = "lector";
+    document.body.classList.add("view-only");
 
     document.getElementById("roleSimulator").addEventListener("change", (e) => {
       document.body.classList.toggle("view-only", e.target.value === "lector");
       showToast(e.target.value === "lector" ? "Vista de Lector activada" : "Vista de Administrador activada");
-    });
-
-    document.getElementById("clearAllDataBtn").addEventListener("click", () => {
-      if(confirm("Esto solo limpiará la caché de este navegador. Los datos compartidos de Supabase NO se borrarán. ¿Continuar?")){
-        Object.values(KEY).forEach(k => localStorage.removeItem(k));
-        activeProjectId = "";
-        showToast("Caché local limpiada. Volviendo a cargar datos compartidos…");
-        loadSharedData();
-      }
-    });
-
-    // GENERAR LINK PARA COMPARTIR: los datos ya viven en Supabase
-    document.getElementById("generateShareLinkBtn").addEventListener("click", () => {
-      const baseUrl = window.location.href.split('?')[0];
-      const shareUrl = baseUrl + "?mode=lector";
-      navigator.clipboard.writeText(shareUrl).then(() => {
-        showToast("¡Link de Lector copiado! Los datos se leerán desde Supabase.");
-      }).catch(() => {
-        prompt("Copia este enlace manualmente:", shareUrl);
-      });
-    });
-
-    document.getElementById("importDataInput").addEventListener("change", function(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(ev) {
-        try {
-          const importedData = JSON.parse(ev.target.result);
-          if (importedData.projects) {
-            projects = importedData.projects || []; activeProjectId = importedData.activeProjectId || ""; tasks = importedData.tasks || []; responsibles = importedData.responsibles || []; sprints = importedData.sprints || []; risks = importedData.risks || []; minutes = importedData.minutes || []; changes = importedData.changes || []; budgetSettings = importedData.budgetSettings || {}; evmSettings = importedData.evmSettings || {};
-            saveAll(); renderAll(); showToast("Backup importado con éxito");
-          } else { showToast("Archivo JSON no válido para AgileBuild"); }
-        } catch (err) { showToast("Error al leer el archivo"); }
-      };
-      reader.readAsText(file); e.target.value = '';
     });
 
     const activeProject = () => projects.find(p => p.id === activeProjectId) || null;
@@ -941,6 +913,7 @@
 
       document.querySelectorAll(".activate-project").forEach(b=>b.addEventListener("click",()=>{
         activeProjectId=b.dataset.id;
+        dashboardProjectFilter = activeProjectId;
         localStorage.setItem(KEY.activeProject, activeProjectId);
         renderAll(); showToast("Proyecto activado");
       }));
@@ -985,6 +958,7 @@
       }
       if(result.error) return showToast("Error al guardar proyecto: "+result.error.message);
       activeProjectId = result.data.id;
+      dashboardProjectFilter = activeProjectId;
       localStorage.setItem(KEY.activeProject, activeProjectId);
       document.getElementById("projectForm").reset();
       document.getElementById("projectId").value="";
@@ -1057,27 +1031,69 @@
 
     function renderBacklog(){
       const arr = projectTasks(), body = document.getElementById("backlogBody");
-      const spMap = Object.fromEntries(projectSprints().map(x=>[x.id,x]));
+      const sprintOptions = projectSprints();
       body.innerHTML = arr.length ? arr.map(t => `
         <tr>
-          <td><strong>${esc(t.id)}</strong></td><td>${esc(t.name)}</td><td>${esc(t.discipline)}</td>
-          <td>${priorityBadge(t.priority)}</td><td>${spMap[t.sprintId]?.name||"—"}</td>
-          <td><select class="owner-editor" data-id="${t.uid}"><option value="">Por asignar</option>${projectResponsibles().map(r=>`<option value="${r.id}" ${r.id===t.ownerId?"selected":""}>${esc(r.name)}</option>`).join("")}</select></td>
+          <td><strong>${esc(t.id)}</strong></td>
+          <td>${esc(t.name)}</td>
+          <td>${esc(t.discipline)}</td>
+          <td>
+            <select class="priority-editor" data-id="${t.uid}">
+              ${["Alta","Media","Baja"].map(x=>`<option ${x===t.priority?"selected":""}>${x}</option>`).join("")}
+            </select>
+          </td>
+          <td>
+            <select class="sprint-editor" data-id="${t.uid}">
+              <option value="">Sin sprint</option>
+              ${sprintOptions.map(sp=>`<option value="${sp.id}" ${sp.id===t.sprintId?"selected":""}>${esc(sp.name)}</option>`).join("")}
+            </select>
+          </td>
+          <td>
+            <select class="owner-editor" data-id="${t.uid}">
+              <option value="">Por asignar</option>
+              ${projectResponsibles().map(r=>`<option value="${r.id}" ${r.id===t.ownerId?"selected":""}>${esc(r.name)}</option>`).join("")}
+            </select>
+          </td>
           <td>${t.hours||0} h</td>
-          <td><select class="status-editor" data-id="${t.uid}">${["Backlog","Por iniciar","En proceso","En revisión","Bloqueado","Aprobado"].map(x=>`<option ${x===t.status?"selected":""}>${x}</option>`).join("")}</select></td>
+          <td><input type="date" class="delivery-editor" data-id="${t.uid}" value="${t.endDate||""}"></td>
+          <td>
+            <select class="status-editor" data-id="${t.uid}">
+              ${["Backlog","Por iniciar","En proceso","En revisión","Bloqueado","Aprobado"].map(x=>`<option ${x===t.status?"selected":""}>${x}</option>`).join("")}
+            </select>
+          </td>
           <td class="admin-only"><button class="btn small danger delete-task" data-id="${t.uid}">X</button></td>
-        </tr>`).join("") : '<tr><td colspan="9"><div class="empty">No hay actividades.</div></td></tr>';
+        </tr>`).join("") : '<tr><td colspan="10"><div class="empty">No hay actividades.</div></td></tr>';
+
+      document.querySelectorAll(".priority-editor").forEach(x=>x.addEventListener("change",async()=>{
+        const {error}=await supabaseClient.from("tasks").update({priority:x.value,updated_at:new Date().toISOString()}).eq("id",x.dataset.id);
+        if(error) return showToast("Error al cambiar prioridad: "+error.message);
+        await loadSharedData();
+      }));
+
+      document.querySelectorAll(".sprint-editor").forEach(x=>x.addEventListener("change",async()=>{
+        const {error}=await supabaseClient.from("tasks").update({sprint_id:x.value||null,updated_at:new Date().toISOString()}).eq("id",x.dataset.id);
+        if(error) return showToast("Error al cambiar sprint: "+error.message);
+        await loadSharedData();
+      }));
 
       document.querySelectorAll(".owner-editor").forEach(x=>x.addEventListener("change",async()=>{
         const {error}=await supabaseClient.from("tasks").update({responsible_id:x.value||null,updated_at:new Date().toISOString()}).eq("id",x.dataset.id);
         if(error) return showToast("Error al asignar responsable: "+error.message);
         await loadSharedData();
       }));
+
+      document.querySelectorAll(".delivery-editor").forEach(x=>x.addEventListener("change",async()=>{
+        const {error}=await supabaseClient.from("tasks").update({end_date:x.value||null,updated_at:new Date().toISOString()}).eq("id",x.dataset.id);
+        if(error) return showToast("Error al cambiar fecha de entrega: "+error.message);
+        await loadSharedData();
+      }));
+
       document.querySelectorAll(".status-editor").forEach(x=>x.addEventListener("change",async()=>{
         const {error}=await supabaseClient.from("tasks").update({status:x.value,updated_at:new Date().toISOString()}).eq("id",x.dataset.id);
         if(error) return showToast("Error al cambiar estado: "+error.message);
         await loadSharedData();
       }));
+
       document.querySelectorAll(".delete-task").forEach(b=>b.addEventListener("click",async()=>{
         const {error}=await supabaseClient.from("tasks").delete().eq("id",b.dataset.id);
         if(error) return showToast("Error al eliminar actividad: "+error.message);
@@ -1085,21 +1101,26 @@
       }));
     }
 
-    document.getElementById("openTaskModal").addEventListener("click",()=>{
+    document.getElementById("openTaskModal").addEventListener("click",async()=>{
       if(!activeProjectId) return showToast("Crea o activa un proyecto primero.");
-      updateDropdowns(); openModal("taskModal");
+      await loadSharedData();
+      updateDropdowns();
+      updateAutoTaskCode();
+      openModal("taskModal");
     });
+
+    document.getElementById("taskDiscipline").addEventListener("change", updateAutoTaskCode);
 
     document.getElementById("taskForm").addEventListener("submit", async e => {
       e.preventDefault();
       if(!activeProjectId) return showToast("Crea o activa un proyecto primero.");
       const payload = {
         project_id:activeProjectId,
-        code:document.getElementById("taskId").value.trim(),
+        code:nextTaskCode(document.getElementById("taskDiscipline").value),
         name:document.getElementById("taskName").value.trim(),
         discipline:document.getElementById("taskDiscipline").value,
         priority:document.getElementById("taskPriority").value,
-        sprint_id:null,
+        sprint_id:document.getElementById("taskSprint").value||null,
         responsible_id:document.getElementById("taskOwner").value||null,
         estimated_hours:Number(document.getElementById("taskHours").value)||0,
         status:document.getElementById("taskStatus").value,
@@ -1133,14 +1154,99 @@
       }));
     }
 
+    function renderSprintTeamSelector(){
+      const el = document.getElementById("sprintTeamList");
+      const people = projectResponsibles();
+      if(!people.length){
+        el.innerHTML = '<div class="empty">Primero agrega responsables al proyecto.</div>';
+        document.getElementById("sprintCapacityTotal").textContent = "0";
+        return;
+      }
+      el.innerHTML = people.map(r=>`
+        <div class="sprint-team-row">
+          <label class="member-label">
+            <input type="checkbox" class="sprint-member-check" data-id="${r.id}">
+            <span>${esc(r.name)} <span class="tiny">· ${esc(r.role||r.area||"")}</span></span>
+          </label>
+          <div class="field">
+            <label>Horas de dedicación</label>
+            <input type="number" min="0" step="1" value="0" class="sprint-member-hours" data-id="${r.id}">
+          </div>
+        </div>`).join("");
+
+      const updateTotal = () => {
+        let total = 0;
+        document.querySelectorAll(".sprint-member-check:checked").forEach(ch=>{
+          const inp = document.querySelector(`.sprint-member-hours[data-id="${ch.dataset.id}"]`);
+          total += Number(inp?.value)||0;
+        });
+        document.getElementById("sprintCapacityTotal").textContent = total;
+      };
+      document.querySelectorAll(".sprint-member-check,.sprint-member-hours").forEach(x=>x.addEventListener("input",updateTotal));
+      updateTotal();
+    }
+
+    document.getElementById("openSprintModal").addEventListener("click",async()=>{
+      if(!activeProjectId) return showToast("Crea o activa un proyecto primero.");
+      await loadSharedData();
+      renderSprintTeamSelector();
+      openModal("sprintModal");
+    });
+
+    document.getElementById("sprintForm").addEventListener("submit", async e => {
+      e.preventDefault();
+      if(!activeProjectId) return showToast("Crea o activa un proyecto primero.");
+
+      const team = [];
+      document.querySelectorAll(".sprint-member-check:checked").forEach(ch=>{
+        const r = projectResponsibles().find(x=>x.id===ch.dataset.id);
+        const inp = document.querySelector(`.sprint-member-hours[data-id="${ch.dataset.id}"]`);
+        const hours = Number(inp?.value)||0;
+        if(r) team.push({responsibleId:r.id,name:r.name,hours});
+      });
+
+      const payload = {
+        project_id:activeProjectId,
+        name:document.getElementById("sprintName").value.trim(),
+        objective:document.getElementById("sprintObjective").value.trim(),
+        start_date:document.getElementById("sprintStart").value||null,
+        end_date:document.getElementById("sprintEnd").value||null,
+        team,
+        updated_at:new Date().toISOString()
+      };
+
+      const {error}=await supabaseClient.from("sprints").insert(payload);
+      if(error) return showToast("Error al crear sprint: "+error.message);
+
+      e.target.reset();
+      closeModal("sprintModal");
+      await loadSharedData();
+      showToast("Sprint creado y compartido");
+    });
+
     function renderSprints(){
       const el = document.getElementById("sprintsList");
-      el.innerHTML = projectSprints().map(sp => `
+      el.innerHTML = projectSprints().map(sp => {
+        const capacity = (sp.team||[]).reduce((sum,m)=>sum+(Number(m.hours)||0),0);
+        const assigned = projectTasks().filter(t=>t.sprintId===sp.id);
+        const committed = assigned.reduce((sum,t)=>sum+(Number(t.hours)||0),0);
+        return `
         <div class="card">
           <div class="sprint-card">
-            <div><span class="badge info">${esc(sp.name)}</span><h3 style="margin-top:10px">${esc(sp.objective)}</h3></div>
+            <div>
+              <span class="badge info">${esc(sp.name)}</span>
+              <h3 style="margin-top:10px">${esc(sp.objective)}</h3>
+              <div class="tiny">${sp.start||"Sin fecha"} → ${sp.end||"Sin fecha"}</div>
+              <div class="tiny" style="margin-top:8px">${(sp.team||[]).map(m=>`${esc(m.name)} (${Number(m.hours)||0} h)`).join(" · ") || "Sin equipo asignado"}</div>
+            </div>
           </div>
-        </div>`).join("") || '<div class="empty">No hay sprints.</div>';
+          <div style="display:flex;gap:18px;flex-wrap:wrap;margin-top:14px">
+            <span><strong>${capacity} h</strong><br><span class="tiny">Capacidad</span></span>
+            <span><strong>${committed} h</strong><br><span class="tiny">Horas comprometidas</span></span>
+            <span><strong>${assigned.length}</strong><br><span class="tiny">Actividades</span></span>
+          </div>
+        </div>`;
+      }).join("") || '<div class="empty">No hay sprints.</div>';
     }
 
     function renderKanban(){
@@ -1166,15 +1272,68 @@
       });
     }
 
+    function renderDashboardProjectSelector(){
+      const sel = document.getElementById("dashboardProjectSelector");
+      if(!sel) return;
+      const current = dashboardProjectFilter || activeProjectId || "__all__";
+      sel.innerHTML = '<option value="__all__">Todos los proyectos</option>' +
+        projects.map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join("");
+      sel.value = projects.some(p=>p.id===current) ? current : "__all__";
+    }
+
     function renderDashboard(){
-      const p = activeProject(), arr = projectTasks();
-      document.getElementById("project-subtitle").textContent = p ? `${p.name}` : "Sin proyecto activo";
+      renderDashboardProjectSelector();
+
+      const allMode = dashboardProjectFilter === "__all__";
+      const p = allMode ? null : projects.find(x=>x.id===dashboardProjectFilter);
+      const arr = allMode ? tasks : tasks.filter(t=>t.projectId===dashboardProjectFilter);
+      const sprintArr = allMode ? sprints : sprints.filter(sp=>sp.projectId===dashboardProjectFilter);
+
+      document.getElementById("project-subtitle").textContent = allMode
+        ? `Resumen consolidado · ${projects.length} proyecto(s)`
+        : (p ? `${p.name}` : "Sin proyecto activo");
+
+      const approved = arr.filter(t=>t.status==="Aprobado").length;
+      const progress = arr.length ? Math.round((approved/arr.length)*100) : 0;
+      document.getElementById("metric-progress").textContent = progress+"%";
+      document.getElementById("progress-bar").style.width = progress+"%";
       document.getElementById("metric-total").textContent = arr.length;
       document.getElementById("metric-blocked").textContent = arr.filter(t=>t.status==="Bloqueado").length;
-      
-      const counts = {}; arr.forEach(t => counts[t.status] = (counts[t.status]||0)+1);
-      document.getElementById("status-summary").innerHTML = Object.entries(counts).map(([st,n])=>`<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">${statusBadge(st)}<strong>${n}</strong></div>`).join("") || '<div class="empty">Sin datos</div>';
+      document.getElementById("metric-sprints").textContent = sprintArr.length;
+
+      const counts = {};
+      arr.forEach(t => counts[t.status] = (counts[t.status]||0)+1);
+      document.getElementById("status-summary").innerHTML = Object.entries(counts)
+        .map(([st,n])=>`<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">${statusBadge(st)}<strong>${n}</strong></div>`)
+        .join("") || '<div class="empty">Sin datos</div>';
+
+      const disciplines = {};
+      arr.forEach(t=>{
+        const d=t.discipline||"Sin disciplina";
+        if(!disciplines[d]) disciplines[d]={total:0,done:0};
+        disciplines[d].total++;
+        if(t.status==="Aprobado") disciplines[d].done++;
+      });
+      const dEl=document.getElementById("discipline-progress-list");
+      dEl.innerHTML = Object.keys(disciplines).length
+        ? Object.entries(disciplines).map(([d,v])=>{
+            const pct=v.total?Math.round(v.done/v.total*100):0;
+            return `<div class="discipline-row"><span>${esc(d)}</span><div class="progress"><span style="width:${pct}%"></span></div><strong>${pct}%</strong></div>`;
+          }).join("")
+        : '<div class="empty">Agrega entregables y actualiza su estado.</div>';
     }
+
+    document.getElementById("dashboardProjectSelector").addEventListener("change", e=>{
+      dashboardProjectFilter = e.target.value;
+      if(dashboardProjectFilter !== "__all__"){
+        activeProjectId = dashboardProjectFilter;
+        localStorage.setItem(KEY.activeProject, activeProjectId);
+        renderAll();
+        showToast("Proyecto activo actualizado");
+      } else {
+        renderDashboard();
+      }
+    });
 
     function renderAll(){
       renderProjects(); renderResponsibles(); renderBacklog(); renderTimeline();
