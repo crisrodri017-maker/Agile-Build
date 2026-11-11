@@ -23,6 +23,7 @@
       --radius:16px;
     }
 
+
     *{box-sizing:border-box}
     body{
       margin:0;
@@ -30,6 +31,7 @@
       color:var(--text);
       background:var(--bg);
     }
+
 
     /* MODO LECTOR (VIEW-ONLY) CSS */
     body.view-only .admin-only {
@@ -45,14 +47,17 @@
     body.view-only .kanban-col { pointer-events: none; }
     body.view-only .kanban-col * { pointer-events: none; }
 
+
     button,input,select,textarea{font:inherit}
     button{cursor:pointer}
+
 
     .app{
       min-height:100vh;
       display:grid;
       grid-template-columns:260px 1fr;
     }
+
 
     aside{
       background:var(--sidebar);
@@ -64,6 +69,7 @@
       overflow:auto;
     }
 
+
     .brand{
       display:flex;
       align-items:center;
@@ -72,6 +78,7 @@
       padding:0 8px;
     }
 
+
     .brand-mark{
       width:42px;height:42px;border-radius:12px;
       display:grid;place-items:center;
@@ -79,8 +86,10 @@
       font-weight:800;color:white;
     }
 
+
     .brand h1{font-size:18px;margin:0}
     .brand p{font-size:12px;margin:2px 0 0;color:#94a3b8}
+
 
     nav{display:grid;gap:8px}
     .nav-btn{
@@ -97,6 +106,7 @@
     .nav-btn:hover,.nav-btn.active{background:#1f2937;color:white}
     .nav-btn.active{box-shadow:inset 3px 0 0 #3b82f6}
 
+
     main{padding:28px;min-width:0;position:relative;}
     
     .topbar{
@@ -109,6 +119,7 @@
     .topbar h2{margin:0;font-size:28px}
     .topbar p{margin:6px 0 0;color:var(--muted)}
     .top-actions{display:flex;gap:10px;flex-wrap:wrap; align-items:center;}
+
 
     /* Simulador de roles */
     .role-simulator {
@@ -123,6 +134,7 @@
     .role-simulator label { font-size: 12px; color: var(--muted); margin:0; }
     .role-simulator select { border:none; background:transparent; font-weight:700; font-size:13px; outline:none; padding:0; width:auto; cursor:pointer; }
 
+
     .sub-header {
       margin: 36px 0 16px;
       padding-bottom: 8px;
@@ -134,6 +146,7 @@
       align-items: center;
       gap: 8px;
     }
+
 
     .btn{
       border:1px solid var(--border);
@@ -151,6 +164,7 @@
     .btn.ghost{background:transparent}
     .btn.danger{color:var(--danger); border-color:#fad4d4; background:#fffafa}
 
+
     .grid{
       display:grid;
       gap:18px;
@@ -158,6 +172,7 @@
     .grid.cols-4{grid-template-columns:repeat(4,minmax(0,1fr))}
     .grid.cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}
     .grid.cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+
 
     .card{
       background:var(--panel);
@@ -178,10 +193,12 @@
     .section{display:none}
     .section.active{display:block}
 
+
     .progress{
       height:10px;border-radius:999px;background:#edf1f5;overflow:hidden;margin-top:10px;
     }
     .progress span{display:block;height:100%;background:var(--accent);border-radius:999px}
+
 
     .discipline-row{
       display:grid;
@@ -190,6 +207,7 @@
       align-items:center;
       margin:12px 0;
     }
+
 
     .badge{
       display:inline-flex;align-items:center;
@@ -205,6 +223,7 @@
     .badge.warning{background:#fff4db;color:#9b6300}
     .badge.danger{background:#fdecec;color:#ad2c2c}
     .badge.info{background:#e9f1ff;color:#245ab7}
+
 
     .table-wrap{
       overflow:auto;
@@ -233,6 +252,7 @@
     }
     tr:last-child td{border-bottom:none}
 
+
     .form-grid{
       display:grid;
       grid-template-columns:repeat(2,minmax(0,1fr));
@@ -255,6 +275,7 @@
       box-shadow:0 0 0 3px rgba(31,111,235,.12)
     }
     textarea{min-height:95px;resize:vertical}
+
 
     .kanban{
       display:grid;
@@ -286,6 +307,7 @@
     .task-card h4{margin:0 0 8px;font-size:14px}
     .task-meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
 
+
     .empty{
       padding:24px;
       border:1px dashed #cbd5e1;
@@ -293,6 +315,7 @@
       color:var(--muted);
       text-align:center;
     }
+
 
     .modal-backdrop{
       display:none;
@@ -322,6 +345,7 @@
       border:0;background:#eef2f7;border-radius:8px;width:36px;height:36px;
     }
 
+
     .toast{
       position:fixed;
       right:20px;
@@ -337,6 +361,7 @@
       z-index:80;
     }
     .toast.show{opacity:1;transform:translateY(0)}
+
 
     .list-row{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--border)}
     .list-row:last-child{border-bottom:0}
@@ -367,11 +392,13 @@
       border-top: 1px solid var(--border);
     }
 
+
     .sprint-team-list{display:grid;gap:10px}
     .sprint-team-row{display:grid;grid-template-columns:minmax(220px,1fr) 150px;gap:12px;align-items:center;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:#fafbfd}
     .sprint-team-row .member-label{display:flex;align-items:center;gap:9px;font-weight:600}
     .sprint-team-row .member-label input{width:auto}
     @media(max-width:760px){.sprint-team-row{grid-template-columns:1fr}}
+
 
   
     /* ===== Responsive / móvil ===== */
@@ -392,6 +419,7 @@
     .evm-svg{width:100%;min-width:620px;height:auto;display:block}
     .demo-note{border-left:4px solid var(--accent);padding:10px 12px;background:var(--accent-soft);border-radius:8px;margin-bottom:14px}
     .kanban-col{scroll-snap-align:start}
+
 
     @media(max-width:760px){
       body{overflow-x:hidden}
@@ -454,6 +482,7 @@
       main{padding-left:10px;padding-right:10px}
     }
 
+
   
     /* ===== Dashboard ejecutivo / Gantt / Gobernanza ===== */
     .dashboard-kpi .metric{font-size:24px}
@@ -478,6 +507,7 @@
       #dashboardMiniCurve{overflow-x:auto}
     }
 
+
   
     /* ===== v16: contexto de proyecto, EDT y ruta crítica ===== */
     .project-context{
@@ -497,8 +527,7 @@
     .risk-scale{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
     .risk-scale > div{padding:9px 10px;border-radius:10px;font-size:12px;font-weight:700;text-align:center}
     .risk-low{background:#e8f7ef;color:#137a4b}.risk-moderate{background:#e9f1ff;color:#245ab7}
-    .risk-high{background:#fff4db;color:#9b6300}.risk-critical{background:#fdecec;color:#ad2c2c}
-    .edt-tree{display:grid;gap:12px}
+    .risk-high{background:#fff4db;color:#9b6300}.risk-critical{background:#fdecec;color:#ad2c2c}    .edt-tree{display:grid;gap:12px}
     .edt-requirement{border:1px solid var(--border);border-radius:14px;background:white;padding:14px}
     .edt-control{margin:10px 0 0 24px;border-left:3px solid #94a3b8;padding-left:14px}
     .edt-work{margin:8px 0 0 24px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:#fafbfd}
@@ -516,6 +545,7 @@
       .project-selector-wrap select{min-width:0}
     }
 
+
   </style>
 </head>
 <body class="view-only">
@@ -531,6 +561,7 @@
         </div>
       </div>
 
+
       <nav>
         <button class="nav-btn active" data-section="dashboard">📊 Dashboard</button>
         <button class="nav-btn" data-section="projects">🏢 Proyecto y Equipo</button>
@@ -540,6 +571,7 @@
         <button class="nav-btn" data-section="governance">🛡️ Gobernanza</button>
       </nav>
     </aside>
+
 
     <main>
       <div class="project-context">
@@ -552,6 +584,7 @@
           <select id="dashboardProjectSelector"></select>
         </div>
       </div>
+
 
       
       <!-- MÓDULO 1: DASHBOARD -->
@@ -577,7 +610,9 @@
           </div>
         </div>
 
+
         <div class="card" id="dashboardProjectInfo" style="margin-bottom:18px"></div>
+
 
         <div class="grid cols-4">
           <div class="card">
@@ -602,6 +637,7 @@
           </div>
         </div>
 
+
         <h3 class="sub-header">📅 Plazo y desempeño</h3>
         <div id="dashboardScheduleSummary" class="grid cols-4"></div>
         <div id="dashboardEvmSummary" class="grid cols-4" style="margin-top:18px"></div>
@@ -612,6 +648,7 @@
           </div>
           <div id="dashboardMiniCurve" style="margin-top:10px"></div>
         </div>
+
 
         <div class="grid cols-2" style="margin-top:18px">
           <div class="card">
@@ -626,6 +663,7 @@
           </div>
         </div>
 
+
         <div class="grid cols-2" style="margin-top:18px">
           <div class="card">
             <h3>Riesgos principales</h3>
@@ -634,6 +672,7 @@
         </div>
       </section>
 
+
       <!-- MÓDULO 2: PROYECTO Y EQUIPO -->
       <section id="projects" class="section">
         <div class="topbar">
@@ -641,6 +680,7 @@
           <button class="btn primary admin-only" id="newProjectBtn">+ Nuevo proyecto</button>
         </div>
         <div class="demo-note admin-only"><strong>Demo compartida:</strong> usa “✨ Cargar ejemplos demo” desde el Dashboard para crear o restablecer Torres del Sol y Hospital 20 de Julio en Supabase.</div>
+
 
         <div class="grid cols-2">
           <form id="projectForm" class="card admin-only">
@@ -659,11 +699,13 @@
             <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px"><button class="btn" type="button" id="clearProjectForm">Limpiar</button><button class="btn primary" type="submit">Guardar proyecto</button></div>
           </form>
 
+
           <div class="card">
             <h3>Proyectos guardados</h3>
             <div id="projectsList"></div>
           </div>
         </div>
+
 
         <h3 class="sub-header">👥 Equipo de Trabajo y Tarifas</h3>
         
@@ -673,6 +715,7 @@
           <input type="file" id="csvFileInput" accept=".csv" style="display:none" />
           <button class="btn primary small" onclick="document.getElementById('csvFileInput').click()">Seleccionar archivo .CSV</button>
         </div>
+
 
         <div class="grid cols-2">
           <div class="card admin-only">
@@ -702,6 +745,16 @@
                   <option>Eléctrico</option>
                   <option>Hidrosanitario</option>
                   <option>BIM</option>
+                  <option>Topografía</option>
+                  <option>Urbanismo</option>
+                  <option>Gas</option>
+                  <option>PCI</option>
+                  <option>Telecomunicaciones</option>
+                  <option>HVAC</option>
+                  <option>Gases medicinales</option>
+                  <option>Equipamiento médico</option>
+                  <option>Seguridad electrónica</option>
+                  <option>Transporte vertical</option>
                   <option>Presupuestos</option>
                 </select>
               </div>
@@ -713,12 +766,14 @@
         </div>
       </section>
 
+
       <!-- MÓDULO 3: ALCANCE Y PLAZO -->
       <section id="scope" class="section">
         <div class="topbar">
           <div><h2>Alcance y Cronograma</h2><p>Gestiona el Backlog de actividades y fechas.</p></div>
           <button class="btn primary admin-only" id="openTaskModal">+ Nueva actividad</button>
         </div>
+
 
         <h3 class="sub-header">🧱 EDT Contractual</h3>
         <div class="card">
@@ -731,6 +786,7 @@
           </div>
           <div id="edtTree" class="edt-tree"></div>
         </div>
+
 
         <h3 class="sub-header">📋 Backlog de Actividades</h3>
         <div class="card">
@@ -755,6 +811,7 @@
           </div>
         </div>
 
+
         <h3 class="sub-header">📅 Cronograma de Entregables</h3>
         <div class="card">
           <div class="timeline">
@@ -765,6 +822,7 @@
         </div>
       </section>
 
+
       <!-- MÓDULO 4: EJECUCIÓN ÁGIL -->
       <section id="execution" class="section">
         <div class="topbar">
@@ -772,12 +830,15 @@
           <button class="btn primary admin-only" id="openSprintModal">+ Crear sprint</button>
         </div>
 
+
         <h3 class="sub-header">⚡ Sprints Planificados</h3>
         <div id="sprintsList" class="grid cols-2"></div>
+
 
         <h3 class="sub-header">🧩 Tablero Kanban Operativo</h3>
         <div id="kanbanBoard" class="kanban"></div>
       </section>
+
 
       <!-- MÓDULO 5: DESEMPEÑO -->
       <section id="performance" class="section">
@@ -790,6 +851,7 @@
         <div id="evmContent"></div>
       </section>
 
+
       <!-- MÓDULO 6: GOBERNANZA -->
       <section id="governance" class="section">
         <div class="topbar">
@@ -800,17 +862,21 @@
           </div>
         </div>
 
+
         <h3 class="sub-header">⚠️ Riesgos y Bloqueos</h3>
         <div id="risksList" class="risk-grid"></div>
 
+
         <h3 class="sub-header">🧠 Actas y Decisiones</h3>
         <div id="minutesList" class="minutes-list"></div>
+
 
         <h3 class="sub-header">🔁 Control de Cambios</h3>
         <div id="changesList" class="grid cols-2"></div>
       </section>
     </main>
   </div>
+
 
   <!-- MODALES -->
   <div class="modal-backdrop" id="taskModal">
@@ -834,6 +900,7 @@
       </form>
     </div>
   </div>
+
 
   <div class="modal-backdrop" id="sprintModal">
     <div class="modal">
@@ -881,6 +948,7 @@
     </div>
   </div>
 
+
   <div class="modal-backdrop" id="minutesModal">
     <div class="modal">
       <div class="modal-head"><h3>Crear acta / Decisión</h3><button class="close" type="button" data-close="minutesModal">✕</button></div>
@@ -900,6 +968,8 @@
       </form>
     </div>
   </div>
+
+
 
 
   <div class="modal-backdrop" id="edtModal">
@@ -932,13 +1002,16 @@
     </div>
   </div>
 
+
   <div class="toast" id="toast"></div>
+
 
   <script>
     // --------------------------------------------------------
     // SISTEMA DE RECEPCIÓN DE DATOS POR LINK (COMPRESIÓN)
     // --------------------------------------------------------
     const KEY = { projects:"ab_v8_proj", activeProject:"ab_v8_act", tasks:"ab_v8_task", responsibles:"ab_v8_resp", sprints:"ab_v8_spr", risks:"ab_v8_risk", minutes:"ab_v8_min", changes:"ab_v8_chg", budget:"ab_v8_budg", evm:"ab_v8_evm" };
+
 
     // --------------------------------------------------------
     // SUPABASE - DATOS COMPARTIDOS DE LA DEMO
@@ -948,12 +1021,14 @@
     const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
     let sharedDataLoading = false;
 
+
     function setSyncStatus(text, kind="info") {
       const el = document.getElementById("syncStatus");
       if (!el) return;
       el.textContent = text;
       el.className = `badge ${kind}`;
     }
+
 
     function projectFromDb(p){
       return {
@@ -979,6 +1054,7 @@
       };
     }
 
+
     function sprintFromDb(sp){
       return {
         id:sp.id, projectId:sp.project_id, name:sp.name||"", objective:sp.objective||"",
@@ -986,6 +1062,7 @@
         team:Array.isArray(sp.team) ? sp.team : []
       };
     }
+
 
     function riskFromDb(r){
       return {id:r.id,projectId:r.project_id,description:r.description||"",causes:r.causes||"",consequences:r.consequences||"",probability:Number(r.probability)||1,impact:Number(r.impact)||1,treatment:r.treatment||"Mitigar",controls:r.controls||"",status:r.status||"Abierto",responsibleId:r.responsible_id||""};
@@ -997,8 +1074,8 @@
       return {id:c.id,projectId:c.project_id,minuteId:c.minute_id||"",code:c.code||"",description:c.description||"",impactDescription:c.impact_description||"",alternatives:c.alternatives||"",status:c.status||"Solicitado",approved:!!c.approved,affectedTaskIds:Array.isArray(c.affected_task_ids)?c.affected_task_ids:[]};
     }
     function requirementFromDb(r){ return {id:r.id,projectId:r.project_id,code:r.code||"",name:r.name||"",description:r.description||""}; }
-    function controlLotFromDb(r){ return {id:r.id,projectId:r.project_id,requirementId:r.requirement_id||"",code:r.code||"",name:r.name||"",description:r.description||"",responsibleId:r.responsible_id||""}; }
-    function workPackageFromDb(r){ return {id:r.id,projectId:r.project_id,controlLotId:r.control_lot_id||"",code:r.code||"",name:r.name||"",description:r.description||"",responsibleId:r.responsible_id||"",startDate:r.start_date||"",endDate:r.end_date||""}; }
+    function controlLotFromDb(r){ return {id:r.id,projectId:r.project_id,requirementId:r.requirement_id||"",code:r.code||"",name:r.name||"",description:r.description||"",responsibleId:r.responsible_id||""}; }    function workPackageFromDb(r){ return {id:r.id,projectId:r.project_id,controlLotId:r.control_lot_id||"",code:r.code||"",name:r.name||"",description:r.description||"",responsibleId:r.responsible_id||"",startDate:r.start_date||"",endDate:r.end_date||""}; }
+
 
     async function loadSharedData(showMessage=false){
       if (sharedDataLoading) return;
@@ -1028,6 +1105,7 @@
         if (ctlRes.error) throw ctlRes.error;
         if (wpRes.error) throw wpRes.error;
 
+
         projects = (pRes.data||[]).map(projectFromDb);
         responsibles = (rRes.data||[]).map(responsibleFromDb);
         tasks = (tRes.data||[]).map(taskFromDb);
@@ -1038,6 +1116,7 @@
         edtRequirements = (reqRes.data||[]).map(requirementFromDb);
         controlLots = (ctlRes.data||[]).map(controlLotFromDb);
         workPackages = (wpRes.data||[]).map(workPackageFromDb);
+
 
         if (!projects.some(p=>p.id===activeProjectId)) activeProjectId = projects[0]?.id || "";
         if (!projects.some(p=>p.id===dashboardProjectFilter)) {
@@ -1053,6 +1132,7 @@
         localStorage.setItem(KEY.minutes, JSON.stringify(minutes));
         localStorage.setItem(KEY.changes, JSON.stringify(changes));
 
+
         renderAll();
         setSyncStatus("Datos compartidos ✓", "success");
         if (showMessage) showToast("Datos actualizados desde Supabase");
@@ -1064,6 +1144,7 @@
         sharedDataLoading = false;
       }
     }
+
 
     // --------------------------------------------------------
     // CÓDIGO NORMAL DE LA APLICACIÓN
@@ -1086,6 +1167,7 @@
     let evmSettings = JSON.parse(localStorage.getItem(KEY.evm)||"{}");
     let dashboardProjectFilter = activeProjectId || "";
 
+
     const DISCIPLINE_PREFIX = {
       "General / Proyecto":"GEN",
       "Arquitectura":"ARQ",
@@ -1096,95 +1178,325 @@
       "Eléctrico":"ELE",
       "Hidrosanitario":"HSA",
       "BIM":"BIM",
+      "Topografía":"TOP",
+      "Urbanismo":"URB",
+      "Gas":"GAS",
+      "PCI":"PCI",
+      "Telecomunicaciones":"TEL",
+      "HVAC":"HVAC",
+      "Gases medicinales":"GME",
+      "Equipamiento médico":"MED",
+      "Seguridad electrónica":"SEG",
+      "Transporte vertical":"TVE",
       "Presupuestos":"PRE"
     };
+
+
+    function demoAddDays(iso, days){
+      const d=new Date(iso+"T00:00:00Z");
+      d.setUTCDate(d.getUTCDate()+days);
+      return d.toISOString().slice(0,10);
+    }
+    function demoDiffDays(a,b){
+      return Math.round((new Date(b+"T00:00:00Z")-new Date(a+"T00:00:00Z"))/86400000);
+    }
+    function demoSprintName(projectStart, taskStart){
+      return "Sprint "+String(Math.floor(demoDiffDays(projectStart,taskStart)/14)+1).padStart(2,"0");
+    }
+    function demoBuildSprints(phases, teamsByPhase){
+      const out=[];
+      let n=1;
+      phases.forEach((phase,idx)=>{
+        for(let i=0;i<phase.sprints;i++){
+          const s=demoAddDays(phase.start,i*14);
+          const e=demoAddDays(s,13);
+          out.push([
+            "Sprint "+String(n).padStart(2,"0"),
+            phase.name+" · "+phase.objective,
+            s,
+            e>phase.end?phase.end:e,
+            teamsByPhase[idx]
+          ]);
+          n++;
+        }
+      });
+      return out;
+    }
+    function demoTask(phases, phaseIndex, code, name, discipline, priority, owner, hours, realHours, status, offsetDays, durationDays, progress, critical){
+      const phase=phases[phaseIndex];
+      const start=demoAddDays(phase.start,offsetDays);
+      let end=demoAddDays(start,durationDays-1);
+      if(end>phase.end) end=phase.end;
+      return [code,name,discipline,priority,demoSprintName(phases[0].start,start),owner,hours,realHours,status,start,end,progress,phaseIndex,!!critical];
+    }
+
+
+    const TDS_PHASES = [
+      {name:"1. Pre-diseño y Cabida",start:"2026-06-01",end:"2026-06-28",sprints:2,objective:"Estudios base, normativa, cabida y criterios preliminares."},
+      {name:"2. Anteproyecto Arquitectónico",start:"2026-06-29",end:"2026-08-23",sprints:4,objective:"Definición arquitectónica de sótanos, torre, fachadas y tipologías."},
+      {name:"3. Desarrollo e Ingenierías",start:"2026-08-24",end:"2026-11-01",sprints:5,objective:"Desarrollo técnico de estructura, MEP y modelos disciplinares."},
+      {name:"4. Coordinación BIM (Clashes)",start:"2026-11-02",end:"2026-11-29",sprints:2,objective:"Federación, detección y resolución de interferencias."},
+      {name:"5. Proyecto Ejecutivo",start:"2026-11-30",end:"2027-02-07",sprints:5,objective:"Detalles, memorias, planos definitivos y emisión para obra."}
+    ];
+    const TDS_TEAMS = [
+      [["Daniela Ortiz",16],["Santiago Mejía",40],["Laura Gómez",64],["Paula Ruiz",56],["Carlos Rojas",24],["Héctor Salazar",48],["Miguel Silva",24]],
+      [["Daniela Ortiz",12],["Santiago Mejía",40],["Laura Gómez",72],["Paula Ruiz",72],["Juan Camilo Díaz",64],["Carlos Rojas",32],["Diana Martínez",16],["Andrés Peña",16],["Miguel Silva",40],["Karen López",48]],
+      [["Daniela Ortiz",12],["Santiago Mejía",48],["Laura Gómez",48],["Paula Ruiz",40],["Carlos Rojas",72],["Felipe Mora",64],["Diana Martínez",64],["Andrés Peña",64],["Ricardo Torres",48],["Valentina Cruz",40],["Nicolás Herrera",32],["Miguel Silva",56],["Karen López",64],["Carolina Vega",32]],
+      [["Daniela Ortiz",8],["Santiago Mejía",40],["Laura Gómez",32],["Carlos Rojas",32],["Diana Martínez",24],["Andrés Peña",24],["Ricardo Torres",16],["Valentina Cruz",16],["Miguel Silva",80],["Karen López",80]],
+      [["Daniela Ortiz",12],["Santiago Mejía",40],["Laura Gómez",64],["Paula Ruiz",64],["Juan Camilo Díaz",64],["Carlos Rojas",56],["Felipe Mora",48],["Diana Martínez",48],["Andrés Peña",48],["Ricardo Torres",40],["Valentina Cruz",32],["Miguel Silva",56],["Karen López",64],["Carolina Vega",48]]
+    ];
+
+
+    const H20_PHASES = [
+      {name:"1. Estudios y Programación Médico-Arquitectónica",start:"2026-01-12",end:"2026-02-22",sprints:3,objective:"Programa médico, flujos, equipos, normativa y estudios base."},
+      {name:"2. Anteproyecto Hospitalario",start:"2026-02-23",end:"2026-05-03",sprints:5,objective:"Definición funcional y espacial de servicios hospitalarios."},
+      {name:"3. Diseño Básico Arquitectura y Estructura",start:"2026-05-04",end:"2026-07-12",sprints:5,objective:"Desarrollo arquitectónico, estructural y coordinación base."},
+      {name:"4. Ingenierías Especializadas",start:"2026-07-13",end:"2026-10-04",sprints:6,objective:"HVAC, gases, redes, respaldo eléctrico, telecom y sistemas especiales."},
+      {name:"5. Coordinación BIM y Validación Técnica",start:"2026-10-05",end:"2026-11-15",sprints:3,objective:"Federación, clashes, validación de áreas críticas y cierre técnico."},
+      {name:"6. Proyecto Ejecutivo y Cierre",start:"2026-11-16",end:"2027-01-10",sprints:4,objective:"Planos definitivos, memorias, cantidades y paquete de cierre."}
+    ];
+    const H20_TEAMS = [
+      [["Natalia Torres",20],["Ángela Pardo",72],["Felipe Vargas",40],["Ana María Cuervo",56],["Héctor Salazar",40],["Jorge Bernal",24]],
+      [["Natalia Torres",12],["Ángela Pardo",64],["Felipe Vargas",72],["Sofía Mendoza",80],["Diego Rincón",72],["Ana María Cuervo",48],["Jorge Bernal",48],["María Cárdenas",24]],
+      [["Natalia Torres",12],["Ángela Pardo",40],["Felipe Vargas",64],["Sofía Mendoza",64],["Diego Rincón",56],["María Cárdenas",72],["Juan Esteban Ruiz",64],["Jorge Bernal",48],["Karen López",64],["Carolina Vega",24]],
+      [["Natalia Torres",8],["Ángela Pardo",32],["Felipe Vargas",32],["Sebastián León",64],["Marcela Prieto",72],["Juliana Acosta",56],["Ricardo Torres",56],["Camila Duarte",72],["Tomás Gil",48],["Valeria Santos",40],["Ana María Cuervo",40],["Pedro Salamanca",32],["Jorge Bernal",64],["Karen López",72],["Luis Nieto",72],["Carolina Vega",32]],
+      [["Natalia Torres",8],["Ángela Pardo",32],["Felipe Vargas",40],["María Cárdenas",24],["Sebastián León",24],["Marcela Prieto",40],["Juliana Acosta",32],["Ricardo Torres",24],["Camila Duarte",40],["Tomás Gil",24],["Valeria Santos",24],["Ana María Cuervo",32],["Jorge Bernal",80],["Karen López",80],["Luis Nieto",80]],
+      [["Natalia Torres",12],["Ángela Pardo",40],["Felipe Vargas",64],["Sofía Mendoza",64],["Diego Rincón",56],["María Cárdenas",48],["Juan Esteban Ruiz",48],["Sebastián León",40],["Marcela Prieto",48],["Juliana Acosta",40],["Ricardo Torres",40],["Camila Duarte",48],["Tomás Gil",32],["Valeria Santos",24],["Ana María Cuervo",32],["Pedro Salamanca",24],["Jorge Bernal",56],["Karen López",64],["Luis Nieto",64],["Carolina Vega",56]]
+    ];
+
 
     const DEMO_PROJECTS = [
       {
         code:"TDS-DEMO", name:"Torres del Sol", client:"Constructora Primavera", contractNumber:"CP-2026-014",
         type:"Residencial", location:"Bogotá", sprintLength:2,
-        description:"Diseño multidisciplinario de torre residencial de 15 pisos, coordinación BIM y entregables de diseño básico.",
+        description:"Diseño integral de una torre residencial de 42 pisos, sótanos, zonas comunes y coordinación BIM, desde pre-diseño y cabida hasta proyecto ejecutivo.",
+        phases:TDS_PHASES,
         people:[
-          ["Laura Gómez","Líder","Arquitectura",92000],
-          ["Carlos Rojas","Especialista","Estructuras",98000],
-          ["Diana Martínez","Especialista","Hidrosanitario",88000],
-          ["Andrés Peña","Especialista","Eléctrico",90000],
-          ["Miguel Silva","Scrum Master","BIM",95000]
+          ["Daniela Ortiz","Director","General / Proyecto",145000],
+          ["Santiago Mejía","Scrum Master","General / Proyecto",125000],
+          ["Laura Gómez","Líder","Arquitectura",112000],
+          ["Paula Ruiz","Especialista","Arquitectura",90000],
+          ["Juan Camilo Díaz","Ingeniero Auxiliar","Arquitectura",72000],
+          ["Carlos Rojas","Líder","Estructuras",120000],
+          ["Felipe Mora","Especialista","Estructuras",96000],
+          ["Héctor Salazar","Especialista","Geotecnia",125000],
+          ["Diana Martínez","Especialista","Hidrosanitario",108000],
+          ["Andrés Peña","Especialista","Eléctrico",110000],
+          ["Ricardo Torres","Especialista","PCI",112000],
+          ["Valentina Cruz","Especialista","Telecomunicaciones",102000],
+          ["Nicolás Herrera","Especialista","Gas",102000],
+          ["Miguel Silva","Líder","BIM",118000],
+          ["Karen López","Dibujante","BIM",82000],
+          ["Carolina Vega","Especialista","Presupuestos",98000]
         ],
-        sprints:[
-          ["Sprint 01","Definiciones base y criterios de diseño","2026-09-07","2026-09-20",[["Laura Gómez",48],["Carlos Rojas",48],["Miguel Silva",24]]],
-          ["Sprint 02","Desarrollo de diseño básico interdisciplinario","2026-09-21","2026-10-04",[["Laura Gómez",56],["Carlos Rojas",56],["Diana Martínez",40],["Andrés Peña",40],["Miguel Silva",32]]],
-          ["Sprint 03","Coordinación y cierre de entregables principales","2026-10-05","2026-10-18",[["Laura Gómez",48],["Carlos Rojas",48],["Diana Martínez",36],["Andrés Peña",36],["Miguel Silva",48]]]
-        ],
+        sprints:demoBuildSprints(TDS_PHASES,TDS_TEAMS),
         tasks:[
-          ["ARQ-001","Esquemas arquitectónicos","Arquitectura","Alta","Sprint 01","Laura Gómez",42,40,"Aprobado","2026-09-07","2026-09-13",100],
-          ["EST-001","Predimensionamiento estructural","Estructuras","Alta","Sprint 01","Carlos Rojas",40,42,"Aprobado","2026-09-09","2026-09-18",100],
-          ["BIM-001","Modelo base de coordinación","BIM","Media","Sprint 01","Miguel Silva",22,20,"Aprobado","2026-09-14","2026-09-20",100],
-          ["ARQ-002","Plantas y fachadas 60%","Arquitectura","Alta","Sprint 02","Laura Gómez",52,50,"Aprobado","2026-09-21","2026-10-02",100],
-          ["HSA-001","Redes hidrosanitarias básicas","Hidrosanitario","Media","Sprint 02","Diana Martínez",36,34,"En revisión","2026-09-23","2026-10-03",88],
-          ["ELE-001","Cargas y distribución eléctrica","Eléctrico","Media","Sprint 02","Andrés Peña",34,32,"En revisión","2026-09-24","2026-10-04",86],
-          ["EST-002","Modelo estructural 60%","Estructuras","Alta","Sprint 02","Carlos Rojas",50,48,"Aprobado","2026-09-21","2026-10-04",100],
-          ["BIM-002","Coordinación interdisciplinaria","BIM","Alta","Sprint 03","Miguel Silva",44,39,"En proceso","2026-10-05","2026-10-18",72]
+          demoTask(TDS_PHASES,0,"GEN-001","Levantamiento topográfico y amarre de coordenadas","Topografía","Alta","Santiago Mejía",90,92,"Aprobado",0,10,100,false),
+          demoTask(TDS_PHASES,0,"GTC-001","Campaña geotécnica y estudio de suelos","Geotecnia","Alta","Héctor Salazar",150,158,"Aprobado",2,18,100,true),
+          demoTask(TDS_PHASES,0,"ARQ-001","Análisis normativo POT y restricciones urbanísticas","Arquitectura","Alta","Laura Gómez",110,114,"Aprobado",0,12,100,false),
+          demoTask(TDS_PHASES,0,"ARQ-002","Cuadro de áreas y programa preliminar","Arquitectura","Media","Laura Gómez",95,98,"Aprobado",5,10,100,false),
+          demoTask(TDS_PHASES,0,"ARQ-003","Alternativas de implantación y volumetría","Arquitectura","Alta","Paula Ruiz",160,166,"Aprobado",9,14,100,true),
+          demoTask(TDS_PHASES,0,"EST-001","Criterios estructurales preliminares","Estructuras","Media","Carlos Rojas",80,82,"Aprobado",12,10,100,false),
+          demoTask(TDS_PHASES,0,"HSA-001","Disponibilidad de servicios y criterios hidráulicos","Hidrosanitario","Media","Diana Martínez",60,59,"Aprobado",14,8,100,false),
+          demoTask(TDS_PHASES,0,"ELE-001","Disponibilidad de energía y criterios eléctricos","Eléctrico","Media","Andrés Peña",60,62,"Aprobado",14,8,100,false),
+
+
+          demoTask(TDS_PHASES,1,"ARQ-004","Diseño de sótanos y parqueaderos","Arquitectura","Alta","Laura Gómez",220,228,"Aprobado",0,28,100,true),
+          demoTask(TDS_PHASES,1,"ARQ-005","Primer piso, accesos y zonas comunes","Arquitectura","Alta","Paula Ruiz",180,184,"Aprobado",3,24,100,false),
+          demoTask(TDS_PHASES,1,"ARQ-006","Plantas tipo de torre pisos 2 a 38","Arquitectura","Alta","Laura Gómez",260,268,"Aprobado",7,32,100,true),
+          demoTask(TDS_PHASES,1,"ARQ-007","Tipologías de apartamentos y áreas privadas","Arquitectura","Alta","Paula Ruiz",210,214,"Aprobado",10,28,100,false),
+          demoTask(TDS_PHASES,1,"ARQ-008","Núcleos, puntos fijos y evacuación","Arquitectura","Alta","Laura Gómez",160,165,"Aprobado",14,24,100,true),
+          demoTask(TDS_PHASES,1,"ARQ-009","Fachadas y envolvente arquitectónica","Arquitectura","Media","Paula Ruiz",190,186,"Aprobado",20,28,100,false),
+          demoTask(TDS_PHASES,1,"ARQ-010","Cortes generales y control de alturas","Arquitectura","Media","Juan Camilo Díaz",130,128,"Aprobado",24,20,100,false),
+          demoTask(TDS_PHASES,1,"ARQ-011","Cubierta y zonas comunes superiores","Arquitectura","Media","Juan Camilo Díaz",120,124,"Aprobado",28,18,100,false),
+          demoTask(TDS_PHASES,1,"EST-002","Predimensionamiento del sistema estructural","Estructuras","Alta","Carlos Rojas",150,157,"Aprobado",21,26,100,true),
+          demoTask(TDS_PHASES,1,"BIM-001","Modelo BIM arquitectónico LOD 200","BIM","Alta","Miguel Silva",240,246,"Aprobado",14,38,100,false),
+
+
+          demoTask(TDS_PHASES,2,"EST-003","Modelo analítico estructural sismorresistente","Estructuras","Alta","Carlos Rojas",300,314,"Aprobado",0,35,100,true),
+          demoTask(TDS_PHASES,2,"EST-004","Diseño de cimentación y contención","Estructuras","Alta","Felipe Mora",230,238,"Aprobado",8,30,100,true),
+          demoTask(TDS_PHASES,2,"EST-005","Diseño de placas, vigas y elementos verticales","Estructuras","Alta","Carlos Rojas",320,330,"Aprobado",18,38,100,true),
+          demoTask(TDS_PHASES,2,"HSA-002","Diseño de redes de agua potable","Hidrosanitario","Alta","Diana Martínez",190,196,"Aprobado",5,28,100,false),
+          demoTask(TDS_PHASES,2,"HSA-003","Diseño sanitario y pluvial","Hidrosanitario","Alta","Diana Martínez",210,217,"Aprobado",12,30,100,false),
+          demoTask(TDS_PHASES,2,"GAS-001","Diseño de red de gas","Gas","Media","Nicolás Herrera",120,123,"Aprobado",18,24,100,false),
+          demoTask(TDS_PHASES,2,"PCI-001","Sistema de protección contra incendio","PCI","Alta","Ricardo Torres",200,211,"Aprobado",14,32,100,true),
+          demoTask(TDS_PHASES,2,"ELE-002","Estudio de cargas y demanda eléctrica","Eléctrico","Alta","Andrés Peña",150,156,"Aprobado",4,24,100,false),
+          demoTask(TDS_PHASES,2,"ELE-003","Subestación, tableros y distribución principal","Eléctrico","Alta","Andrés Peña",230,242,"Aprobado",15,35,100,true),
+          demoTask(TDS_PHASES,2,"ELE-004","Iluminación, tomas y servicios comunes","Eléctrico","Media","Andrés Peña",190,197,"Aprobado",28,30,100,false),
+          demoTask(TDS_PHASES,2,"TEL-001","Telecomunicaciones, datos y citofonía","Telecomunicaciones","Media","Valentina Cruz",150,154,"Aprobado",30,28,100,false),
+          demoTask(TDS_PHASES,2,"BIM-002","Modelos BIM disciplinares LOD 300","BIM","Alta","Miguel Silva",300,318,"Aprobado",20,40,100,true),
+          demoTask(TDS_PHASES,2,"BIM-003","Coordinación de shafts y cuartos técnicos","BIM","Alta","Karen López",220,232,"Aprobado",32,28,100,true),
+          demoTask(TDS_PHASES,2,"PRE-001","Cantidades y presupuesto preliminar","Presupuestos","Media","Carolina Vega",170,180,"Aprobado",45,22,100,false),
+          demoTask(TDS_PHASES,2,"GEN-002","Memorias de cálculo preliminares","General / Proyecto","Media","Santiago Mejía",190,198,"Aprobado",48,20,100,false),
+          demoTask(TDS_PHASES,2,"ARQ-012","Ajustes arquitectónicos por desarrollo de ingenierías","Arquitectura","Alta","Laura Gómez",200,212,"Aprobado",42,26,100,true),
+
+
+          demoTask(TDS_PHASES,3,"BIM-004","Federación de modelos multidisciplinares","BIM","Alta","Miguel Silva",190,96,"En proceso",0,18,45,true),
+          demoTask(TDS_PHASES,3,"BIM-005","Clash detection estructura versus MEP","BIM","Alta","Karen López",210,88,"En proceso",2,18,38,true),
+          demoTask(TDS_PHASES,3,"BIM-006","Resolución de interferencias críticas","BIM","Alta","Miguel Silva",250,76,"Bloqueado",7,20,25,true),
+          demoTask(TDS_PHASES,3,"ARQ-013","Ajustes de arquitectura por coordinación BIM","Arquitectura","Alta","Laura Gómez",160,48,"En proceso",8,18,30,false),
+          demoTask(TDS_PHASES,3,"EST-006","Ajustes estructurales por coordinación BIM","Estructuras","Alta","Carlos Rojas",140,22,"Por iniciar",11,15,10,true),
+          demoTask(TDS_PHASES,3,"GEN-003","Comité de coordinación y cierre de clashes","General / Proyecto","Media","Santiago Mejía",80,12,"Por iniciar",14,12,10,false),
+
+
+          demoTask(TDS_PHASES,4,"ARQ-014","Detalles constructivos de arquitectura","Arquitectura","Alta","Laura Gómez",320,0,"Backlog",0,35,0,false),
+          demoTask(TDS_PHASES,4,"ARQ-015","Carpinterías, puertas y especificaciones","Arquitectura","Media","Paula Ruiz",190,0,"Backlog",8,30,0,false),
+          demoTask(TDS_PHASES,4,"ARQ-016","Acabados, cuadros y detalles de zonas comunes","Arquitectura","Media","Juan Camilo Díaz",180,0,"Backlog",15,32,0,false),
+          demoTask(TDS_PHASES,4,"EST-007","Planos estructurales definitivos","Estructuras","Alta","Carlos Rojas",280,0,"Backlog",0,40,0,true),
+          demoTask(TDS_PHASES,4,"HSA-004","Planos hidrosanitarios definitivos","Hidrosanitario","Alta","Diana Martínez",220,0,"Backlog",12,34,0,false),
+          demoTask(TDS_PHASES,4,"ELE-005","Planos eléctricos definitivos","Eléctrico","Alta","Andrés Peña",220,0,"Backlog",12,34,0,false),
+          demoTask(TDS_PHASES,4,"PCI-002","Planos PCI definitivos","PCI","Media","Ricardo Torres",170,0,"Backlog",18,28,0,false),
+          demoTask(TDS_PHASES,4,"TEL-002","Planos de telecomunicaciones definitivos","Telecomunicaciones","Media","Valentina Cruz",140,0,"Backlog",20,26,0,false),
+          demoTask(TDS_PHASES,4,"BIM-007","Modelo federado final LOD 350","BIM","Alta","Miguel Silva",260,0,"Backlog",26,36,0,true),
+          demoTask(TDS_PHASES,4,"PRE-002","Cantidades y presupuesto definitivo","Presupuestos","Alta","Carolina Vega",210,0,"Backlog",38,24,0,false),
+          demoTask(TDS_PHASES,4,"GEN-004","Memorias definitivas y emisión IFC","General / Proyecto","Alta","Santiago Mejía",220,0,"Backlog",48,22,0,true)
         ]
       },
       {
         code:"H20J-DEMO", name:"Hospital 20 de Julio", client:"Red Hospitalaria Distrital", contractNumber:"RHD-2026-020J",
         type:"Hospitalario", location:"Bogotá", sprintLength:2,
-        description:"Diseño básico multidisciplinario del Hospital 20 de Julio, incluyendo áreas clínicas, estructuras, redes técnicas, respaldo eléctrico y coordinación BIM.",
+        description:"Diseño integral de hospital de alta complejidad con programación médico-arquitectónica, arquitectura, estructura, ingenierías especializadas, equipamiento médico, coordinación BIM y proyecto ejecutivo.",
+        phases:H20_PHASES,
         people:[
-          ["Natalia Torres","Director","General / Proyecto",125000],
-          ["Felipe Vargas","Líder","Arquitectura",102000],
-          ["María Cárdenas","Especialista","Estructuras",110000],
-          ["Sebastián León","Especialista","Hidrosanitario",96000],
-          ["Camila Duarte","Especialista","Eléctrico",98000],
-          ["Jorge Bernal","Scrum Master","BIM",105000]
+          ["Natalia Torres","Director","General / Proyecto",150000],
+          ["Ángela Pardo","Scrum Master","General / Proyecto",138000],
+          ["Felipe Vargas","Líder","Arquitectura",122000],
+          ["Sofía Mendoza","Especialista","Arquitectura",100000],
+          ["Diego Rincón","Ingeniero Auxiliar","Arquitectura",88000],
+          ["María Cárdenas","Líder","Estructuras",125000],
+          ["Juan Esteban Ruiz","Especialista","Estructuras",98000],
+          ["Héctor Salazar","Especialista","Geotecnia",128000],
+          ["Sebastián León","Especialista","Hidrosanitario",108000],
+          ["Marcela Prieto","Especialista","HVAC",122000],
+          ["Juliana Acosta","Especialista","Gases medicinales",128000],
+          ["Ricardo Torres","Especialista","PCI",116000],
+          ["Camila Duarte","Especialista","Eléctrico",114000],
+          ["Tomás Gil","Especialista","Telecomunicaciones",106000],
+          ["Valeria Santos","Especialista","Seguridad electrónica",106000],
+          ["Ana María Cuervo","Especialista","Equipamiento médico",135000],
+          ["Pedro Salamanca","Especialista","Transporte vertical",112000],
+          ["Jorge Bernal","Líder","BIM",120000],
+          ["Karen López","Dibujante","BIM",84000],
+          ["Luis Nieto","Especialista","BIM",90000],
+          ["Carolina Vega","Especialista","Presupuestos",102000]
         ],
-        sprints:[
-          ["Sprint 01","Criterios hospitalarios, arquitectura y estructura base","2026-10-05","2026-10-18",[["Natalia Torres",24],["Felipe Vargas",56],["María Cárdenas",52],["Jorge Bernal",28]]],
-          ["Sprint 02","Desarrollo MEP y coordinación de áreas críticas","2026-10-19","2026-11-01",[["Felipe Vargas",48],["María Cárdenas",44],["Sebastián León",52],["Camila Duarte",52],["Jorge Bernal",40]]],
-          ["Sprint 03","Coordinación avanzada y cierre de diseño básico","2026-11-02","2026-11-15",[["Natalia Torres",20],["Felipe Vargas",48],["María Cárdenas",44],["Sebastián León",48],["Camila Duarte",48],["Jorge Bernal",56]]]
-        ],
+        sprints:demoBuildSprints(H20_PHASES,H20_TEAMS),
         tasks:[
-          ["ARQ-001","Programa arquitectónico y flujos clínicos","Arquitectura","Alta","Sprint 01","Felipe Vargas",54,62,"Aprobado","2026-10-05","2026-10-15",100],
-          ["EST-001","Criterios y predimensionamiento estructural","Estructuras","Alta","Sprint 01","María Cárdenas",48,55,"Aprobado","2026-10-07","2026-10-18",100],
-          ["BIM-001","Modelo federado inicial","BIM","Alta","Sprint 01","Jorge Bernal",26,31,"Aprobado","2026-10-12","2026-10-18",100],
-          ["HSA-001","Redes sanitarias y gases - coordinación base","Hidrosanitario","Alta","Sprint 02","Sebastián León",48,57,"En revisión","2026-10-19","2026-10-31",78],
-          ["ELE-001","Cargas críticas y respaldo eléctrico","Eléctrico","Alta","Sprint 02","Camila Duarte",50,61,"En revisión","2026-10-19","2026-11-01",74],
-          ["ARQ-002","Áreas críticas y circulaciones 60%","Arquitectura","Alta","Sprint 02","Felipe Vargas",46,54,"En proceso","2026-10-20","2026-11-01",68],
-          ["EST-002","Modelo estructural de áreas técnicas","Estructuras","Alta","Sprint 03","María Cárdenas",42,39,"En proceso","2026-11-02","2026-11-13",52],
-          ["BIM-002","Clash detection áreas críticas","BIM","Alta","Sprint 03","Jorge Bernal",52,43,"Bloqueado","2026-11-03","2026-11-15",38],
-          ["ELE-002","Tableros y canalizaciones principales","Eléctrico","Media","Sprint 03","Camila Duarte",42,30,"Por iniciar","2026-11-05","2026-11-15",20],
-          ["HSA-002","Redes de agua y drenaje 60%","Hidrosanitario","Media","Sprint 03","Sebastián León",44,33,"En proceso","2026-11-04","2026-11-15",45]
+          demoTask(H20_PHASES,0,"GEN-001","Kickoff contractual y matriz de requisitos","General / Proyecto","Alta","Natalia Torres",100,106,"Aprobado",0,10,100,false),
+          demoTask(H20_PHASES,0,"ARQ-001","Programa médico-arquitectónico","Arquitectura","Alta","Ángela Pardo",260,278,"Aprobado",0,28,100,true),
+          demoTask(H20_PHASES,0,"MED-001","Matriz de equipamiento médico","Equipamiento médico","Alta","Ana María Cuervo",220,236,"Aprobado",5,26,100,true),
+          demoTask(H20_PHASES,0,"ARQ-002","Flujos clínicos limpio, sucio, pacientes y personal","Arquitectura","Alta","Ángela Pardo",240,252,"Aprobado",10,28,100,true),
+          demoTask(H20_PHASES,0,"GTC-001","Estudio geotécnico y recomendaciones de cimentación","Geotecnia","Alta","Héctor Salazar",170,178,"Aprobado",0,24,100,false),
+          demoTask(H20_PHASES,0,"ARQ-003","Normativa de habilitación, accesibilidad y seguridad humana","Arquitectura","Alta","Felipe Vargas",180,190,"Aprobado",12,24,100,false),
+          demoTask(H20_PHASES,0,"GEN-002","Levantamiento de redes y disponibilidad de servicios","General / Proyecto","Media","Diego Rincón",120,124,"Aprobado",15,20,100,false),
+          demoTask(H20_PHASES,0,"BIM-001","BEP, coordenadas y estándares de modelación","BIM","Media","Jorge Bernal",130,134,"Aprobado",20,20,100,false),
+
+
+          demoTask(H20_PHASES,1,"ARQ-004","Implantación general y master plan hospitalario","Arquitectura","Alta","Felipe Vargas",260,274,"Aprobado",0,32,100,true),
+          demoTask(H20_PHASES,1,"ARQ-005","Anteproyecto de urgencias","Arquitectura","Alta","Sofía Mendoza",240,252,"Aprobado",4,28,100,true),
+          demoTask(H20_PHASES,1,"ARQ-006","Anteproyecto de UCI","Arquitectura","Alta","Felipe Vargas",230,244,"Aprobado",10,28,100,true),
+          demoTask(H20_PHASES,1,"ARQ-007","Anteproyecto de quirófanos y recuperación","Arquitectura","Alta","Sofía Mendoza",280,296,"Aprobado",15,32,100,true),
+          demoTask(H20_PHASES,1,"ARQ-008","Anteproyecto de hospitalización","Arquitectura","Alta","Diego Rincón",220,232,"Aprobado",21,30,100,false),
+          demoTask(H20_PHASES,1,"ARQ-009","Anteproyecto de imagenología","Arquitectura","Alta","Felipe Vargas",210,224,"Aprobado",28,28,100,true),
+          demoTask(H20_PHASES,1,"ARQ-010","Laboratorios, farmacia y apoyo diagnóstico","Arquitectura","Media","Sofía Mendoza",210,216,"Aprobado",35,28,100,false),
+          demoTask(H20_PHASES,1,"ARQ-011","Servicios generales, logística y residuos","Arquitectura","Media","Diego Rincón",190,196,"Aprobado",42,26,100,false),
+          demoTask(H20_PHASES,1,"ARQ-012","Circulaciones diferenciadas y núcleos verticales","Arquitectura","Alta","Felipe Vargas",220,232,"Aprobado",48,25,100,true),
+          demoTask(H20_PHASES,1,"MED-002","Layouts de equipos por servicio","Equipamiento médico","Alta","Ana María Cuervo",240,254,"Aprobado",28,35,100,true),
+          demoTask(H20_PHASES,1,"BIM-002","Modelo BIM arquitectónico hospitalario LOD 200","BIM","Alta","Jorge Bernal",320,336,"Aprobado",32,38,100,false),
+
+
+          demoTask(H20_PHASES,2,"EST-001","Criterios estructurales y sistema sismorresistente","Estructuras","Alta","María Cárdenas",190,202,"Aprobado",0,24,100,true),
+          demoTask(H20_PHASES,2,"EST-002","Modelo analítico estructural","Estructuras","Alta","María Cárdenas",320,340,"Aprobado",6,36,100,true),
+          demoTask(H20_PHASES,2,"EST-003","Diseño de cimentación y contención","Estructuras","Alta","Juan Esteban Ruiz",260,274,"Aprobado",15,32,100,true),
+          demoTask(H20_PHASES,2,"ARQ-013","Desarrollo arquitectónico al 60%","Arquitectura","Alta","Felipe Vargas",340,360,"Aprobado",0,42,100,true),
+          demoTask(H20_PHASES,2,"ARQ-014","Fachadas y envolvente térmica","Arquitectura","Media","Sofía Mendoza",210,218,"Aprobado",18,30,100,false),
+          demoTask(H20_PHASES,2,"ARQ-015","Accesibilidad, evacuación y seguridad humana","Arquitectura","Alta","Felipe Vargas",190,200,"Aprobado",25,28,100,false),
+          demoTask(H20_PHASES,2,"ARQ-016","Cielos técnicos y corredores de instalaciones","Arquitectura","Alta","Diego Rincón",220,232,"Aprobado",32,28,100,true),
+          demoTask(H20_PHASES,2,"BIM-003","Modelo BIM estructural LOD 300","BIM","Alta","Karen López",260,278,"Aprobado",24,36,100,false),
+          demoTask(H20_PHASES,2,"GEN-003","Revisión interdisciplinaria de diseño básico 60%","General / Proyecto","Alta","Ángela Pardo",140,148,"Aprobado",46,20,100,false),
+          demoTask(H20_PHASES,2,"PRE-001","Cantidades y estimación de costo 60%","Presupuestos","Media","Carolina Vega",180,190,"Aprobado",50,18,100,false),
+
+
+          demoTask(H20_PHASES,3,"HSA-001","Red de agua potable y agua caliente","Hidrosanitario","Alta","Sebastián León",220,232,"Aprobado",0,32,100,false),
+          demoTask(H20_PHASES,3,"HSA-002","Redes sanitarias, pluviales y especiales","Hidrosanitario","Alta","Sebastián León",240,252,"Aprobado",8,34,100,false),
+          demoTask(H20_PHASES,3,"PCI-001","Sistema de protección contra incendio hospitalario","PCI","Alta","Ricardo Torres",250,232,"En revisión",12,38,90,true),
+          demoTask(H20_PHASES,3,"HVAC-001","Zonificación HVAC y criterios de presión","HVAC","Alta","Marcela Prieto",260,276,"Aprobado",0,34,100,true),
+          demoTask(H20_PHASES,3,"HVAC-002","Balance de aire y áreas críticas","HVAC","Alta","Marcela Prieto",300,286,"En revisión",18,40,82,true),
+          demoTask(H20_PHASES,3,"GME-001","Redes de gases medicinales","Gases medicinales","Alta","Juliana Acosta",280,258,"En revisión",14,42,75,true),
+          demoTask(H20_PHASES,3,"ELE-001","Estudio de demanda y acometida eléctrica","Eléctrico","Alta","Camila Duarte",180,190,"Aprobado",0,28,100,false),
+          demoTask(H20_PHASES,3,"ELE-002","Distribución eléctrica normal","Eléctrico","Alta","Camila Duarte",260,246,"En revisión",12,38,88,false),
+          demoTask(H20_PHASES,3,"ELE-003","Red regulada, UPS y cargas críticas","Eléctrico","Alta","Camila Duarte",300,270,"En proceso",22,42,72,true),
+          demoTask(H20_PHASES,3,"ELE-004","Planta de emergencia y transferencia","Eléctrico","Alta","Camila Duarte",260,238,"En proceso",32,38,68,true),
+          demoTask(H20_PHASES,3,"TEL-001","Datos, voz y backbone de comunicaciones","Telecomunicaciones","Media","Tomás Gil",190,198,"Aprobado",14,32,100,false),
+          demoTask(H20_PHASES,3,"TEL-002","Llamado de enfermería e intercomunicación","Telecomunicaciones","Alta","Tomás Gil",190,176,"En revisión",28,32,80,false),
+          demoTask(H20_PHASES,3,"SEG-001","CCTV, control de acceso y seguridad electrónica","Seguridad electrónica","Media","Valeria Santos",180,164,"En proceso",36,30,70,false),
+          demoTask(H20_PHASES,3,"MED-003","Interfaces de equipos médicos con instalaciones","Equipamiento médico","Alta","Ana María Cuervo",230,214,"En proceso",38,34,65,true),
+          demoTask(H20_PHASES,3,"TVE-001","Ascensores camilleros, públicos y de servicio","Transporte vertical","Media","Pedro Salamanca",150,154,"Aprobado",24,28,100,false),
+          demoTask(H20_PHASES,3,"BIM-004","Modelos BIM MEP LOD 300","BIM","Alta","Luis Nieto",360,328,"En proceso",28,45,75,true),
+          demoTask(H20_PHASES,3,"PRE-002","Actualización de cantidades y presupuesto 80%","Presupuestos","Media","Carolina Vega",220,198,"En proceso",48,26,65,false),
+
+
+          demoTask(H20_PHASES,4,"BIM-005","Federación de modelos multidisciplinares","BIM","Alta","Jorge Bernal",260,168,"En proceso",0,24,55,true),
+          demoTask(H20_PHASES,4,"BIM-006","Clash detection de cielos técnicos","BIM","Alta","Karen López",300,154,"Bloqueado",2,28,35,true),
+          demoTask(H20_PHASES,4,"BIM-007","Coordinación de cuartos técnicos","BIM","Alta","Luis Nieto",240,132,"En proceso",6,26,45,true),
+          demoTask(H20_PHASES,4,"BIM-008","Coordinación de equipamiento médico","BIM","Alta","Jorge Bernal",230,138,"En proceso",8,26,52,true),
+          demoTask(H20_PHASES,4,"ARQ-017","Ajustes arquitectónicos por coordinación técnica","Arquitectura","Alta","Felipe Vargas",210,112,"En proceso",10,24,45,false),
+          demoTask(H20_PHASES,4,"HVAC-003","Ajustes HVAC por interferencias críticas","HVAC","Alta","Marcela Prieto",190,86,"Bloqueado",12,24,30,true),
+          demoTask(H20_PHASES,4,"ELE-005","Ajustes de respaldo eléctrico y rutas críticas","Eléctrico","Alta","Camila Duarte",210,96,"En proceso",14,22,38,true),
+          demoTask(H20_PHASES,4,"GME-002","Ajustes de gases medicinales por equipamiento","Gases medicinales","Alta","Juliana Acosta",170,42,"Por iniciar",18,20,15,false),
+
+
+          demoTask(H20_PHASES,5,"ARQ-018","Planos arquitectónicos ejecutivos","Arquitectura","Alta","Felipe Vargas",360,0,"Backlog",0,35,0,true),
+          demoTask(H20_PHASES,5,"ARQ-019","Acabados, especificaciones y detalles clínicos","Arquitectura","Media","Sofía Mendoza",280,0,"Backlog",7,32,0,false),
+          demoTask(H20_PHASES,5,"EST-004","Planos estructurales definitivos","Estructuras","Alta","María Cárdenas",300,0,"Backlog",0,35,0,true),
+          demoTask(H20_PHASES,5,"HSA-003","Planos hidrosanitarios definitivos","Hidrosanitario","Alta","Sebastián León",240,0,"Backlog",8,30,0,false),
+          demoTask(H20_PHASES,5,"HVAC-004","Planos HVAC definitivos y secuencias de control","HVAC","Alta","Marcela Prieto",300,0,"Backlog",8,34,0,true),
+          demoTask(H20_PHASES,5,"GME-003","Planos definitivos de gases medicinales","Gases medicinales","Alta","Juliana Acosta",230,0,"Backlog",12,28,0,false),
+          demoTask(H20_PHASES,5,"ELE-006","Planos eléctricos, UPS y emergencia definitivos","Eléctrico","Alta","Camila Duarte",300,0,"Backlog",10,34,0,true),
+          demoTask(H20_PHASES,5,"PCI-002","Planos PCI definitivos","PCI","Alta","Ricardo Torres",220,0,"Backlog",14,28,0,false),
+          demoTask(H20_PHASES,5,"BIM-009","Modelo federado final e IFC","BIM","Alta","Jorge Bernal",320,0,"Backlog",24,32,0,true),
+          demoTask(H20_PHASES,5,"PRE-003","Cantidades y presupuesto definitivo","Presupuestos","Alta","Carolina Vega",260,0,"Backlog",30,24,0,false),
+          demoTask(H20_PHASES,5,"GEN-004","Memorias finales, permisos y paquete de cierre","General / Proyecto","Alta","Ángela Pardo",240,0,"Backlog",36,20,0,true)
         ]
       }
     ];
 
+
     const DEMO_GOVERNANCE = {
       "TDS-DEMO":{
         risks:[
-          ["Coordinación de pases en losas","2","3","Mitigar · coordinación BIM semanal y matriz de interferencias."],
-          ["Definición tardía de acabados","2","2","Aceptar con seguimiento · congelar decisiones antes del cierre del Sprint 03."]
+          ["Definiciones tardías de acabados y especificaciones","3","4","Mitigar · matriz semanal de decisiones y fecha de congelamiento por paquete.","Santiago Mejía"],
+          ["Interferencias en núcleo, shafts y cuartos técnicos","3","4","Mitigar · coordinación BIM diaria durante la fase de clashes.","Miguel Silva"],
+          ["Ajustes de estructura por pases de instalaciones","2","4","Mitigar · revisión conjunta de aperturas antes de liberar planos.","Carlos Rojas"],
+          ["Variaciones en cantidades durante proyecto ejecutivo","2","3","Aceptar con seguimiento · control quincenal de cantidades y presupuesto.","Carolina Vega"]
         ],
         minutes:[
-          ["2026-10-06","Comité de coordinación 03","Se validó la arquitectura 60% y se priorizó la coordinación BIM del núcleo central."]
+          ["2026-09-14","Comité de desarrollo de ingenierías","Se aprobaron criterios estructurales y MEP; se solicitó priorizar shafts y cuartos técnicos."],
+          ["2026-11-05","Comité de coordinación BIM","Se identificaron interferencias críticas en núcleo y sótanos; se acordó plan de cierre por zonas."]
         ],
         changes:[
-          ["CHG-001","Ajuste de ubicación de cuartos técnicos","Aprobado","Impacto menor en Arquitectura, Eléctrico y BIM."]
+          ["CHG-001","Cambio de material de fachada principal","Aprobado","Impacta arquitectura, detalles de fachada, presupuesto y coordinación con estructura.","Mantener especificación original; usar sistema equivalente; aprobar nuevo material con ajuste de detalles."],
+          ["CHG-002","Reubicación de cuartos técnicos de sótano","En evaluación","Puede afectar rutas eléctricas, redes hidráulicas, PCI y modelo BIM.","Mantener ubicación; redistribuir equipos; mover cuartos conservando shafts verticales."]
         ]
       },
       "H20J-DEMO":{
         risks:[
-          ["Retraso en definición de equipos médicos","4","5","Escalar y mitigar · solicitar matriz de equipos priorizada y congelar áreas críticas."],
-          ["Interferencias MEP en cielos de áreas clínicas","4","4","Mitigar · sesiones BIM diarias durante cierre del Sprint 03."],
-          ["Incremento de horas de coordinación eléctrica","3","4","Mitigar · redistribuir capacidad y revisar alcance de respaldo eléctrico."]
+          ["Retraso en definición de equipos médicos","4","5","Escalar · priorizar matriz de equipos de UCI, cirugía e imagenología.","Ana María Cuervo"],
+          ["Interferencias MEP en cielos de áreas clínicas","4","4","Mitigar · sesiones BIM diarias y liberación por zonas.","Jorge Bernal"],
+          ["Requisitos de presión y filtración HVAC en áreas críticas","3","5","Mitigar · validar criterios clínicos y secuencias de presión antes del cierre.","Marcela Prieto"],
+          ["Capacidad insuficiente del sistema de respaldo eléctrico","4","4","Mitigar · revisar cargas críticas, selectividad y estrategia de generación.","Camila Duarte"],
+          ["Aprobaciones tardías de flujos y áreas por parte del cliente","3","4","Escalar · comité semanal de decisiones y congelamiento progresivo.","Ángela Pardo"],
+          ["Cambios de puntos de gases medicinales por equipamiento","3","4","Mitigar · coordinar matriz equipo-punto y revisar modelos por servicio.","Juliana Acosta"]
         ],
         minutes:[
-          ["2026-11-04","Comité técnico hospitalario","Se priorizaron UCI, cirugía y urgencias. Se solicitaron ajustes en respaldo eléctrico y gases."],
-          ["2026-11-09","Coordinación interdisciplinaria","Se identificaron interferencias críticas sobre corredores técnicos y se acordó resolución por zonas."]
+          ["2026-09-08","Comité de ingenierías especializadas","Se priorizaron respaldo eléctrico, HVAC de áreas críticas y gases medicinales."],
+          ["2026-10-20","Coordinación BIM de áreas críticas","Se detectaron interferencias en UCI, quirófanos y corredores técnicos; se acordó cierre por zonas."],
+          ["2026-11-09","Comité técnico hospitalario","El cliente solicitó ajustes de equipamiento y capacidad de respaldo; se revisaron impactos en plazo y costo."]
         ],
         changes:[
-          ["CHG-001","Aumento de capacidad del sistema de respaldo","En evaluación","Afecta Eléctrico, Arquitectura y BIM."],
-          ["CHG-002","Reubicación de equipos en áreas críticas","Solicitado","Afecta Arquitectura, Hidrosanitario, Eléctrico y BIM."]
+          ["CHG-001","Aumento de capacidad del sistema de respaldo","En evaluación","Aumenta horas de ingeniería eléctrica, espacio técnico y coordinación BIM; puede extender el cierre técnico.","Optimizar cargas críticas; ampliar planta de emergencia; redistribuir respaldo por bloques."],
+          ["CHG-002","Reubicación de equipos en áreas críticas","Solicitado","Afecta arquitectura, gases medicinales, eléctrico, HVAC y coordinación BIM.","Mantener layout actual; mover solo equipos móviles; rediseñar el recinto completo."],
+          ["CHG-003","Ajuste de presiones diferenciales en quirófanos","Aprobado","Requiere recalcular balance de aire, controles y algunos trazados de ductos.","Ajustar caudales; modificar zoning; incorporar control adicional por sala."]
         ]
       }
     };
@@ -1195,6 +1507,7 @@
         .from("projects").select("*").or(`code.eq.${spec.code},name.eq.${spec.name}`).limit(1);
       if(findErr) throw findErr;
 
+
       let projectId;
       if(found && found.length){
         projectId = found[0].id;
@@ -1204,6 +1517,7 @@
           updated_at:new Date().toISOString()
         }).eq("id",projectId);
         if(uErr) throw uErr;
+
 
         await supabaseClient.from("work_packages").delete().eq("project_id",projectId);
         await supabaseClient.from("control_lots").delete().eq("project_id",projectId);
@@ -1220,6 +1534,7 @@
         projectId = newP.id;
       }
 
+
       const peoplePayload = spec.people.map(p=>({
         project_id:projectId, name:p[0], role:p[1], area:p[2], hourly_rate:p[3]
       }));
@@ -1227,6 +1542,7 @@
         .from("responsibles").insert(peoplePayload).select();
       if(peopleErr) throw peopleErr;
       const peopleByName = Object.fromEntries(peopleRows.map(r=>[r.name,r]));
+
 
       const sprintRows = [];
       for(const s of spec.sprints){
@@ -1243,41 +1559,72 @@
       }
       const sprintByName = Object.fromEntries(sprintRows.map(s=>[s.name,s]));
 
+
       const taskPayload = spec.tasks.map(t=>({
         project_id:projectId, code:t[0], name:t[1], discipline:t[2], priority:t[3],
         sprint_id:sprintByName[t[4]]?.id||null,
         responsible_id:peopleByName[t[5]]?.id||null,
         estimated_hours:t[6], real_hours:t[7], status:t[8],
         start_date:t[9], end_date:t[10], physical_progress:t[11],
-        is_critical:(t[3]==="Alta" && ["Bloqueado","En proceso","Por iniciar"].includes(t[8]))
+        is_critical:(t.length>13 ? !!t[13] : (t[3]==="Alta" && ["Bloqueado","En proceso","Por iniciar"].includes(t[8])))
       }));
       const {error:tErr}=await supabaseClient.from("tasks").insert(taskPayload);
       if(tErr) throw tErr;
 
-      const reqPayload = [
-        {project_id:projectId,code:"RC-01",name:"Diseño y coordinación interdisciplinaria",description:"Cumplimiento del alcance contractual de diseño básico y coordinación técnica."},
-        {project_id:projectId,code:"RC-02",name:"Entregables y aprobaciones",description:"Producción, revisión y aprobación de entregables contractuales."}
-      ];
-      const {data:reqRows,error:reqErr}=await supabaseClient.from("edt_requirements").insert(reqPayload).select();
-      if(reqErr) throw reqErr;
-      const req1=reqRows[0], req2=reqRows[1];
-      const lead=peopleRows[0]?.id||null, bim=peopleRows[peopleRows.length-1]?.id||lead;
-      const {data:ctlRows,error:ctlErr}=await supabaseClient.from("control_lots").insert([
-        {project_id:projectId,requirement_id:req1.id,code:"LC-01",name:"Diseño disciplinar",description:"Control del desarrollo de diseños por disciplina.",responsible_id:lead},
-        {project_id:projectId,requirement_id:req1.id,code:"LC-02",name:"Coordinación interdisciplinaria",description:"Control de coordinación y resolución de interferencias.",responsible_id:bim},
-        {project_id:projectId,requirement_id:req2.id,code:"LC-03",name:"Control de entregables",description:"Seguimiento a emisión, revisión y aprobación.",responsible_id:lead}
-      ]).select();
-      if(ctlErr) throw ctlErr;
-      const minStart=spec.tasks.map(t=>t[9]).filter(Boolean).sort()[0]||null;
-      const maxEnd=spec.tasks.map(t=>t[10]).filter(Boolean).sort().slice(-1)[0]||null;
-      const {error:wpErr}=await supabaseClient.from("work_packages").insert([
-        {project_id:projectId,control_lot_id:ctlRows[0].id,code:"LT-01",name:"Desarrollo de diseños",description:"Producción de entregables disciplinares.",responsible_id:lead,start_date:minStart,end_date:maxEnd},
-        {project_id:projectId,control_lot_id:ctlRows[1].id,code:"LT-02",name:"Coordinación BIM",description:"Federación, revisión y cierre de interferencias.",responsible_id:bim,start_date:minStart,end_date:maxEnd},
-        {project_id:projectId,control_lot_id:ctlRows[2].id,code:"LT-03",name:"Revisión y aprobación",description:"Gestión de revisiones y cierre de observaciones.",responsible_id:lead,start_date:minStart,end_date:maxEnd}
-      ]);
-      if(wpErr) throw wpErr;
+
+      if(Array.isArray(spec.phases) && spec.phases.length){
+        const reqPayload=spec.phases.map((phase,i)=>({
+          project_id:projectId,
+          code:"RC-"+String(i+1).padStart(2,"0"),
+          name:phase.name,
+          description:phase.objective
+        }));
+        const {data:reqRows,error:reqErr}=await supabaseClient.from("edt_requirements").insert(reqPayload).select();
+        if(reqErr) throw reqErr;
+
+
+        let lotCounter=1, workCounter=1;
+        for(let pIndex=0;pIndex<spec.phases.length;pIndex++){
+          const phaseTasks=spec.tasks.filter(t=>t[12]===pIndex);
+          const grouped={};
+          phaseTasks.forEach(t=>{
+            const key=t[2]||"General / Proyecto";
+            if(!grouped[key]) grouped[key]=[];
+            grouped[key].push(t);
+          });
+          for(const [discipline,groupTasks] of Object.entries(grouped)){
+            const first=groupTasks[0];
+            const ownerId=peopleByName[first[5]]?.id||null;
+            const {data:lot,error:lotErr}=await supabaseClient.from("control_lots").insert({
+              project_id:projectId,
+              requirement_id:reqRows[pIndex].id,
+              code:"LC-"+String(lotCounter++).padStart(2,"0"),
+              name:discipline,
+              description:"Lote de control de "+discipline+" para "+spec.phases[pIndex].name+".",
+              responsible_id:ownerId
+            }).select().single();
+            if(lotErr) throw lotErr;
+
+
+            const wpRows=groupTasks.map(t=>({
+              project_id:projectId,
+              control_lot_id:lot.id,
+              code:"LT-"+String(workCounter++).padStart(3,"0"),
+              name:t[1],
+              description:"Entregable "+t[0]+" · "+t[2]+".",
+              responsible_id:peopleByName[t[5]]?.id||null,
+              start_date:t[9],
+              end_date:t[10]
+            }));
+            const {error:wpErr}=await supabaseClient.from("work_packages").insert(wpRows);
+            if(wpErr) throw wpErr;
+          }
+        }
+      }
       return projectId;
     }
+
+
 
 
     async function seedDemoGovernance(projectId, code){
@@ -1287,10 +1634,12 @@
       await supabaseClient.from("minutes").delete().eq("project_id",projectId);
       await supabaseClient.from("risks").delete().eq("project_id",projectId);
 
+
       const demoPeople=responsibles.filter(r=>r.projectId===projectId);
-      const demoRiskOwner=demoPeople[0]?.id||null;
-      const riskRows=demo.risks.map(r=>({project_id:projectId,description:r[0],probability:Number(r[1]),impact:Number(r[2]),treatment:String(r[3]).split("·")[0].trim(),controls:String(r[3]).split("·").slice(1).join("·").trim(),causes:"Condición identificada durante la coordinación del proyecto.",consequences:"Puede afectar plazo, costo o coordinación interdisciplinaria.",responsible_id:demoRiskOwner}));
+      const peopleByDemoName=Object.fromEntries(demoPeople.map(r=>[r.name,r]));
+      const riskRows=demo.risks.map(r=>({project_id:projectId,description:r[0],probability:Number(r[1]),impact:Number(r[2]),treatment:String(r[3]).split("·")[0].trim(),controls:String(r[3]).split("·").slice(1).join("·").trim(),causes:"Condición identificada durante la coordinación del proyecto.",consequences:"Puede afectar plazo, costo o coordinación interdisciplinaria.",responsible_id:peopleByDemoName[r[4]]?.id||demoPeople[0]?.id||null}));
       if(riskRows.length){const {error}=await supabaseClient.from("risks").insert(riskRows);if(error)throw error;}
+
 
       const minuteMap={};
       for(const m of demo.minutes){
@@ -1299,12 +1648,13 @@
         minuteMap[m[0]]=data;
       }
       const taskIds=tasks.filter(t=>t.projectId===projectId).map(t=>t.uid);
-      const changeRows=demo.changes.map((c,i)=>({project_id:projectId,code:c[0],description:c[1],impact_description:c[3]||"Impacto por evaluar en plazo, costo y coordinación.",alternatives:"Mantener la solución actual; ajustar el diseño; implementar el cambio con plan de mitigación.",status:c[2],approved:c[2]==="Aprobado",affected_task_ids:taskIds.slice(0,Math.min(3,taskIds.length))}));
+      const changeRows=demo.changes.map((c,i)=>({project_id:projectId,code:c[0],description:c[1],impact_description:c[3]||"Impacto por evaluar en plazo, costo y coordinación.",alternatives:c[4]||"Mantener la solución actual; ajustar el diseño; implementar el cambio con plan de mitigación.",status:c[2],approved:c[2]==="Aprobado",affected_task_ids:taskIds.slice(i*3,Math.min((i+1)*3,taskIds.length))}));
       if(changeRows.length){const {error}=await supabaseClient.from("changes").insert(changeRows);if(error)throw error;}
     }
 
+
     async function loadDemoProjects(){
-      if(!confirm("Esto creará o restablecerá los dos proyectos demo y reemplazará sus actividades actuales. ¿Continuar?")) return;
+      if(!confirm("Esto restablecerá los dos proyectos demo con cronogramas realistas: Torres del Sol (36 semanas) y Hospital 20 de Julio (52 semanas). ¿Continuar?")) return;
       const btn=document.getElementById("loadDemoProjectsBtn");
       if(btn){btn.disabled=true;btn.textContent="Cargando demo...";}
       setSyncStatus("Cargando demo…","warning");
@@ -1334,6 +1684,7 @@
       }
     }
 
+
     function nextTaskCode(discipline){
       const prefix = DISCIPLINE_PREFIX[discipline] || "ACT";
       const nums = projectTasks()
@@ -1345,6 +1696,7 @@
       return `${prefix}-${String(next).padStart(3,"0")}`;
     }
 
+
     function updateAutoTaskCode(){
       const discipline = document.getElementById("taskDiscipline")?.value || "General / Proyecto";
       const idInput = document.getElementById("taskId");
@@ -1352,13 +1704,17 @@
     }
 
 
+
+
     document.getElementById("roleSimulator").value = "lector";
     document.body.classList.add("view-only");
+
 
     document.getElementById("roleSimulator").addEventListener("change", (e) => {
       document.body.classList.toggle("view-only", e.target.value === "lector");
       showToast(e.target.value === "lector" ? "Vista de Lector activada" : "Vista de Administrador activada");
     });
+
 
     const activeProject = () => projects.find(p => p.id === activeProjectId) || null;
     const projectTasks = () => tasks.filter(t => t.projectId === activeProjectId);
@@ -1375,15 +1731,18 @@
       localStorage.setItem(KEY.projects, JSON.stringify(projects)); localStorage.setItem(KEY.activeProject, activeProjectId); localStorage.setItem(KEY.tasks, JSON.stringify(tasks)); localStorage.setItem(KEY.responsibles, JSON.stringify(responsibles)); localStorage.setItem(KEY.sprints, JSON.stringify(sprints)); localStorage.setItem(KEY.risks, JSON.stringify(risks)); localStorage.setItem(KEY.minutes, JSON.stringify(minutes)); localStorage.setItem(KEY.changes, JSON.stringify(changes)); localStorage.setItem(KEY.budget, JSON.stringify(budgetSettings)); localStorage.setItem(KEY.evm, JSON.stringify(evmSettings));
     }
 
+
     function showToast(msg) {
       const t = document.getElementById("toast"); t.textContent = msg; t.classList.add("show");
       clearTimeout(window.__toastTimer); window.__toastTimer = setTimeout(() => t.classList.remove("show"), 3000);
     }
 
+
     function statusBadge(s){
       const m = {Aprobado:"success", "En revisión":"warning", Bloqueado:"danger", "En proceso":"info"};
       return `<span class="badge ${m[s]||""}">${s}</span>`;
     }
+
 
     const sections = document.querySelectorAll(".section"), navButtons = document.querySelectorAll(".nav-btn");
     function goToSection(id){
@@ -1396,6 +1755,7 @@
     function openModal(id){ document.getElementById(id).classList.add("show"); }
     function closeModal(id){ document.getElementById(id).classList.remove("show"); }
     document.querySelectorAll("[data-close]").forEach(b => b.addEventListener("click", () => closeModal(b.dataset.close)));
+
 
     function renderProjects(){
       const el = document.getElementById("projectsList");
@@ -1411,6 +1771,7 @@
             <button class="btn small danger delete-project" data-id="${p.id}">Eliminar</button>
           </div>
         </div>`).join("") : '<div class="empty">Aún no hay proyectos. Crea uno nuevo.</div>';
+
 
       document.querySelectorAll(".activate-project").forEach(b=>b.addEventListener("click",()=>{
         activeProjectId=b.dataset.id;
@@ -1439,6 +1800,7 @@
       }));
     }
 
+
     document.getElementById("newProjectBtn").addEventListener("click",()=>{
       document.getElementById("projectForm").reset();
       document.getElementById("projectId").value="";
@@ -1446,6 +1808,7 @@
       document.getElementById("projectDescription").value="";
       document.getElementById("projectName").focus();
     });
+
 
     document.getElementById("projectForm").addEventListener("submit", async e => {
       e.preventDefault();
@@ -1477,6 +1840,7 @@
       await loadSharedData(); showToast("Proyecto guardado en Supabase");
     });
 
+
     function renderResponsibles(){
       const arr = projectResponsibles(), el = document.getElementById("responsiblesList");
       if(!activeProjectId){ el.innerHTML='<div class="empty">Activa un proyecto primero.</div>'; return; }
@@ -1488,6 +1852,7 @@
           <button class="btn small danger delete-responsible admin-only" data-id="${r.id}">Eliminar</button>
         </div>`).join("") : '<div class="empty">No hay responsables agregados.</div>';
 
+
       document.querySelectorAll(".delete-responsible").forEach(b=>b.addEventListener("click",async()=>{
         const { error } = await supabaseClient.from("responsibles").delete().eq("id", b.dataset.id);
         if(error) return showToast("Error al eliminar responsable: "+error.message);
@@ -1496,9 +1861,9 @@
       updateDropdowns();
     }
 
+
     document.getElementById("responsibleForm").addEventListener("submit", async e => {
-      e.preventDefault();
-      if(!activeProjectId) return showToast("Activa un proyecto primero.");
+      e.preventDefault();      if(!activeProjectId) return showToast("Activa un proyecto primero.");
       const payload = {
         project_id: activeProjectId,
         name: document.getElementById("responsibleName").value.trim(),
@@ -1511,6 +1876,7 @@
       if(error) return showToast("Error al guardar responsable: "+error.message);
       e.target.reset(); await loadSharedData(); showToast("Responsable guardado en Supabase");
     });
+
 
     document.getElementById("csvFileInput").addEventListener("change", function(e) {
       if(!activeProjectId) return showToast("Activa un proyecto primero.");
@@ -1533,7 +1899,9 @@
       reader.readAsText(file);
     });
 
+
     function priorityBadge(p){ const c=p==="Alta"?"danger":p==="Media"?"warning":""; return `<span class="badge ${c}">${esc(p||"Media")}</span>`; }
+
 
     function updateDropdowns(){
       const ownerSel = document.getElementById("taskOwner"), sprintSel = document.getElementById("taskSprint");
@@ -1542,9 +1910,12 @@
     }
 
 
+
+
     const projectRequirements=()=>edtRequirements.filter(x=>x.projectId===activeProjectId);
     const projectControlLots=()=>controlLots.filter(x=>x.projectId===activeProjectId);
     const projectWorkPackages=()=>workPackages.filter(x=>x.projectId===activeProjectId);
+
 
     function renderEdt(){
       const el=document.getElementById("edtTree");
@@ -1564,10 +1935,12 @@
         </div>`;
       }).join(""):'<div class="empty">Aún no hay EDT. Registra primero los requisitos contractuales.</div>';
 
+
       document.querySelectorAll(".delete-work-package").forEach(b=>b.addEventListener("click",async()=>{const {error}=await supabaseClient.from("work_packages").delete().eq("id",b.dataset.id);if(error)return showToast(error.message);await loadSharedData();}));
       document.querySelectorAll(".delete-control-lot").forEach(b=>b.addEventListener("click",async()=>{const {error}=await supabaseClient.from("control_lots").delete().eq("id",b.dataset.id);if(error)return showToast(error.message);await loadSharedData();}));
       document.querySelectorAll(".delete-edt-requirement").forEach(b=>b.addEventListener("click",async()=>{const {error}=await supabaseClient.from("edt_requirements").delete().eq("id",b.dataset.id);if(error)return showToast(error.message);await loadSharedData();}));
     }
+
 
     function refreshEdtModal(){
       const type=document.getElementById("edtType").value;
@@ -1593,6 +1966,7 @@
       const {error}=await q;if(error)return showToast("Error guardando EDT: "+error.message);
       closeModal("edtModal");await loadSharedData();showToast("Elemento EDT guardado");
     });
+
 
     function renderBacklog(){
       const arr = projectTasks(), body = document.getElementById("backlogBody");
@@ -1629,11 +2003,13 @@
           <td class="admin-only"><button class="btn small danger delete-task" data-id="${t.uid}">X</button></td>
         </tr>`).join("") : '<tr><td colspan="10"><div class="empty">No hay actividades.</div></td></tr>';
 
+
       document.querySelectorAll(".priority-editor").forEach(x=>x.addEventListener("change",async()=>{
         const {error}=await supabaseClient.from("tasks").update({priority:x.value,updated_at:new Date().toISOString()}).eq("id",x.dataset.id);
         if(error) return showToast("Error al cambiar prioridad: "+error.message);
         await loadSharedData();
       }));
+
 
       document.querySelectorAll(".sprint-editor").forEach(x=>x.addEventListener("change",async()=>{
         const {error}=await supabaseClient.from("tasks").update({sprint_id:x.value||null,updated_at:new Date().toISOString()}).eq("id",x.dataset.id);
@@ -1641,11 +2017,13 @@
         await loadSharedData();
       }));
 
+
       document.querySelectorAll(".owner-editor").forEach(x=>x.addEventListener("change",async()=>{
         const {error}=await supabaseClient.from("tasks").update({responsible_id:x.value||null,updated_at:new Date().toISOString()}).eq("id",x.dataset.id);
         if(error) return showToast("Error al asignar responsable: "+error.message);
         await loadSharedData();
       }));
+
 
       document.querySelectorAll(".delivery-editor").forEach(x=>x.addEventListener("change",async()=>{
         const {error}=await supabaseClient.from("tasks").update({end_date:x.value||null,updated_at:new Date().toISOString()}).eq("id",x.dataset.id);
@@ -1653,11 +2031,13 @@
         await loadSharedData();
       }));
 
+
       document.querySelectorAll(".status-editor").forEach(x=>x.addEventListener("change",async()=>{
         const {error}=await supabaseClient.from("tasks").update({status:x.value,updated_at:new Date().toISOString()}).eq("id",x.dataset.id);
         if(error) return showToast("Error al cambiar estado: "+error.message);
         await loadSharedData();
       }));
+
 
       document.querySelectorAll(".delete-task").forEach(b=>b.addEventListener("click",async()=>{
         const {error}=await supabaseClient.from("tasks").delete().eq("id",b.dataset.id);
@@ -1665,6 +2045,7 @@
         await loadSharedData(); showToast("Actividad eliminada");
       }));
     }
+
 
     document.getElementById("openTaskModal").addEventListener("click",async()=>{
       if(!activeProjectId) return showToast("Crea o activa un proyecto primero.");
@@ -1674,7 +2055,9 @@
       openModal("taskModal");
     });
 
+
     document.getElementById("taskDiscipline").addEventListener("change", updateAutoTaskCode);
+
 
     document.getElementById("taskForm").addEventListener("submit", async e => {
       e.preventDefault();
@@ -1697,6 +2080,7 @@
       if(error) return showToast("Error al crear actividad: "+error.message);
       e.target.reset(); closeModal("taskModal"); await loadSharedData(); showToast("Actividad guardada en Supabase");
     });
+
 
     function renderTimeline(){
       const arr = projectTasks(), body = document.getElementById("timelineBody");
@@ -1722,6 +2106,7 @@
       const today=new Date(); today.setHours(0,0,0,0);
       const todayPct=minDate&&maxDate?Math.max(0,Math.min(100,((today-minDate)/span)*100)):0;
 
+
       body.innerHTML = arr.map(t => {
         let bar="";
         if(t.startDate&&t.endDate&&minDate){
@@ -1741,6 +2126,7 @@
         </div>`;
       }).join("");
 
+
       document.querySelectorAll(".timeline-start, .timeline-end").forEach(inp=>inp.addEventListener("change",async()=>{
         const field = inp.classList.contains("timeline-start") ? "start_date" : "end_date";
         const payload = {[field]: inp.value||null, updated_at:new Date().toISOString()};
@@ -1749,6 +2135,7 @@
         await loadSharedData();
       }));
     }
+
 
     function renderSprintTeamSelector(){
       const el = document.getElementById("sprintTeamList");
@@ -1770,6 +2157,7 @@
           </div>
         </div>`).join("");
 
+
       const updateTotal = () => {
         let total = 0;
         document.querySelectorAll(".sprint-member-check:checked").forEach(ch=>{
@@ -1782,6 +2170,7 @@
       updateTotal();
     }
 
+
     document.getElementById("openSprintModal").addEventListener("click",async()=>{
       if(!activeProjectId) return showToast("Crea o activa un proyecto primero.");
       await loadSharedData();
@@ -1789,9 +2178,11 @@
       openModal("sprintModal");
     });
 
+
     document.getElementById("sprintForm").addEventListener("submit", async e => {
       e.preventDefault();
       if(!activeProjectId) return showToast("Crea o activa un proyecto primero.");
+
 
       const team = [];
       document.querySelectorAll(".sprint-member-check:checked").forEach(ch=>{
@@ -1800,6 +2191,7 @@
         const hours = Number(inp?.value)||0;
         if(r) team.push({responsibleId:r.id,name:r.name,hours});
       });
+
 
       const payload = {
         project_id:activeProjectId,
@@ -1811,14 +2203,17 @@
         updated_at:new Date().toISOString()
       };
 
+
       const {error}=await supabaseClient.from("sprints").insert(payload);
       if(error) return showToast("Error al crear sprint: "+error.message);
+
 
       e.target.reset();
       closeModal("sprintModal");
       await loadSharedData();
       showToast("Sprint creado y compartido");
     });
+
 
     function renderSprints(){
       const el = document.getElementById("sprintsList");
@@ -1845,6 +2240,7 @@
       }).join("") || '<div class="empty">No hay sprints.</div>';
     }
 
+
     function renderKanban(){
       const sts = ["Backlog","Por iniciar","En proceso","En revisión","Bloqueado","Aprobado"], board = document.getElementById("kanbanBoard");
       board.innerHTML = sts.map(st => {
@@ -1868,6 +2264,7 @@
       });
     }
 
+
     function renderDashboardProjectSelector(){
       const sel = document.getElementById("dashboardProjectSelector");
       if(!sel) return;
@@ -1875,12 +2272,14 @@
       if(activeProjectId && projects.some(p=>p.id===activeProjectId)) sel.value=activeProjectId;
     }
 
+
     function renderDashboard(){
       renderDashboardProjectSelector();
       const p = projects.find(x=>x.id===activeProjectId) || null;
       const arr = projectTasks();
       const sprintArr = projectSprints();
       const riskArr = projectRisks();
+
 
       document.getElementById("project-subtitle").textContent = p ? "Resumen ejecutivo del proyecto" : "Sin proyecto activo";
       const info=document.getElementById("dashboardProjectInfo");
@@ -1890,6 +2289,7 @@
         <div class="project-info-item"><div class="label">Ubicación</div><div class="value">${esc(p.location||"—")}</div></div>
       </div>`:'<div class="empty">Selecciona un proyecto.</div>';
 
+
       const avgProgress=arr.length?Math.round(arr.reduce((s,t)=>s+(Number(t.physicalProgress)||0),0)/arr.length):0;
       document.getElementById("metric-progress").textContent = avgProgress+"%";
       document.getElementById("progress-bar").style.width = avgProgress+"%";
@@ -1897,11 +2297,13 @@
       document.getElementById("metric-blocked").textContent = arr.filter(t=>t.status==="Bloqueado").length;
       document.getElementById("metric-sprints").textContent = sprintArr.length;
 
+
       const counts = {};
       arr.forEach(t => counts[t.status] = (counts[t.status]||0)+1);
       document.getElementById("status-summary").innerHTML = Object.entries(counts)
         .map(([st,n])=>`<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">${statusBadge(st)}<strong>${n}</strong></div>`)
         .join("") || '<div class="empty">Sin datos</div>';
+
 
       const disciplines = {};
       arr.forEach(t=>{
@@ -1918,6 +2320,7 @@
           }).join("")
         : '<div class="empty">Agrega entregables y actualiza su avance.</div>';
 
+
       const dated=arr.filter(t=>t.startDate&&t.endDate);
       let minDate=null,maxDate=null;
       dated.forEach(t=>{const s=new Date(t.startDate+"T00:00:00"),e=new Date(t.endDate+"T00:00:00");if(!minDate||s<minDate)minDate=s;if(!maxDate||e>maxDate)maxDate=e;});
@@ -1929,6 +2332,7 @@
         <div class="card dashboard-kpi"><div class="muted">Duración planeada</div><div class="metric">${duration?duration+" días":"—"}</div></div>
         <div class="card dashboard-kpi"><div class="muted">Avance físico promedio</div><div class="metric">${avgProgress}%</div></div>`;
 
+
       const evm=evmSnapshot(new Date(),arr);
       const [cpiLabel,cpiClass,cpiMsg]=evmStatus(evm.CPI,"CPI");
       const [spiLabel,spiClass,spiMsg]=evmStatus(evm.SPI,"SPI");
@@ -1939,6 +2343,7 @@
         <div class="card dashboard-kpi"><div class="muted">SPI</div><div class="metric">${evm.SPI?evm.SPI.toFixed(2):"—"}</div><div class="metric-alert ${spiClass}">${spiLabel}: ${spiMsg}</div></div>`;
       document.getElementById("dashboardMiniCurve").innerHTML=miniCurveSvg(buildCurveData(arr));
 
+
       const riskEl=document.getElementById("dashboard-risks");
       const sorted=[...riskArr].sort((a,b)=>(b.probability*b.impact)-(a.probability*a.impact)).slice(0,3);
       riskEl.innerHTML=sorted.length?sorted.map((r,idx)=>{
@@ -1946,6 +2351,7 @@
         return `<div class="task-card"><div style="display:flex;justify-content:space-between;gap:8px;align-items:start"><strong>${esc(r.description)}</strong><span class="badge ${cls}">${lvl} · ${r.probability*r.impact}</span></div><div class="tiny" style="margin-top:7px">${esc(r.treatment)} · ${esc(r.controls)}</div></div>`;
       }).join(""):'<div class="empty">Sin riesgos registrados.</div>';
     }
+
 
     document.getElementById("dashboardProjectSelector").addEventListener("change", e=>{
       activeProjectId=e.target.value;
@@ -1956,9 +2362,12 @@
     });
 
 
+
+
     function currentProjectForView(){
       return projects.find(p=>p.id===activeProjectId)||null;
     }
+
 
     function taskCost(t){
       const r=responsibles.find(x=>x.id===t.ownerId);
@@ -1970,6 +2379,7 @@
       };
     }
 
+
     function renderBudget(){
       const el=document.getElementById("budgetContent");
       const p=currentProjectForView();
@@ -1977,6 +2387,7 @@
       const arr=projectTasks();
       const directPlanned=arr.reduce((s,t)=>s+taskCost(t).planned,0);
       const directActual=arr.reduce((s,t)=>s+taskCost(t).actual,0);
+
 
       el.innerHTML=`
         <div class="grid cols-4" style="margin-bottom:18px">
@@ -1997,13 +2408,13 @@
                     <td><strong>${esc(t.id)}</strong></td><td>${esc(t.name)}</td><td>${esc(r?.name||"Por asignar")}</td>
                     <td>${money(c.rate)}</td><td>${Number(t.hours)||0}</td>
                     <td><input class="real-hours-editor" data-id="${t.uid}" type="number" min="0" step="1" value="${Number(t.realHours)||0}"></td>
-                    <td>${money(c.planned)}</td><td>${money(c.actual)}</td>
-                  </tr>`;
+                    <td>${money(c.planned)}</td><td>${money(c.actual)}</td>                  </tr>`;
                 }).join("")||'<tr><td colspan="8">Sin entregables.</td></tr>'}
               </tbody>
             </table>
           </div>
         </div>`;
+
 
       document.querySelectorAll(".real-hours-editor").forEach(inp=>inp.addEventListener("change",async()=>{
         const val=Math.max(0,Number(inp.value)||0);
@@ -2013,6 +2424,7 @@
       }));
     }
 
+
     function evmStatus(value,type){
       if(!Number.isFinite(value)||value<=0) return ["Sin dato","watch","Aún no hay suficiente información."];
       if(value>=1) return ["Bien","good",type==="CPI"?"Costo bajo control.":"Cronograma en línea o adelantado."];
@@ -2021,9 +2433,11 @@
       return ["Crítico","critical","Desviación significativa: requiere acción correctiva."];
     }
 
+
     function daysBetween(a,b){
       return Math.max(1,(b-a)/86400000);
     }
+
 
     function evmSnapshot(cutoff, arr=projectTasks()){
       let BAC=0,PV=0,EV=0,AC=0;
@@ -2044,6 +2458,7 @@
       return {BAC,PV,EV,AC,CPI,SPI,EAC,ETC:Math.max(0,EAC-AC),VAC:BAC-EAC};
     }
 
+
     function buildCurveData(sourceTasks=projectTasks()){
       const arr=sourceTasks.filter(t=>t.startDate&&t.endDate);
       if(!arr.length) return [];
@@ -2061,6 +2476,7 @@
           let planFrac=d<=s?0:d>=e?1:(d-s)/(e-s||86400000);
           pv+=c.planned*Math.max(0,Math.min(1,planFrac));
 
+
           const currentProg=Math.max(0,Math.min(1,(Number(t.physicalProgress)||0)/100));
           const currentActual=c.actual;
           if(d<=cutoff){
@@ -2076,6 +2492,7 @@
       }
       return points;
     }
+
 
     function curveSvg(points){
       if(points.length<2) return '<div class="empty">Agrega fechas a los entregables para visualizar la Curva S.</div>';
@@ -2104,6 +2521,8 @@
     }
 
 
+
+
     function miniCurveSvg(points){
       if(points.length<2) return '<div class="empty">Agrega fechas para visualizar la curva.</div>';
       const W=720,H=170,pad=18;
@@ -2113,6 +2532,7 @@
       const poly=k=>points.map((p,i)=>`${x(i)},${y(p[k])}`).join(" ");
       return `<svg class="dashboard-mini-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Curva S resumida"><line x1="${pad}" y1="${H-pad}" x2="${W-pad}" y2="${H-pad}" stroke="#dfe5ec"/><polyline points="${poly("pv")}" fill="none" stroke="#64748b" stroke-width="3"/><polyline points="${poly("ev")}" fill="none" stroke="#1f6feb" stroke-width="3"/><polyline points="${poly("ac")}" fill="none" stroke="#d98200" stroke-width="3"/><text x="${pad}" y="14" font-size="11" fill="#64748b">PV</text><text x="${pad+38}" y="14" font-size="11" fill="#1f6feb">EV</text><text x="${pad+76}" y="14" font-size="11" fill="#d98200">AC</text></svg>`;
     }
+
 
     function renderEvm(){
       const el=document.getElementById("evmContent");
@@ -2151,6 +2571,7 @@
       }));
     }
 
+
     function riskLevel(p,i){
       const score=(Number(p)||1)*(Number(i)||1);
       if(score>=17)return ["Crítico","danger"];
@@ -2159,10 +2580,12 @@
       return ["Bajo","success"];
     }
 
+
     function nextChangeCode(){
       const nums=projectChanges().map(c=>Number(String(c.code||"").split("-").pop())).filter(Number.isFinite);
       return `CHG-${String((nums.length?Math.max(...nums):0)+1).padStart(3,"0")}`;
     }
+
 
     function renderGovernanceShared(){
       const riskEl=document.getElementById("risksList"),minutesEl=document.getElementById("minutesList"),changesEl=document.getElementById("changesList");
@@ -2174,8 +2597,10 @@
         return `<div class="card"><div style="display:flex;justify-content:space-between;gap:10px"><span class="badge ${cls}">${lvl} · ${r.probability*r.impact}</span><button class="btn small danger delete-risk admin-only" data-id="${r.id}">Eliminar</button></div><h3 style="margin-top:12px">R-${String(idx+1).padStart(3,"0")} · ${esc(r.description)}</h3><div class="risk-card-grid"><div><span class="tiny">Probabilidad</span><br><strong>${r.probability}/5</strong></div><div><span class="tiny">Impacto</span><br><strong>${r.impact}/5</strong></div><div><span class="tiny">Tratamiento</span><br><strong>${esc(r.treatment)}</strong></div></div><p><strong>Responsable:</strong> ${esc(rr?.name||"Por asignar")}</p>${r.causes?`<p><strong>Causas:</strong> ${esc(r.causes)}</p>`:""}${r.consequences?`<p><strong>Consecuencias:</strong> ${esc(r.consequences)}</p>`:""}<p><strong>Controles:</strong> ${esc(r.controls)}</p></div>`;
       }).join(""):'<div class="empty">No hay riesgos registrados.</div>';
 
+
       const pm=projectMinutes();
       minutesEl.innerHTML=pm.length?pm.map(m=>`<div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;gap:10px"><span class="badge info">${esc(m.date)}</span><button class="btn small danger delete-minute admin-only" data-id="${m.id}">Eliminar</button></div><h3 style="margin-top:10px">${esc(m.title)}</h3><p>${esc(m.topics)}</p>${m.commitments.length?`<h4>Compromisos</h4><div>${m.commitments.map(c=>`<div class="task-card"><strong>${esc(c.text||"")}</strong><div class="tiny">${esc(c.responsibleName||"Por asignar")} · Entrega: ${esc(c.dueDate||"Sin fecha")}</div></div>`).join("")}</div>`:""}</div>`).join(""):'<div class="empty">No hay actas registradas.</div>';
+
 
       const pc=projectChanges();
       changesEl.innerHTML=pc.length?pc.map(c=>{
@@ -2183,11 +2608,13 @@
         return `<div class="card"><span class="badge ${c.approved?"success":"warning"}">${c.approved?"Aprobado":"No aprobado"}</span><h3 style="margin-top:10px">${esc(c.code)} · ${esc(c.description)}</h3><div class="tiny">Entregables afectados: ${affected.length?affected.map(t=>esc(t.id)).join(", "):"Ninguno"}</div>${c.impactDescription?`<div class="change-extra"><strong>Impacto:</strong> ${esc(c.impactDescription)}</div>`:""}${c.alternatives?`<div class="change-extra"><strong>Alternativas:</strong> ${esc(c.alternatives)}</div>`:""}<div class="change-controls admin-only"><div class="field"><label>Cambio aprobado</label><select class="change-approved" data-id="${c.id}"><option value="false" ${!c.approved?"selected":""}>No</option><option value="true" ${c.approved?"selected":""}>Sí</option></select></div><div class="field"><label>Estado</label><select class="change-status" data-id="${c.id}">${["Solicitado","En evaluación","Aprobado","Rechazado","En implementación","Implementado"].map(s=>`<option ${s===c.status?"selected":""}>${s}</option>`).join("")}</select></div></div></div>`;
       }).join(""):'<div class="empty">No hay cambios registrados.</div>';
 
+
       document.querySelectorAll(".delete-risk").forEach(b=>b.addEventListener("click",async()=>{const {error}=await supabaseClient.from("risks").delete().eq("id",b.dataset.id);if(error)return showToast(error.message);await loadSharedData();}));
       document.querySelectorAll(".delete-minute").forEach(b=>b.addEventListener("click",async()=>{const {error}=await supabaseClient.from("minutes").delete().eq("id",b.dataset.id);if(error)return showToast(error.message);await loadSharedData();}));
       document.querySelectorAll(".change-approved").forEach(s=>s.addEventListener("change",async()=>{const approved=s.value==="true";const {error}=await supabaseClient.from("changes").update({approved,status:approved?"Aprobado":"Solicitado",updated_at:new Date().toISOString()}).eq("id",s.dataset.id);if(error)return showToast(error.message);await loadSharedData();}));
       document.querySelectorAll(".change-status").forEach(s=>s.addEventListener("change",async()=>{const {error}=await supabaseClient.from("changes").update({status:s.value,approved:s.value==="Aprobado",updated_at:new Date().toISOString()}).eq("id",s.dataset.id);if(error)return showToast(error.message);await loadSharedData();}));
     }
+
 
     function updateRiskPreview(){
       const p=Number(document.getElementById("riskProbability").value)||1,i=Number(document.getElementById("riskImpact").value)||1;
@@ -2197,6 +2624,7 @@
     document.getElementById("riskImpact").addEventListener("input",updateRiskPreview);
     document.getElementById("openRiskModal").addEventListener("click",()=>{if(!activeProjectId)return showToast("Selecciona un proyecto primero.");document.getElementById("riskForm").reset();document.getElementById("riskProbability").value=3;document.getElementById("riskImpact").value=3;document.getElementById("riskResponsible").innerHTML=responsibleOptions();updateRiskPreview();openModal("riskModal");});
     document.getElementById("riskForm").addEventListener("submit",async e=>{e.preventDefault();const payload={project_id:activeProjectId,description:document.getElementById("riskDescription").value.trim(),causes:document.getElementById("riskCauses").value.trim(),consequences:document.getElementById("riskConsequences").value.trim(),probability:Number(document.getElementById("riskProbability").value)||1,impact:Number(document.getElementById("riskImpact").value)||1,treatment:document.getElementById("riskTreatment").value,responsible_id:document.getElementById("riskResponsible").value||null,controls:document.getElementById("riskControls").value.trim(),updated_at:new Date().toISOString()};const {error}=await supabaseClient.from("risks").insert(payload);if(error)return showToast("Error guardando riesgo: "+error.message);closeModal("riskModal");await loadSharedData();showToast("Riesgo guardado");});
+
 
     let commitmentCounter=0,clientChangeCounter=0;
     function responsibleOptions(){return '<option value="">Por asignar</option>'+projectResponsibles().map(r=>`<option value="${r.id}">${esc(r.name)}</option>`).join("");}
@@ -2212,6 +2640,8 @@
     document.getElementById("minutesForm").addEventListener("submit",async e=>{e.preventDefault();const commitments=[...document.querySelectorAll(".commitment-row")].map(row=>{const rid=row.querySelector(".commitment-responsible").value;const r=projectResponsibles().find(x=>x.id===rid);return {text:row.querySelector(".commitment-text").value.trim(),responsibleId:rid,responsibleName:r?.name||"",dueDate:row.querySelector(".commitment-date").value};}).filter(c=>c.text);const {data:minute,error:mErr}=await supabaseClient.from("minutes").insert({project_id:activeProjectId,meeting_date:document.getElementById("minutesDate").value,title:document.getElementById("minutesTitle").value.trim(),topics:document.getElementById("minutesTopics").value.trim(),commitments,updated_at:new Date().toISOString()}).select().single();if(mErr)return showToast("Error guardando acta: "+mErr.message);const changeRows=[...document.querySelectorAll(".client-change-row")].map(row=>{const desc=row.querySelector(".client-change-description").value.trim();const affected=[...row.querySelectorAll(".affected-task:checked")].map(x=>x.value);const approved=row.querySelector(".client-change-approved").value==="true";const impact=row.querySelector(".client-change-impact").value.trim();const alternatives=row.querySelector(".client-change-alternatives").value.trim();return desc?{project_id:activeProjectId,minute_id:minute.id,code:nextChangeCode(),description:desc,impact_description:impact,alternatives,status:approved?"Aprobado":"Solicitado",approved,affected_task_ids:affected}:null;}).filter(Boolean);for(let i=0;i<changeRows.length;i++)changeRows[i].code=`CHG-${String((Number(nextChangeCode().split("-")[1])||1)+i).padStart(3,"0")}`;if(changeRows.length){const {error:cErr}=await supabaseClient.from("changes").insert(changeRows);if(cErr)return showToast("Acta guardada, pero fallaron cambios: "+cErr.message);}closeModal("minutesModal");await loadSharedData();showToast("Acta guardada");});
 
 
+
+
     function renderGlobalProjectContext(){
       const p=activeProject();
       const name=document.getElementById("globalProjectName");
@@ -2225,6 +2655,7 @@
       meta.textContent=[p.client,p.contractNumber?`Contrato ${p.contractNumber}`:"",p.location].filter(Boolean).join(" · ");
     }
 
+
     function renderAll(){
       renderGlobalProjectContext(); renderDashboardProjectSelector();
       renderProjects(); renderResponsibles(); renderEdt(); renderBacklog(); renderTimeline();
@@ -2233,7 +2664,10 @@
     }
 
 
+
+
     document.getElementById("loadDemoProjectsBtn").addEventListener("click",loadDemoProjects);
+
 
     const appShell=document.getElementById("appShell");
     const mobileMenuBtn=document.getElementById("mobileMenuBtn");
@@ -2249,8 +2683,10 @@
     mobileNavBackdrop.addEventListener("click",closeMobileMenu);
     navButtons.forEach(b=>b.addEventListener("click",closeMobileMenu));
 
+
     // Actualización manual + refresco periódico para colaboración entre equipos.
     document.getElementById("refreshSharedDataBtn").addEventListener("click",()=>loadSharedData(true));
+
 
     renderAll();
     loadSharedData();
