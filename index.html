@@ -37,8 +37,8 @@
     body.view-only .admin-only {
       display: none !important;
     }
-    body.view-only input:not([type="search"]), 
-    body.view-only select:not(#roleSimulator):not(#dashboardProjectSelector):not(#filterDiscipline):not(#filterStatus), 
+    body.view-only input:not([type="search"]):not(#filterDeliveryDate), 
+    body.view-only select:not(#roleSimulator):not(#dashboardProjectSelector):not(#filterDiscipline):not(#filterPriority):not(#filterSprint):not(#filterResponsible):not(#filterStatus):not(#filterDeliveryDate), 
     body.view-only textarea {
       pointer-events: none;
       background-color: #f8fafc;
@@ -546,6 +546,54 @@
     }
 
 
+  
+    /* ===== v18: EVM interactivo, filtros, EDT horizontal y Sprints compactos ===== */
+    .backlog-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+    .backlog-filters{display:grid;grid-template-columns:repeat(6,minmax(150px,1fr)) auto;gap:10px;align-items:end;margin-bottom:14px;padding:12px;border:1px solid var(--border);border-radius:12px;background:#f8fafc}
+    .backlog-filters .field{margin:0}
+    .backlog-filter-count{font-size:12px;color:var(--muted);font-weight:700;margin:4px 0 12px}
+
+    .edt-horizontal{display:grid;gap:18px}
+    .edt-phase{border:1px solid var(--border);border-radius:14px;padding:14px;background:#fff}
+    .edt-phase-head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:12px}
+    .edt-phase-title{font-size:16px;font-weight:800}
+    .edt-columns{display:flex;gap:14px;overflow-x:auto;padding:4px 2px 12px;scroll-snap-type:x proximity}
+    .edt-account-column{flex:0 0 245px;scroll-snap-align:start}
+    .edt-account-card,.edt-package-card{border:1px solid #94a3b8;background:#fff;overflow:hidden}
+    .edt-account-card{border-radius:8px 8px 0 0}
+    .edt-package-card{border-radius:7px;margin-top:10px}
+    .edt-card-code{background:#0f3b63;color:#fff;font-weight:800;padding:6px 9px;font-size:12px}
+    .edt-card-name{font-weight:800;text-align:center;padding:12px 10px;min-height:56px;display:grid;place-items:center;line-height:1.25}
+    .edt-card-owner{border-top:1px solid #cbd5e1;background:#dbeafe;text-align:center;padding:7px;font-size:12px;font-weight:700}
+    .edt-card-actions{display:flex;justify-content:flex-end;padding:6px;background:#f8fafc}
+    .edt-package-stack{padding:0 7px 7px;border-left:1px solid #cbd5e1;border-right:1px solid #cbd5e1;border-bottom:1px solid #cbd5e1;border-radius:0 0 8px 8px;min-height:20px}
+
+    .sprint-compact-card{cursor:pointer;transition:transform .15s ease,box-shadow .15s ease;border:1px solid var(--border)}
+    .sprint-compact-card:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(15,23,42,.10)}
+    .sprint-compact-number{font-size:12px;font-weight:800;color:#245ab7;margin-bottom:8px}
+    .sprint-compact-name{font-size:17px;font-weight:800;line-height:1.25;margin-bottom:10px}
+    .sprint-compact-owner{font-size:13px;color:var(--muted)}
+    .sprint-detail-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0}
+    .sprint-detail-stat{padding:12px;border:1px solid var(--border);border-radius:10px;background:#f8fafc}
+    .sprint-detail-team{display:grid;gap:8px;margin-top:10px}
+    .sprint-detail-member{display:flex;justify-content:space-between;gap:12px;padding:9px 10px;border-bottom:1px solid var(--border)}
+
+    .evm-chart-wrap{position:relative}
+    .evm-svg,.dashboard-mini-svg{overflow:visible}
+    .evm-hover-zone{cursor:crosshair}
+    .evm-cutoff-line{stroke:#ef4444;stroke-width:1.5;stroke-dasharray:5 4}
+    .evm-cutoff-label{fill:#b42318;font-size:10px;font-weight:700}
+    .evm-point{stroke:#fff;stroke-width:1.5}
+    .evm-note{font-size:12px;color:var(--muted);margin-top:8px}
+
+    @media(max-width:1100px){.backlog-filters{grid-template-columns:repeat(3,minmax(150px,1fr)) auto}}
+    @media(max-width:760px){
+      .backlog-filters{grid-template-columns:1fr 1fr}
+      .backlog-filters .btn{width:100%}
+      .edt-account-column{flex-basis:78vw}
+      .sprint-detail-grid{grid-template-columns:1fr}
+    }
+
   </style>
 </head>
 <body class="view-only">
@@ -770,8 +818,7 @@
       <!-- MÓDULO 3: ALCANCE Y PLAZO -->
       <section id="scope" class="section">
         <div class="topbar">
-          <div><h2>Alcance y Cronograma</h2><p>Gestiona el Backlog de actividades y fechas.</p></div>
-          <button class="btn primary admin-only" id="openTaskModal">+ Nueva actividad</button>
+          <div><h2>Alcance y Cronograma</h2><p>Gestiona el alcance contractual, el Backlog y las fechas del proyecto.</p></div>
         </div>
 
 
@@ -779,8 +826,8 @@
         <div class="card">
           <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px">
             <div>
-              <strong>Requisitos contractuales → Lotes de control → Lotes de trabajo</strong>
-              <div class="tiny">Estructura el alcance contractual y asigna responsables.</div>
+              <strong>Requisitos contractuales → Cuentas de control → Paquetes de trabajo</strong>
+              <div class="tiny">Estructura horizontalmente el alcance contractual y asigna responsables.</div>
             </div>
             <button class="btn primary admin-only" id="openEdtModal">+ Añadir elemento EDT</button>
           </div>
@@ -788,8 +835,21 @@
         </div>
 
 
-        <h3 class="sub-header">📋 Backlog de Actividades</h3>
+        <div class="backlog-head sub-header">
+          <h3 style="margin:0">📋 Backlog de Actividades</h3>
+          <button class="btn primary admin-only" id="openTaskModal">+ Nueva actividad</button>
+        </div>
         <div class="card">
+          <div class="backlog-filters">
+            <div class="field"><label>Disciplina</label><select id="filterDiscipline"><option value="">Todas</option></select></div>
+            <div class="field"><label>Prioridad</label><select id="filterPriority"><option value="">Todas</option><option>Alta</option><option>Media</option><option>Baja</option></select></div>
+            <div class="field"><label>Sprint</label><select id="filterSprint"><option value="">Todos</option></select></div>
+            <div class="field"><label>Responsable</label><select id="filterResponsible"><option value="">Todos</option></select></div>
+            <div class="field"><label>Entrega hasta</label><input id="filterDeliveryDate" type="date"></div>
+            <div class="field"><label>Estado</label><select id="filterStatus"><option value="">Todos</option><option>Backlog</option><option>Por iniciar</option><option>En proceso</option><option>En revisión</option><option>Bloqueado</option><option>Aprobado</option></select></div>
+            <button class="btn" type="button" id="clearBacklogFilters">Limpiar filtros</button>
+          </div>
+          <div id="backlogFilterCount" class="backlog-filter-count"></div>
           <div class="table-wrap">
             <table>
               <thead>
@@ -919,6 +979,14 @@
     </div>
   </div>
   
+
+  <div class="modal-backdrop" id="sprintDetailModal">
+    <div class="modal" style="max-width:720px">
+      <div class="modal-head"><h3 id="sprintDetailTitle">Detalle del sprint</h3><button class="close" type="button" data-close="sprintDetailModal">✕</button></div>
+      <div id="sprintDetailContent"></div>
+    </div>
+  </div>
+
   <div class="modal-backdrop" id="riskModal">
     <div class="modal">
       <div class="modal-head"><h3>Crear riesgo</h3><button class="close" type="button" data-close="riskModal">✕</button></div>
@@ -980,19 +1048,16 @@
           <div class="field">
             <label>Tipo de elemento</label>
             <select id="edtType">
-              <option value="requirement">Requisito contractual</option>
-              <option value="control">Lote de control</option>
-              <option value="work">Lote de trabajo</option>
+              <option value="requirement">Requisito contractual / fase</option>
+              <option value="control">Cuenta de control</option>
+              <option value="work">Paquete de trabajo</option>
             </select>
           </div>
-          <div class="field"><label>Código</label><input id="edtCode" required placeholder="Ej. RC-01 / LC-01 / LT-01"></div>
+          <div class="field"><label>Código</label><input id="edtCode" required placeholder="Ej. RC-01 / CC-01 / PT-01"></div>
           <div class="field full"><label>Nombre</label><input id="edtName" required></div>
-          <div class="field full"><label>Descripción / criterio contractual</label><textarea id="edtDescription"></textarea></div>
-          <div class="field full" id="edtRequirementParentField" style="display:none"><label>Requisito contractual padre</label><select id="edtRequirementParent"></select></div>
-          <div class="field full" id="edtControlParentField" style="display:none"><label>Lote de control padre</label><select id="edtControlParent"></select></div>
+          <div class="field full" id="edtRequirementParentField" style="display:none"><label>Requisito contractual / fase</label><select id="edtRequirementParent"></select></div>
+          <div class="field full" id="edtControlParentField" style="display:none"><label>Cuenta de control padre</label><select id="edtControlParent"></select></div>
           <div class="field full" id="edtResponsibleField" style="display:none"><label>Responsable</label><select id="edtResponsible"></select></div>
-          <div class="field" id="edtStartField" style="display:none"><label>Inicio planeado</label><input id="edtStart" type="date"></div>
-          <div class="field" id="edtEndField" style="display:none"><label>Fin planeado</label><input id="edtEnd" type="date"></div>
         </div>
         <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px">
           <button class="btn" type="button" data-close="edtModal">Cancelar</button>
@@ -1598,9 +1663,9 @@
             const {data:lot,error:lotErr}=await supabaseClient.from("control_lots").insert({
               project_id:projectId,
               requirement_id:reqRows[pIndex].id,
-              code:"LC-"+String(lotCounter++).padStart(2,"0"),
+              code:"CC-"+String(lotCounter++).padStart(2,"0"),
               name:discipline,
-              description:"Lote de control de "+discipline+" para "+spec.phases[pIndex].name+".",
+              description:"Cuenta de control de "+discipline+" para "+spec.phases[pIndex].name+".",
               responsible_id:ownerId
             }).select().single();
             if(lotErr) throw lotErr;
@@ -1609,7 +1674,7 @@
             const wpRows=groupTasks.map(t=>({
               project_id:projectId,
               control_lot_id:lot.id,
-              code:"LT-"+String(workCounter++).padStart(3,"0"),
+              code:"PT-"+String(workCounter++).padStart(3,"0"),
               name:t[1],
               description:"Entregable "+t[0]+" · "+t[2]+".",
               responsible_id:peopleByName[t[5]]?.id||null,
@@ -1922,33 +1987,48 @@
       if(!activeProjectId){el.innerHTML='<div class="empty">Selecciona un proyecto.</div>';return;}
       const reqs=projectRequirements();
       const owners=Object.fromEntries(projectResponsibles().map(r=>[r.id,r]));
+      el.className="edt-horizontal";
       el.innerHTML=reqs.length?reqs.map(req=>{
-        const lots=projectControlLots().filter(c=>c.requirementId===req.id);
-        return `<div class="edt-requirement">
-          <div class="edt-row-head"><div><span class="badge info">${esc(req.code)}</span><h3 style="margin-top:8px">${esc(req.name)}</h3><div class="muted">${esc(req.description)}</div></div><button class="btn small danger admin-only delete-edt-requirement" data-id="${req.id}">Eliminar</button></div>
-          ${lots.map(lot=>{
-            const wps=projectWorkPackages().filter(w=>w.controlLotId===lot.id);
-            return `<div class="edt-control"><div class="edt-row-head"><div><strong>${esc(lot.code)} · ${esc(lot.name)}</strong><div class="tiny">Responsable: ${esc(owners[lot.responsibleId]?.name||"Por asignar")}</div><div class="muted">${esc(lot.description)}</div></div><button class="btn small danger admin-only delete-control-lot" data-id="${lot.id}">Eliminar</button></div>
-              ${wps.map(w=>`<div class="edt-work"><div class="edt-row-head"><div><strong>${esc(w.code)} · ${esc(w.name)}</strong><div class="tiny">Responsable: ${esc(owners[w.responsibleId]?.name||"Por asignar")} · ${esc(w.startDate||"Sin inicio")} → ${esc(w.endDate||"Sin fin")}</div><div class="muted">${esc(w.description)}</div></div><button class="btn small danger admin-only delete-work-package" data-id="${w.id}">Eliminar</button></div></div>`).join("")}
-            </div>`;
-          }).join("")}
+        const accounts=projectControlLots().filter(c=>c.requirementId===req.id);
+        return `<div class="edt-phase">
+          <div class="edt-phase-head">
+            <div><span class="badge info">${esc(req.code)}</span><span class="edt-phase-title" style="margin-left:8px">${esc(req.name)}</span></div>
+            <button class="btn small danger admin-only delete-edt-requirement" data-id="${req.id}">Eliminar</button>
+          </div>
+          <div class="edt-columns">
+            ${accounts.map(account=>{
+              const packages=projectWorkPackages().filter(w=>w.controlLotId===account.id);
+              return `<div class="edt-account-column">
+                <div class="edt-account-card">
+                  <div class="edt-card-code">${esc(account.code)}</div>
+                  <div class="edt-card-name">${esc(account.name)}</div>
+                  <div class="edt-card-owner">${esc(owners[account.responsibleId]?.name||"Por asignar")}</div>
+                  <div class="edt-card-actions admin-only"><button class="btn small danger delete-control-lot" data-id="${account.id}">Eliminar</button></div>
+                </div>
+                <div class="edt-package-stack">
+                  ${packages.map(w=>`<div class="edt-package-card">
+                    <div class="edt-card-code">${esc(w.code)}</div>
+                    <div class="edt-card-name">${esc(w.name)}</div>
+                    <div class="edt-card-owner">${esc(owners[w.responsibleId]?.name||"Por asignar")}</div>
+                    <div class="edt-card-actions admin-only"><button class="btn small danger delete-work-package" data-id="${w.id}">Eliminar</button></div>
+                  </div>`).join("") || '<div class="tiny" style="padding:12px;text-align:center">Sin paquetes de trabajo</div>'}
+                </div>
+              </div>`;
+            }).join("") || '<div class="empty" style="min-width:300px">Sin cuentas de control.</div>'}
+          </div>
         </div>`;
       }).join(""):'<div class="empty">Aún no hay EDT. Registra primero los requisitos contractuales.</div>';
-
 
       document.querySelectorAll(".delete-work-package").forEach(b=>b.addEventListener("click",async()=>{const {error}=await supabaseClient.from("work_packages").delete().eq("id",b.dataset.id);if(error)return showToast(error.message);await loadSharedData();}));
       document.querySelectorAll(".delete-control-lot").forEach(b=>b.addEventListener("click",async()=>{const {error}=await supabaseClient.from("control_lots").delete().eq("id",b.dataset.id);if(error)return showToast(error.message);await loadSharedData();}));
       document.querySelectorAll(".delete-edt-requirement").forEach(b=>b.addEventListener("click",async()=>{const {error}=await supabaseClient.from("edt_requirements").delete().eq("id",b.dataset.id);if(error)return showToast(error.message);await loadSharedData();}));
     }
 
-
     function refreshEdtModal(){
       const type=document.getElementById("edtType").value;
       document.getElementById("edtRequirementParentField").style.display=type==="control"?"grid":"none";
       document.getElementById("edtControlParentField").style.display=type==="work"?"grid":"none";
       document.getElementById("edtResponsibleField").style.display=(type==="control"||type==="work")?"grid":"none";
-      document.getElementById("edtStartField").style.display=type==="work"?"grid":"none";
-      document.getElementById("edtEndField").style.display=type==="work"?"grid":"none";
       document.getElementById("edtRequirementParent").innerHTML=projectRequirements().map(r=>`<option value="${r.id}">${esc(r.code)} · ${esc(r.name)}</option>`).join("");
       document.getElementById("edtControlParent").innerHTML=projectControlLots().map(r=>`<option value="${r.id}">${esc(r.code)} · ${esc(r.name)}</option>`).join("");
       document.getElementById("edtResponsible").innerHTML=responsibleOptions();
@@ -1958,18 +2038,61 @@
     document.getElementById("edtForm").addEventListener("submit",async e=>{
       e.preventDefault();
       const type=document.getElementById("edtType").value;
-      const common={project_id:activeProjectId,code:document.getElementById("edtCode").value.trim(),name:document.getElementById("edtName").value.trim(),description:document.getElementById("edtDescription").value.trim()||null,updated_at:new Date().toISOString()};
+      const common={project_id:activeProjectId,code:document.getElementById("edtCode").value.trim(),name:document.getElementById("edtName").value.trim(),description:null,updated_at:new Date().toISOString()};
       let q;
       if(type==="requirement") q=supabaseClient.from("edt_requirements").insert(common);
       else if(type==="control") q=supabaseClient.from("control_lots").insert({...common,requirement_id:document.getElementById("edtRequirementParent").value,responsible_id:document.getElementById("edtResponsible").value||null});
-      else q=supabaseClient.from("work_packages").insert({...common,control_lot_id:document.getElementById("edtControlParent").value,responsible_id:document.getElementById("edtResponsible").value||null,start_date:document.getElementById("edtStart").value||null,end_date:document.getElementById("edtEnd").value||null});
+      else q=supabaseClient.from("work_packages").insert({...common,control_lot_id:document.getElementById("edtControlParent").value,responsible_id:document.getElementById("edtResponsible").value||null,start_date:null,end_date:null});
       const {error}=await q;if(error)return showToast("Error guardando EDT: "+error.message);
       closeModal("edtModal");await loadSharedData();showToast("Elemento EDT guardado");
     });
 
+    function populateBacklogFilters(){
+      const values={
+        discipline:document.getElementById("filterDiscipline")?.value||"",
+        sprint:document.getElementById("filterSprint")?.value||"",
+        responsible:document.getElementById("filterResponsible")?.value||""
+      };
+      const disciplines=[...new Set(projectTasks().map(t=>t.discipline).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"es"));
+      const d=document.getElementById("filterDiscipline");
+      if(d){d.innerHTML='<option value="">Todas</option>'+disciplines.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join("");d.value=values.discipline;}
+      const s=document.getElementById("filterSprint");
+      if(s){s.innerHTML='<option value="">Todos</option>'+projectSprints().map(sp=>`<option value="${sp.id}">${esc(sp.name)}</option>`).join("");s.value=values.sprint;}
+      const r=document.getElementById("filterResponsible");
+      if(r){r.innerHTML='<option value="">Todos</option>'+projectResponsibles().map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join("");r.value=values.responsible;}
+    }
+
+    function filteredBacklogTasks(){
+      const discipline=document.getElementById("filterDiscipline")?.value||"";
+      const priority=document.getElementById("filterPriority")?.value||"";
+      const sprint=document.getElementById("filterSprint")?.value||"";
+      const responsible=document.getElementById("filterResponsible")?.value||"";
+      const delivery=document.getElementById("filterDeliveryDate")?.value||"";
+      const status=document.getElementById("filterStatus")?.value||"";
+      return projectTasks().filter(t=>
+        (!discipline||t.discipline===discipline) &&
+        (!priority||t.priority===priority) &&
+        (!sprint||t.sprintId===sprint) &&
+        (!responsible||t.ownerId===responsible) &&
+        (!delivery||((t.endDate||"") && t.endDate<=delivery)) &&
+        (!status||t.status===status)
+      );
+    }
+
+    ["filterDiscipline","filterPriority","filterSprint","filterResponsible","filterDeliveryDate","filterStatus"].forEach(id=>{
+      document.getElementById(id)?.addEventListener("change",renderBacklog);
+    });
+    document.getElementById("clearBacklogFilters")?.addEventListener("click",()=>{
+      ["filterDiscipline","filterPriority","filterSprint","filterResponsible","filterDeliveryDate","filterStatus"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
+      renderBacklog();
+    });
 
     function renderBacklog(){
-      const arr = projectTasks(), body = document.getElementById("backlogBody");
+      populateBacklogFilters();
+      const arr = filteredBacklogTasks(), body = document.getElementById("backlogBody");
+      const total = projectTasks().length;
+      const countEl=document.getElementById("backlogFilterCount");
+      if(countEl) countEl.textContent=`Mostrando ${arr.length} de ${total} actividades`;
       const sprintOptions = projectSprints();
       body.innerHTML = arr.length ? arr.map(t => `
         <tr>
@@ -2215,31 +2338,54 @@
     });
 
 
-    function renderSprints(){
-      const el = document.getElementById("sprintsList");
-      el.innerHTML = projectSprints().map(sp => {
-        const capacity = (sp.team||[]).reduce((sum,m)=>sum+(Number(m.hours)||0),0);
-        const assigned = projectTasks().filter(t=>t.sprintId===sp.id);
-        const committed = assigned.reduce((sum,t)=>sum+(Number(t.hours)||0),0);
-        return `
-        <div class="card">
-          <div class="sprint-card">
-            <div>
-              <span class="badge info">${esc(sp.name)}</span>
-              <h3 style="margin-top:10px">${esc(sp.objective)}</h3>
-              <div class="tiny">${sp.start||"Sin fecha"} → ${sp.end||"Sin fecha"}</div>
-              <div class="tiny" style="margin-top:8px">${(sp.team||[]).map(m=>`${esc(m.name)} (${Number(m.hours)||0} h)`).join(" · ") || "Sin equipo asignado"}</div>
-            </div>
-          </div>
-          <div style="display:flex;gap:18px;flex-wrap:wrap;margin-top:14px">
-            <span><strong>${capacity} h</strong><br><span class="tiny">Capacidad</span></span>
-            <span><strong>${committed} h</strong><br><span class="tiny">Horas comprometidas</span></span>
-            <span><strong>${assigned.length}</strong><br><span class="tiny">Actividades</span></span>
-          </div>
-        </div>`;
-      }).join("") || '<div class="empty">No hay sprints.</div>';
+    function sprintPrimaryResponsible(sp){
+      const scrum=projectResponsibles().find(r=>String(r.role||"").toLowerCase().includes("scrum"));
+      if(scrum && (sp.team||[]).some(m=>m.responsibleId===scrum.id || m.name===scrum.name)) return scrum.name;
+      const team=[...(sp.team||[])].sort((a,b)=>(Number(b.hours)||0)-(Number(a.hours)||0));
+      return team[0]?.name||"Por asignar";
     }
 
+    function sprintDisplayName(sp){
+      const objective=String(sp.objective||"").trim();
+      return objective.split(" · ")[0] || objective || "Sin nombre";
+    }
+
+    function openSprintDetail(spId){
+      const sp=projectSprints().find(x=>x.id===spId); if(!sp)return;
+      const assigned=projectTasks().filter(t=>t.sprintId===sp.id);
+      const capacity=(sp.team||[]).reduce((s,m)=>s+(Number(m.hours)||0),0);
+      const committed=assigned.reduce((s,t)=>s+(Number(t.hours)||0),0);
+      document.getElementById("sprintDetailTitle").textContent=`${sp.name} · ${sprintDisplayName(sp)}`;
+      document.getElementById("sprintDetailContent").innerHTML=`
+        <div class="muted">${esc(sp.objective||"")}</div>
+        <div class="sprint-detail-grid">
+          <div class="sprint-detail-stat"><div class="tiny">Periodo</div><strong>${esc(sp.start||"Sin fecha")} → ${esc(sp.end||"Sin fecha")}</strong></div>
+          <div class="sprint-detail-stat"><div class="tiny">Capacidad</div><strong>${capacity} h</strong></div>
+          <div class="sprint-detail-stat"><div class="tiny">Horas comprometidas</div><strong>${committed} h</strong></div>
+        </div>
+        <h4>Equipo y dedicación</h4>
+        <div class="sprint-detail-team">${(sp.team||[]).map(m=>`<div class="sprint-detail-member"><span>${esc(m.name)}</span><strong>${Number(m.hours)||0} h</strong></div>`).join("")||'<div class="empty">Sin equipo asignado</div>'}</div>
+        <h4 style="margin-top:18px">Actividades (${assigned.length})</h4>
+        <div class="table-wrap"><table><thead><tr><th>ID</th><th>Actividad</th><th>Responsable</th><th>Horas</th><th>Estado</th></tr></thead><tbody>
+          ${assigned.map(t=>{const r=projectResponsibles().find(x=>x.id===t.ownerId);return `<tr><td>${esc(t.id)}</td><td>${esc(t.name)}</td><td>${esc(r?.name||"Por asignar")}</td><td>${Number(t.hours)||0} h</td><td>${statusBadge(t.status)}</td></tr>`}).join("")||'<tr><td colspan="5">Sin actividades asignadas.</td></tr>'}
+        </tbody></table></div>`;
+      openModal("sprintDetailModal");
+    }
+
+    function renderSprints(){
+      const el=document.getElementById("sprintsList");
+      el.innerHTML=projectSprints().map(sp=>`
+        <div class="card sprint-compact-card" data-sprint-id="${sp.id}" role="button" tabindex="0">
+          <div class="sprint-compact-number">${esc(sp.name)}</div>
+          <div class="sprint-compact-name">${esc(sprintDisplayName(sp))}</div>
+          <div class="sprint-compact-owner"><strong>Responsable:</strong> ${esc(sprintPrimaryResponsible(sp))}</div>
+        </div>`).join("")||'<div class="empty">No hay sprints.</div>';
+      document.querySelectorAll(".sprint-compact-card").forEach(card=>{
+        const open=()=>openSprintDetail(card.dataset.sprintId);
+        card.addEventListener("click",open);
+        card.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();open();}});
+      });
+    }
 
     function renderKanban(){
       const sts = ["Backlog","Por iniciar","En proceso","En revisión","Bloqueado","Aprobado"], board = document.getElementById("kanbanBoard");
@@ -2333,14 +2479,14 @@
         <div class="card dashboard-kpi"><div class="muted">Avance físico promedio</div><div class="metric">${avgProgress}%</div></div>`;
 
 
-      const evm=evmSnapshot(new Date(),arr);
+      const evm=evmSnapshot(evmCurrentCutoff(),arr);
       const [cpiLabel,cpiClass,cpiMsg]=evmStatus(evm.CPI,"CPI");
       const [spiLabel,spiClass,spiMsg]=evmStatus(evm.SPI,"SPI");
       document.getElementById("dashboardEvmSummary").innerHTML=`
         <div class="card dashboard-kpi"><div class="muted">Costo planeado (BAC)</div><div class="metric">${money(evm.BAC)}</div></div>
         <div class="card dashboard-kpi"><div class="muted">Costo real (AC)</div><div class="metric">${money(evm.AC)}</div></div>
-        <div class="card dashboard-kpi"><div class="muted">CPI</div><div class="metric">${evm.CPI?evm.CPI.toFixed(2):"—"}</div><div class="metric-alert ${cpiClass}">${cpiLabel}: ${cpiMsg}</div></div>
-        <div class="card dashboard-kpi"><div class="muted">SPI</div><div class="metric">${evm.SPI?evm.SPI.toFixed(2):"—"}</div><div class="metric-alert ${spiClass}">${spiLabel}: ${spiMsg}</div></div>`;
+        <div class="card dashboard-kpi"><div class="muted">CPI</div><div class="metric">${formatIndex(evm.CPI)}</div><div class="metric-alert ${cpiClass}">${cpiLabel}: ${cpiMsg}</div></div>
+        <div class="card dashboard-kpi"><div class="muted">SPI</div><div class="metric">${formatIndex(evm.SPI)}</div><div class="metric-alert ${spiClass}">${spiLabel}: ${spiMsg}</div></div>`;
       document.getElementById("dashboardMiniCurve").innerHTML=miniCurveSvg(buildCurveData(arr));
 
 
@@ -2439,6 +2585,12 @@
     }
 
 
+    function evmCurrentCutoff(){
+      const d=new Date();
+      d.setHours(0,0,0,0);
+      return d;
+    }
+
     function evmSnapshot(cutoff, arr=projectTasks()){
       let BAC=0,PV=0,EV=0,AC=0;
       arr.forEach(t=>{
@@ -2459,86 +2611,132 @@
     }
 
 
+    function evmPlannedFraction(t,d){
+      if(!t.startDate||!t.endDate)return 0;
+      const s=new Date(t.startDate+"T00:00:00"),e=new Date(t.endDate+"T00:00:00");
+      if(d<=s)return 0;if(d>=e)return 1;
+      return Math.max(0,Math.min(1,(d-s)/(e-s||86400000)));
+    }
+
+    function evmHistoricalFactor(t,d,cutoff){
+      if(!t.startDate)return 0;
+      const s=new Date(t.startDate+"T00:00:00");
+      if(d<=s)return 0;
+      const plannedEnd=t.endDate?new Date(t.endDate+"T00:00:00"):cutoff;
+      const accrualEnd=plannedEnd<cutoff?plannedEnd:cutoff;
+      if(accrualEnd<=s)return d>=cutoff?1:0;
+      if(d>=accrualEnd)return 1;
+      return Math.max(0,Math.min(1,(d-s)/(accrualEnd-s)));
+    }
+
     function buildCurveData(sourceTasks=projectTasks()){
       const arr=sourceTasks.filter(t=>t.startDate&&t.endDate);
-      if(!arr.length) return [];
+      if(!arr.length)return [];
       const starts=arr.map(t=>new Date(t.startDate+"T00:00:00"));
       const ends=arr.map(t=>new Date(t.endDate+"T00:00:00"));
-      const min=new Date(Math.min(...starts)), max=new Date(Math.max(...ends));
-      const cutoff=new Date();
-      const n=7, points=[];
-      for(let i=0;i<n;i++){
-        const d=new Date(min.getTime()+(max-min)*(i/(n-1)));
+      const min=new Date(Math.min(...starts));
+      const max=new Date(Math.max(...ends));
+      const now=evmCurrentCutoff();
+      const cutoff=now<min?min:(now>max?max:now);
+
+      const dates=[];
+      for(let d=new Date(min);d<=max;d=new Date(d.getTime()+15*86400000)) dates.push(new Date(d));
+      if(!dates.some(d=>Math.abs(d-cutoff)<43200000)) dates.push(new Date(cutoff));
+      if(!dates.some(d=>Math.abs(d-max)<43200000)) dates.push(new Date(max));
+      dates.sort((a,b)=>a-b);
+
+      const snapshot=evmSnapshot(cutoff,sourceTasks);
+      return dates.map(d=>{
         let pv=0,ev=0,ac=0;
         arr.forEach(t=>{
           const c=taskCost(t);
-          const s=new Date(t.startDate+"T00:00:00"), e=new Date(t.endDate+"T00:00:00");
-          let planFrac=d<=s?0:d>=e?1:(d-s)/(e-s||86400000);
-          pv+=c.planned*Math.max(0,Math.min(1,planFrac));
-
-
-          const currentProg=Math.max(0,Math.min(1,(Number(t.physicalProgress)||0)/100));
-          const currentActual=c.actual;
+          pv+=c.planned*evmPlannedFraction(t,d);
           if(d<=cutoff){
-            const denom=Math.max(1,cutoff-s);
-            const elapsed=Math.max(0,Math.min(1,(d-s)/denom));
-            ev+=c.planned*currentProg*elapsed;
-            ac+=currentActual*elapsed;
-          }else{
-            ev+=c.planned*currentProg; ac+=currentActual;
+            const currentEV=c.planned*(Math.max(0,Math.min(100,Number(t.physicalProgress)||0))/100);
+            const factor=evmHistoricalFactor(t,d,cutoff);
+            ev+=currentEV*factor;
+            ac+=c.actual*factor;
           }
         });
-        points.push({date:d,pv,ev,ac});
-      }
-      return points;
+        const isCutoff=Math.abs(d-cutoff)<43200000;
+        if(isCutoff){pv=snapshot.PV;ev=snapshot.EV;ac=snapshot.AC;}
+        return {date:d,pv,ev:d<=cutoff?ev:null,ac:d<=cutoff?ac:null,isCutoff};
+      });
     }
 
+    function evmTooltipText(p){
+      return `${p.date.toLocaleDateString("es-CO")}\nPV: ${money(p.pv)}${p.ev==null?"":`\nEV: ${money(p.ev)}`}${p.ac==null?"":`\nAC: ${money(p.ac)}`}`;
+    }
+
+    function formatIndex(v){
+      if(!Number.isFinite(v)||v<=0)return "—";
+      const two=Number(v.toFixed(2));
+      if(two===1 && Math.abs(v-1)>=0.0005)return v.toFixed(3);
+      return v.toFixed(2);
+    }
 
     function curveSvg(points){
-      if(points.length<2) return '<div class="empty">Agrega fechas a los entregables para visualizar la Curva S.</div>';
-      const W=760,H=280,padL=62,padR=20,padT=20,padB=42;
-      const maxV=Math.max(...points.flatMap(p=>[p.pv,p.ev,p.ac]),1);
+      if(points.length<2)return '<div class="empty">Agrega fechas a los entregables para visualizar la Curva S.</div>';
+      const W=900,H=310,padL=72,padR=28,padT=30,padB=48;
+      const maxV=Math.max(...points.flatMap(p=>[p.pv,p.ev||0,p.ac||0]),1);
       const x=i=>padL+(W-padL-padR)*(i/(points.length-1));
       const y=v=>H-padB-(H-padT-padB)*(v/maxV);
-      const poly=key=>points.map((p,i)=>`${x(i)},${y(p[key])}`).join(" ");
-      const labels=points.map((p,i)=>`<text x="${x(i)}" y="${H-14}" text-anchor="middle" font-size="11" fill="#687386">${p.date.toLocaleDateString("es-CO",{month:"short",day:"numeric"})}</text>`).join("");
+      const pvPoly=points.map((p,i)=>`${x(i)},${y(p.pv)}`).join(" ");
+      const actualPts=points.map((p,i)=>({p,i})).filter(o=>o.p.ev!=null);
+      const evPoly=actualPts.map(o=>`${x(o.i)},${y(o.p.ev)}`).join(" ");
+      const acPoly=actualPts.map(o=>`${x(o.i)},${y(o.p.ac)}`).join(" ");
+      const labels=points.map((p,i)=>i%2===0||p.isCutoff?`<text x="${x(i)}" y="${H-15}" text-anchor="middle" font-size="10" fill="${p.isCutoff?'#b42318':'#687386'}">${p.date.toLocaleDateString("es-CO",{month:"short",day:"numeric"})}</text>`:"").join("");
+      const cutoffIndex=points.findIndex(p=>p.isCutoff);
+      const zones=points.map((p,i)=>{
+        const left=i===0?padL:(x(i-1)+x(i))/2;
+        const right=i===points.length-1?W-padR:(x(i)+x(i+1))/2;
+        return `<rect class="evm-hover-zone" x="${left}" y="${padT}" width="${Math.max(8,right-left)}" height="${H-padT-padB}" fill="transparent"><title>${esc(evmTooltipText(p))}</title></rect>`;
+      }).join("");
+      const circles=points.map((p,i)=>`<circle class="evm-point" cx="${x(i)}" cy="${y(p.pv)}" r="3.5" fill="#64748b"><title>${esc(evmTooltipText(p))}</title></circle>${p.ev!=null?`<circle class="evm-point" cx="${x(i)}" cy="${y(p.ev)}" r="3.5" fill="#1f6feb"><title>${esc(evmTooltipText(p))}</title></circle><circle class="evm-point" cx="${x(i)}" cy="${y(p.ac)}" r="3.5" fill="#d98200"><title>${esc(evmTooltipText(p))}</title></circle>`:""}`).join("");
       return `<div class="card evm-chart-wrap">
         <svg class="evm-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Curva S EVM">
           <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${H-padB}" stroke="#cbd5e1"/>
           <line x1="${padL}" y1="${H-padB}" x2="${W-padR}" y2="${H-padB}" stroke="#cbd5e1"/>
           ${[0,.25,.5,.75,1].map(q=>`<line x1="${padL}" y1="${y(maxV*q)}" x2="${W-padR}" y2="${y(maxV*q)}" stroke="#eef2f7"/><text x="${padL-8}" y="${y(maxV*q)+4}" text-anchor="end" font-size="10" fill="#687386">${Math.round(maxV*q/1000000)}M</text>`).join("")}
-          <polyline points="${poly("pv")}" fill="none" stroke="#64748b" stroke-width="3"/>
-          <polyline points="${poly("ev")}" fill="none" stroke="#1f6feb" stroke-width="3"/>
-          <polyline points="${poly("ac")}" fill="none" stroke="#d98200" stroke-width="3"/>
-          ${labels}
-          <g transform="translate(${padL+10},12)">
-            <text x="0" y="0" font-size="11" fill="#64748b">PV</text>
-            <text x="45" y="0" font-size="11" fill="#1f6feb">EV</text>
-            <text x="90" y="0" font-size="11" fill="#d98200">AC</text>
-          </g>
+          <polyline points="${pvPoly}" fill="none" stroke="#64748b" stroke-width="3"/>
+          <polyline points="${evPoly}" fill="none" stroke="#1f6feb" stroke-width="3"/>
+          <polyline points="${acPoly}" fill="none" stroke="#d98200" stroke-width="3"/>
+          ${cutoffIndex>=0?`<line class="evm-cutoff-line" x1="${x(cutoffIndex)}" y1="${padT}" x2="${x(cutoffIndex)}" y2="${H-padB}"/><text class="evm-cutoff-label" x="${x(cutoffIndex)+5}" y="${padT+12}">Fecha de corte</text>`:""}
+          ${labels}${circles}${zones}
+          <g transform="translate(${padL+10},18)"><text x="0" y="0" font-size="11" fill="#64748b">PV</text><text x="45" y="0" font-size="11" fill="#1f6feb">EV</text><text x="90" y="0" font-size="11" fill="#d98200">AC</text></g>
         </svg>
+        <div class="evm-note">Puntos de control quincenales. Pasa el cursor sobre la gráfica para consultar PV, EV y AC. EV y AC se muestran únicamente hasta la fecha de corte.</div>
       </div>`;
     }
 
-
-
-
     function miniCurveSvg(points){
-      if(points.length<2) return '<div class="empty">Agrega fechas para visualizar la curva.</div>';
-      const W=720,H=170,pad=18;
-      const maxV=Math.max(...points.flatMap(p=>[p.pv,p.ev,p.ac]),1);
-      const x=i=>pad+(W-pad*2)*(i/(points.length-1));
-      const y=v=>H-pad-(H-pad*2)*(v/maxV);
-      const poly=k=>points.map((p,i)=>`${x(i)},${y(p[k])}`).join(" ");
-      return `<svg class="dashboard-mini-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Curva S resumida"><line x1="${pad}" y1="${H-pad}" x2="${W-pad}" y2="${H-pad}" stroke="#dfe5ec"/><polyline points="${poly("pv")}" fill="none" stroke="#64748b" stroke-width="3"/><polyline points="${poly("ev")}" fill="none" stroke="#1f6feb" stroke-width="3"/><polyline points="${poly("ac")}" fill="none" stroke="#d98200" stroke-width="3"/><text x="${pad}" y="14" font-size="11" fill="#64748b">PV</text><text x="${pad+38}" y="14" font-size="11" fill="#1f6feb">EV</text><text x="${pad+76}" y="14" font-size="11" fill="#d98200">AC</text></svg>`;
+      if(points.length<2)return '<div class="empty">Agrega fechas para visualizar la curva.</div>';
+      const W=820,H=190,padL=24,padR=18,padT=22,padB=24;
+      const maxV=Math.max(...points.flatMap(p=>[p.pv,p.ev||0,p.ac||0]),1);
+      const x=i=>padL+(W-padL-padR)*(i/(points.length-1));
+      const y=v=>H-padB-(H-padT-padB)*(v/maxV);
+      const pvPoly=points.map((p,i)=>`${x(i)},${y(p.pv)}`).join(" ");
+      const actual=points.map((p,i)=>({p,i})).filter(o=>o.p.ev!=null);
+      const evPoly=actual.map(o=>`${x(o.i)},${y(o.p.ev)}`).join(" ");
+      const acPoly=actual.map(o=>`${x(o.i)},${y(o.p.ac)}`).join(" ");
+      const cutoffIndex=points.findIndex(p=>p.isCutoff);
+      const zones=points.map((p,i)=>{const left=i===0?padL:(x(i-1)+x(i))/2;const right=i===points.length-1?W-padR:(x(i)+x(i+1))/2;return `<rect x="${left}" y="${padT}" width="${Math.max(8,right-left)}" height="${H-padT-padB}" fill="transparent"><title>${esc(evmTooltipText(p))}</title></rect>`}).join("");
+      return `<svg class="dashboard-mini-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Curva S resumida">
+        <line x1="${padL}" y1="${H-padB}" x2="${W-padR}" y2="${H-padB}" stroke="#dfe5ec"/>
+        <polyline points="${pvPoly}" fill="none" stroke="#64748b" stroke-width="3"/>
+        <polyline points="${evPoly}" fill="none" stroke="#1f6feb" stroke-width="3"/>
+        <polyline points="${acPoly}" fill="none" stroke="#d98200" stroke-width="3"/>
+        ${cutoffIndex>=0?`<line class="evm-cutoff-line" x1="${x(cutoffIndex)}" y1="${padT}" x2="${x(cutoffIndex)}" y2="${H-padB}"/>`:""}
+        <text x="${padL}" y="14" font-size="11" fill="#64748b">PV</text><text x="${padL+38}" y="14" font-size="11" fill="#1f6feb">EV</text><text x="${padL+76}" y="14" font-size="11" fill="#d98200">AC</text>
+        ${zones}
+      </svg>`;
     }
-
 
     function renderEvm(){
       const el=document.getElementById("evmContent");
       const p=currentProjectForView();
       if(!p){el.innerHTML='<div class="empty">Selecciona un proyecto.</div>';return;}
-      const s=evmSnapshot(new Date());
+      const s=evmSnapshot(evmCurrentCutoff());
       const [cpiLabel,cpiClass,cpiMsg]=evmStatus(s.CPI,"CPI");
       const [spiLabel,spiClass,spiMsg]=evmStatus(s.SPI,"SPI");
       el.innerHTML=`
@@ -2549,8 +2747,8 @@
           <div class="card"><div class="muted">AC</div><div class="metric">${money(s.AC)}</div><div class="tiny">Costo real</div></div>
         </div>
         <div class="grid cols-4" style="margin-bottom:18px">
-          <div class="card"><div class="muted">CPI</div><div class="metric">${s.CPI?s.CPI.toFixed(2):"—"}</div><div class="metric-alert ${cpiClass}">${cpiLabel}: ${cpiMsg}</div></div>
-          <div class="card"><div class="muted">SPI</div><div class="metric">${s.SPI?s.SPI.toFixed(2):"—"}</div><div class="metric-alert ${spiClass}">${spiLabel}: ${spiMsg}</div></div>
+          <div class="card"><div class="muted">CPI</div><div class="metric">${formatIndex(s.CPI)}</div><div class="metric-alert ${cpiClass}">${cpiLabel}: ${cpiMsg}</div></div>
+          <div class="card"><div class="muted">SPI</div><div class="metric">${formatIndex(s.SPI)}</div><div class="metric-alert ${spiClass}">${spiLabel}: ${spiMsg}</div></div>
           <div class="card"><div class="muted">EAC</div><div class="metric">${s.EAC?money(s.EAC):"—"}</div><div class="tiny">Estimación al completar</div></div>
           <div class="card"><div class="muted">VAC</div><div class="metric">${s.EAC?money(s.VAC):"—"}</div><div class="tiny">Variación esperada al cierre</div></div>
         </div>
