@@ -594,6 +594,30 @@
       .sprint-detail-grid{grid-template-columns:1fr}
     }
 
+
+    /* ===== v19: dashboard, personal, EDT 2 niveles y sprints 4 columnas ===== */
+    .dashboard-evm-layout{display:grid;grid-template-columns:minmax(0,2.2fr) minmax(280px,.8fr);gap:18px;align-items:stretch}
+    .dashboard-evm-layout .evm-chart-wrap{height:100%;margin:0}
+    .dashboard-evm-kpis{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .dashboard-evm-kpis .card{padding:16px;min-height:128px}
+    .activity-summary-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0 14px}
+    .activity-summary-metric{padding:11px;border:1px solid var(--border);border-radius:10px;background:#f8fafc}
+    .activity-summary-metric strong{display:block;font-size:22px;margin-top:4px}
+    .team-entry-grid{display:grid;grid-template-columns:2fr 1fr 1.2fr 1fr auto;gap:12px;align-items:end}
+    .team-entry-grid .field{margin:0}.team-add-action{align-self:end}
+    .csv-inline-tools{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+    .team-list-card{margin-top:18px}.team-list-head{display:flex;justify-content:space-between;gap:14px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+    .team-pagination-controls{display:flex;align-items:center;gap:8px;margin-left:auto}.team-pagination-controls select{width:auto;min-width:68px;padding:7px 28px 7px 9px}
+    .team-table{width:100%;min-width:720px}.team-table th,.team-table td{padding:9px 12px}.team-table td:last-child,.team-table th:last-child{text-align:right}
+    .edt-horizontal{display:flex;gap:14px;overflow-x:auto;padding:4px 2px 12px;scroll-snap-type:x proximity}
+    .edt-account-column{flex:0 0 250px;scroll-snap-align:start}.edt-code-preview{padding:11px 12px;border:1px solid var(--border);border-radius:10px;background:#f8fafc;font-weight:800;color:#245ab7}
+    .sprints-grid-4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+    .sprints-grid-4 .sprint-compact-card{padding:13px 14px;min-height:128px}.sprints-grid-4 .sprint-compact-number{margin-bottom:5px}.sprints-grid-4 .sprint-compact-name{font-size:14px;line-height:1.22;margin-bottom:8px}.sprints-grid-4 .sprint-compact-owner{font-size:12px}
+    @media(max-width:1200px){.team-entry-grid{grid-template-columns:1fr 1fr}.team-add-action{grid-column:1/-1}.sprints-grid-4{grid-template-columns:repeat(3,minmax(0,1fr))}}
+    @media(max-width:900px){.dashboard-evm-layout{grid-template-columns:1fr}.dashboard-evm-kpis{grid-template-columns:repeat(4,minmax(0,1fr))}.sprints-grid-4{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:760px){.dashboard-evm-kpis{grid-template-columns:1fr 1fr}.activity-summary-metrics{grid-template-columns:1fr}.team-entry-grid{grid-template-columns:1fr}.team-pagination-controls{width:100%;justify-content:flex-end}.sprints-grid-4{grid-template-columns:1fr 1fr}}
+    @media(max-width:460px){.sprints-grid-4{grid-template-columns:1fr}}
+
   </style>
 </head>
 <body class="view-only">
@@ -662,39 +686,13 @@
         <div class="card" id="dashboardProjectInfo" style="margin-bottom:18px"></div>
 
 
-        <div class="grid cols-4">
-          <div class="card">
-            <div class="muted">Avance general</div>
-            <div class="metric" id="metric-progress">0%</div>
-            <div class="progress"><span id="progress-bar" style="width:0%"></span></div>
-          </div>
-          <div class="card">
-            <div class="muted">Actividades</div>
-            <div class="metric" id="metric-total">0</div>
-            <div class="tiny">Backlog total del proyecto</div>
-          </div>
-          <div class="card">
-            <div class="muted">Bloqueadas</div>
-            <div class="metric" id="metric-blocked">0</div>
-            <div class="tiny">Requieren intervención</div>
-          </div>
-          <div class="card">
-            <div class="muted">Sprint actual</div>
-            <div class="metric" id="metric-sprints">0</div>
-            <div class="tiny">Sprints creados</div>
-          </div>
-        </div>
-
-
-        <h3 class="sub-header">📅 Plazo y desempeño</h3>
+        <h3 class="sub-header">📅 Resumen de plazo</h3>
         <div id="dashboardScheduleSummary" class="grid cols-4"></div>
-        <div id="dashboardEvmSummary" class="grid cols-4" style="margin-top:18px"></div>
-        <div class="card" style="margin-top:18px">
-          <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap">
-            <h3 style="margin:0">Curva S resumida</h3>
-            <span class="tiny">PV · EV · AC</span>
-          </div>
-          <div id="dashboardMiniCurve" style="margin-top:10px"></div>
+
+        <h3 class="sub-header">📈 Curva S e indicadores EVM</h3>
+        <div class="dashboard-evm-layout">
+          <div id="dashboardFullCurve"></div>
+          <div id="dashboardEvmSummary" class="dashboard-evm-kpis"></div>
         </div>
 
 
@@ -707,6 +705,7 @@
           </div>
           <div class="card">
             <h3>Estado de actividades</h3>
+            <div id="activitySummaryMetrics" class="activity-summary-metrics"></div>
             <div id="status-summary"></div>
           </div>
         </div>
@@ -756,62 +755,46 @@
 
 
         <h3 class="sub-header">👥 Equipo de Trabajo y Tarifas</h3>
-        
-        <div class="csv-upload-box admin-only">
-          <strong>📥 Carga Masiva de Personal (CSV)</strong>
-          <p class="tiny">Sube un archivo Excel guardado como CSV. Formato esperado de columnas (sin encabezados obligatorios):<br><b>Nombre Completo, Rol, Área, Tarifa (número sin puntos)</b></p>
-          <input type="file" id="csvFileInput" accept=".csv" style="display:none" />
-          <button class="btn primary small" onclick="document.getElementById('csvFileInput').click()">Seleccionar archivo .CSV</button>
-        </div>
 
-
-        <div class="grid cols-2">
-          <div class="card admin-only">
-            <h3>Añadir responsable manualmente</h3>
-            <form id="responsibleForm" class="form-grid">
-              <div class="field full"><label>Nombre Completo</label><input id="responsibleName" required placeholder="Ej. Juan Pérez" /></div>
-              <div class="field">
-                <label>Rol Estandarizado</label>
-                <select id="responsibleRole">
-                  <option>Director</option>
-                  <option>Scrum Master</option>
-                  <option>Líder</option>
-                  <option>Especialista</option>
-                  <option>Ingeniero Auxiliar</option>
-                  <option>Dibujante</option>
-                </select>
-              </div>
-              <div class="field">
-                <label>Área / Disciplina</label>
-                <select id="responsibleArea">
-                  <option>General / Proyecto</option>
-                  <option>Arquitectura</option>
-                  <option>Estructuras</option>
-                  <option>Geotecnia</option>
-                  <option>Geología</option>
-                  <option>Hidrología</option>
-                  <option>Eléctrico</option>
-                  <option>Hidrosanitario</option>
-                  <option>BIM</option>
-                  <option>Topografía</option>
-                  <option>Urbanismo</option>
-                  <option>Gas</option>
-                  <option>PCI</option>
-                  <option>Telecomunicaciones</option>
-                  <option>HVAC</option>
-                  <option>Gases medicinales</option>
-                  <option>Equipamiento médico</option>
-                  <option>Seguridad electrónica</option>
-                  <option>Transporte vertical</option>
-                  <option>Presupuestos</option>
-                </select>
-              </div>
-              <div class="field full"><label>Costo por hora (COP)</label><input id="responsibleHourlyRate" type="number" min="0" step="1000" value="0" placeholder="Ej. 85000" /></div>
-              <div class="field full"><button class="btn primary" type="submit">+ Añadir responsable</button></div>
-            </form>
+        <div class="card admin-only team-entry-card">
+          <h3>Añadir equipo de trabajo</h3>
+          <form id="responsibleForm" class="team-entry-grid">
+            <div class="field"><label>Nombre Completo</label><input id="responsibleName" required placeholder="Ej. Juan Pérez" /></div>
+            <div class="field"><label>Rol Estandarizado</label><select id="responsibleRole"><option>Director</option><option>Scrum Master</option><option>Líder</option><option>Especialista</option><option>Ingeniero Auxiliar</option><option>Dibujante</option></select></div>
+            <div class="field"><label>Área / Disciplina</label><select id="responsibleArea"><option>General / Proyecto</option><option>Arquitectura</option><option>Estructuras</option><option>Geotecnia</option><option>Geología</option><option>Hidrología</option><option>Eléctrico</option><option>Hidrosanitario</option><option>BIM</option><option>Topografía</option><option>Urbanismo</option><option>Gas</option><option>PCI</option><option>Telecomunicaciones</option><option>HVAC</option><option>Gases medicinales</option><option>Equipamiento médico</option><option>Seguridad electrónica</option><option>Transporte vertical</option><option>Presupuestos</option></select></div>
+            <div class="field"><label>Costo por hora (COP)</label><input id="responsibleHourlyRate" type="number" min="0" step="1000" value="0" placeholder="Ej. 85000" /></div>
+            <div class="field team-add-action"><button class="btn primary" type="submit">+ Añadir responsable</button></div>
+          </form>
+          <div class="csv-inline-tools">
+            <input type="file" id="csvFileInput" accept=".csv" style="display:none" />
+            <button class="btn small" type="button" onclick="document.getElementById('csvFileInput').click()">📥 Carga masiva CSV</button>
+            <span class="tiny">Formato: Nombre, Rol, Área, Tarifa</span>
           </div>
-          <div class="card"><h3>Listado de responsables</h3><div id="responsiblesList"></div></div>
         </div>
+
+        <div class="card team-list-card">
+          <div class="team-list-head">
+            <div><h3 style="margin:0">Listado de personal</h3><div class="tiny" id="responsiblesCount"></div></div>
+            <div class="team-pagination-controls">
+              <label class="tiny" for="responsiblesPageSize">Mostrar</label>
+              <select id="responsiblesPageSize"><option value="15" selected>15</option><option value="30">30</option></select>
+              <button class="btn small" id="responsiblesPrev" type="button">←</button>
+              <span class="tiny" id="responsiblesPageInfo">Página 1</span>
+              <button class="btn small" id="responsiblesNext" type="button">→</button>
+            </div>
+          </div>
+          <div id="responsiblesList"></div>
+        </div>
+
+        <h3 class="sub-header">🧱 EDT Contractual</h3>
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px">
+            <div><strong>Cuentas de control → Paquetes de trabajo</strong><div class="tiny">EDT de dos niveles con responsables asignados.</div></div>
+            <button class="btn primary admin-only" id="openEdtModal">+ Añadir elemento EDT</button>
+          </div>
+          <div id="edtTree" class="edt-tree"></div>
+        </div>
+
       </section>
 
 
@@ -819,19 +802,6 @@
       <section id="scope" class="section">
         <div class="topbar">
           <div><h2>Alcance y Cronograma</h2><p>Gestiona el alcance contractual, el Backlog y las fechas del proyecto.</p></div>
-        </div>
-
-
-        <h3 class="sub-header">🧱 EDT Contractual</h3>
-        <div class="card">
-          <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:14px">
-            <div>
-              <strong>Requisitos contractuales → Cuentas de control → Paquetes de trabajo</strong>
-              <div class="tiny">Estructura horizontalmente el alcance contractual y asigna responsables.</div>
-            </div>
-            <button class="btn primary admin-only" id="openEdtModal">+ Añadir elemento EDT</button>
-          </div>
-          <div id="edtTree" class="edt-tree"></div>
         </div>
 
 
@@ -892,7 +862,7 @@
 
 
         <h3 class="sub-header">⚡ Sprints Planificados</h3>
-        <div id="sprintsList" class="grid cols-2"></div>
+        <div id="sprintsList" class="sprints-grid-4"></div>
 
 
         <h3 class="sub-header">🧩 Tablero Kanban Operativo</h3>
@@ -1045,24 +1015,13 @@
       <div class="modal-head"><h3>Añadir elemento EDT</h3><button class="close" type="button" data-close="edtModal">✕</button></div>
       <form id="edtForm">
         <div class="form-grid">
-          <div class="field">
-            <label>Tipo de elemento</label>
-            <select id="edtType">
-              <option value="requirement">Requisito contractual / fase</option>
-              <option value="control">Cuenta de control</option>
-              <option value="work">Paquete de trabajo</option>
-            </select>
-          </div>
-          <div class="field"><label>Código</label><input id="edtCode" required placeholder="Ej. RC-01 / CC-01 / PT-01"></div>
+          <div class="field"><label>Tipo de elemento</label><select id="edtType"><option value="control">Cuenta de control</option><option value="work">Paquete de trabajo</option></select></div>
+          <div class="field"><label>Código automático</label><div id="edtCodePreview" class="edt-code-preview">CC 1</div></div>
           <div class="field full"><label>Nombre</label><input id="edtName" required></div>
-          <div class="field full" id="edtRequirementParentField" style="display:none"><label>Requisito contractual / fase</label><select id="edtRequirementParent"></select></div>
-          <div class="field full" id="edtControlParentField" style="display:none"><label>Cuenta de control padre</label><select id="edtControlParent"></select></div>
-          <div class="field full" id="edtResponsibleField" style="display:none"><label>Responsable</label><select id="edtResponsible"></select></div>
+          <div class="field full" id="edtControlParentField" style="display:none"><label>Cuenta de control</label><select id="edtControlParent"></select></div>
+          <div class="field full"><label>Responsable</label><select id="edtResponsible"></select></div>
         </div>
-        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px">
-          <button class="btn" type="button" data-close="edtModal">Cancelar</button>
-          <button class="btn primary" type="submit">Guardar elemento EDT</button>
-        </div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px"><button class="btn" type="button" data-close="edtModal">Cancelar</button><button class="btn primary" type="submit">Guardar elemento EDT</button></div>
       </form>
     </div>
   </div>
@@ -1231,6 +1190,8 @@
     let budgetSettings = JSON.parse(localStorage.getItem(KEY.budget)||"{}");
     let evmSettings = JSON.parse(localStorage.getItem(KEY.evm)||"{}");
     let dashboardProjectFilter = activeProjectId || "";
+    let responsiblePage = 1;
+    let responsiblePageSize = 15;
 
 
     const DISCIPLINE_PREFIX = {
@@ -1648,7 +1609,7 @@
         if(reqErr) throw reqErr;
 
 
-        let lotCounter=1, workCounter=1;
+        let lotCounter=1;
         for(let pIndex=0;pIndex<spec.phases.length;pIndex++){
           const phaseTasks=spec.tasks.filter(t=>t[12]===pIndex);
           const grouped={};
@@ -1663,18 +1624,19 @@
             const {data:lot,error:lotErr}=await supabaseClient.from("control_lots").insert({
               project_id:projectId,
               requirement_id:reqRows[pIndex].id,
-              code:"CC-"+String(lotCounter++).padStart(2,"0"),
-              name:discipline,
+              code:"CC "+lotCounter,
+              name:spec.phases[pIndex].name+" · "+discipline,
               description:"Cuenta de control de "+discipline+" para "+spec.phases[pIndex].name+".",
               responsible_id:ownerId
             }).select().single();
             if(lotErr) throw lotErr;
 
 
-            const wpRows=groupTasks.map(t=>({
+            const accountNo=lotCounter++;
+            const wpRows=groupTasks.map((t,pkgIndex)=>({
               project_id:projectId,
               control_lot_id:lot.id,
-              code:"PT-"+String(workCounter++).padStart(3,"0"),
+              code:accountNo+"."+(pkgIndex+1),
               name:t[1],
               description:"Entregable "+t[0]+" · "+t[2]+".",
               responsible_id:peopleByName[t[5]]?.id||null,
@@ -1907,25 +1869,22 @@
 
 
     function renderResponsibles(){
-      const arr = projectResponsibles(), el = document.getElementById("responsiblesList");
-      if(!activeProjectId){ el.innerHTML='<div class="empty">Activa un proyecto primero.</div>'; return; }
-      el.innerHTML = arr.length ? arr.map(r => `
-        <div class="list-row">
-          <div><strong>${esc(r.name)}</strong><div class="tiny">${esc(r.role)} · ${esc(r.area)}</div>
-            <div class="tiny" style="margin-top:4px">Tarifa: <strong>${money(r.hourlyRate||0)} / hora</strong></div>
-          </div>
-          <button class="btn small danger delete-responsible admin-only" data-id="${r.id}">Eliminar</button>
-        </div>`).join("") : '<div class="empty">No hay responsables agregados.</div>';
-
-
-      document.querySelectorAll(".delete-responsible").forEach(b=>b.addEventListener("click",async()=>{
-        const { error } = await supabaseClient.from("responsibles").delete().eq("id", b.dataset.id);
-        if(error) return showToast("Error al eliminar responsable: "+error.message);
-        await loadSharedData(); showToast("Responsable eliminado");
-      }));
+      const arr=projectResponsibles(),el=document.getElementById("responsiblesList");
+      const countEl=document.getElementById("responsiblesCount"),pageInfo=document.getElementById("responsiblesPageInfo");
+      const prev=document.getElementById("responsiblesPrev"),next=document.getElementById("responsiblesNext"),sizeSel=document.getElementById("responsiblesPageSize");
+      if(!activeProjectId){el.innerHTML='<div class="empty">Activa un proyecto primero.</div>';return;}
+      if(sizeSel)sizeSel.value=String(responsiblePageSize);
+      const totalPages=Math.max(1,Math.ceil(arr.length/responsiblePageSize));if(responsiblePage>totalPages)responsiblePage=totalPages;
+      const start=(responsiblePage-1)*responsiblePageSize,pageRows=arr.slice(start,start+responsiblePageSize);
+      if(countEl)countEl.textContent=`${arr.length} persona(s) · mostrando ${arr.length?start+1:0}-${Math.min(start+responsiblePageSize,arr.length)}`;
+      if(pageInfo)pageInfo.textContent=`Página ${responsiblePage} de ${totalPages}`;if(prev)prev.disabled=responsiblePage<=1;if(next)next.disabled=responsiblePage>=totalPages;
+      el.innerHTML=arr.length?`<div class="table-wrap"><table class="team-table"><thead><tr><th>Nombre</th><th>Rol</th><th>Tarifa / hora</th><th class="admin-only">Acción</th></tr></thead><tbody>${pageRows.map(r=>`<tr><td><strong>${esc(r.name)}</strong></td><td>${esc(r.role)}</td><td>${money(r.hourlyRate||0)}</td><td class="admin-only"><button class="btn small danger delete-responsible" data-id="${r.id}">Eliminar</button></td></tr>`).join("")}</tbody></table></div>`:'<div class="empty">No hay personal agregado.</div>';
+      document.querySelectorAll(".delete-responsible").forEach(b=>b.addEventListener("click",async()=>{const {error}=await supabaseClient.from("responsibles").delete().eq("id",b.dataset.id);if(error)return showToast("Error al eliminar personal: "+error.message);await loadSharedData();showToast("Personal eliminado");}));
       updateDropdowns();
     }
-
+    document.getElementById("responsiblesPageSize").addEventListener("change",e=>{responsiblePageSize=Number(e.target.value)||15;responsiblePage=1;renderResponsibles();});
+    document.getElementById("responsiblesPrev").addEventListener("click",()=>{if(responsiblePage>1){responsiblePage--;renderResponsibles();}});
+    document.getElementById("responsiblesNext").addEventListener("click",()=>{const total=Math.max(1,Math.ceil(projectResponsibles().length/responsiblePageSize));if(responsiblePage<total){responsiblePage++;renderResponsibles();}});
 
     document.getElementById("responsibleForm").addEventListener("submit", async e => {
       e.preventDefault();      if(!activeProjectId) return showToast("Activa un proyecto primero.");
@@ -1980,72 +1939,22 @@
     const projectRequirements=()=>edtRequirements.filter(x=>x.projectId===activeProjectId);
     const projectControlLots=()=>controlLots.filter(x=>x.projectId===activeProjectId);
     const projectWorkPackages=()=>workPackages.filter(x=>x.projectId===activeProjectId);
-
-
+    function numericCode(value){const m=String(value||"").match(/(\d+)/);return m?Number(m[1]):0;}
+    function controlDisplayNumber(account,index){return numericCode(account.code)||index+1;}
+    function nextControlNumber(){return Math.max(0,...projectControlLots().map(x=>numericCode(x.code)))+1;}
+    function nextPackageNumber(controlId){const accounts=projectControlLots(),account=accounts.find(x=>x.id===controlId);const accountNo=account?controlDisplayNumber(account,accounts.indexOf(account)):1;return `${accountNo}.${projectWorkPackages().filter(x=>x.controlLotId===controlId).length+1}`;}
+    async function ensureEdtRootRequirement(){let root=projectRequirements().find(r=>r.code==="EDT-ROOT");if(root)return root.id;const {data,error}=await supabaseClient.from("edt_requirements").insert({project_id:activeProjectId,code:"EDT-ROOT",name:"EDT",description:null}).select().single();if(error)throw error;edtRequirements.push(requirementFromDb(data));return data.id;}
     function renderEdt(){
-      const el=document.getElementById("edtTree");
-      if(!activeProjectId){el.innerHTML='<div class="empty">Selecciona un proyecto.</div>';return;}
-      const reqs=projectRequirements();
-      const owners=Object.fromEntries(projectResponsibles().map(r=>[r.id,r]));
-      el.className="edt-horizontal";
-      el.innerHTML=reqs.length?reqs.map(req=>{
-        const accounts=projectControlLots().filter(c=>c.requirementId===req.id);
-        return `<div class="edt-phase">
-          <div class="edt-phase-head">
-            <div><span class="badge info">${esc(req.code)}</span><span class="edt-phase-title" style="margin-left:8px">${esc(req.name)}</span></div>
-            <button class="btn small danger admin-only delete-edt-requirement" data-id="${req.id}">Eliminar</button>
-          </div>
-          <div class="edt-columns">
-            ${accounts.map(account=>{
-              const packages=projectWorkPackages().filter(w=>w.controlLotId===account.id);
-              return `<div class="edt-account-column">
-                <div class="edt-account-card">
-                  <div class="edt-card-code">${esc(account.code)}</div>
-                  <div class="edt-card-name">${esc(account.name)}</div>
-                  <div class="edt-card-owner">${esc(owners[account.responsibleId]?.name||"Por asignar")}</div>
-                  <div class="edt-card-actions admin-only"><button class="btn small danger delete-control-lot" data-id="${account.id}">Eliminar</button></div>
-                </div>
-                <div class="edt-package-stack">
-                  ${packages.map(w=>`<div class="edt-package-card">
-                    <div class="edt-card-code">${esc(w.code)}</div>
-                    <div class="edt-card-name">${esc(w.name)}</div>
-                    <div class="edt-card-owner">${esc(owners[w.responsibleId]?.name||"Por asignar")}</div>
-                    <div class="edt-card-actions admin-only"><button class="btn small danger delete-work-package" data-id="${w.id}">Eliminar</button></div>
-                  </div>`).join("") || '<div class="tiny" style="padding:12px;text-align:center">Sin paquetes de trabajo</div>'}
-                </div>
-              </div>`;
-            }).join("") || '<div class="empty" style="min-width:300px">Sin cuentas de control.</div>'}
-          </div>
-        </div>`;
-      }).join(""):'<div class="empty">Aún no hay EDT. Registra primero los requisitos contractuales.</div>';
-
+      const el=document.getElementById("edtTree");if(!activeProjectId){el.innerHTML='<div class="empty">Selecciona un proyecto.</div>';return;}
+      const accounts=projectControlLots(),owners=Object.fromEntries(projectResponsibles().map(r=>[r.id,r]));el.className="edt-horizontal";
+      el.innerHTML=accounts.length?accounts.map((account,index)=>{const accountNo=controlDisplayNumber(account,index),packages=projectWorkPackages().filter(w=>w.controlLotId===account.id);return `<div class="edt-account-column"><div class="edt-account-card"><div class="edt-card-code">CC ${accountNo}</div><div class="edt-card-name">${esc(account.name)}</div><div class="edt-card-owner">${esc(owners[account.responsibleId]?.name||"Por asignar")}</div><div class="edt-card-actions admin-only"><button class="btn small danger delete-control-lot" data-id="${account.id}">Eliminar</button></div></div><div class="edt-package-stack">${packages.map((w,pIndex)=>`<div class="edt-package-card"><div class="edt-card-code">${accountNo}.${pIndex+1}</div><div class="edt-card-name">${esc(w.name)}</div><div class="edt-card-owner">${esc(owners[w.responsibleId]?.name||"Por asignar")}</div><div class="edt-card-actions admin-only"><button class="btn small danger delete-work-package" data-id="${w.id}">Eliminar</button></div></div>`).join("")||'<div class="tiny" style="padding:12px;text-align:center">Sin paquetes de trabajo</div>'}</div></div>`;}).join(""):'<div class="empty">Aún no hay cuentas de control en la EDT.</div>';
       document.querySelectorAll(".delete-work-package").forEach(b=>b.addEventListener("click",async()=>{const {error}=await supabaseClient.from("work_packages").delete().eq("id",b.dataset.id);if(error)return showToast(error.message);await loadSharedData();}));
       document.querySelectorAll(".delete-control-lot").forEach(b=>b.addEventListener("click",async()=>{const {error}=await supabaseClient.from("control_lots").delete().eq("id",b.dataset.id);if(error)return showToast(error.message);await loadSharedData();}));
-      document.querySelectorAll(".delete-edt-requirement").forEach(b=>b.addEventListener("click",async()=>{const {error}=await supabaseClient.from("edt_requirements").delete().eq("id",b.dataset.id);if(error)return showToast(error.message);await loadSharedData();}));
     }
-
-    function refreshEdtModal(){
-      const type=document.getElementById("edtType").value;
-      document.getElementById("edtRequirementParentField").style.display=type==="control"?"grid":"none";
-      document.getElementById("edtControlParentField").style.display=type==="work"?"grid":"none";
-      document.getElementById("edtResponsibleField").style.display=(type==="control"||type==="work")?"grid":"none";
-      document.getElementById("edtRequirementParent").innerHTML=projectRequirements().map(r=>`<option value="${r.id}">${esc(r.code)} · ${esc(r.name)}</option>`).join("");
-      document.getElementById("edtControlParent").innerHTML=projectControlLots().map(r=>`<option value="${r.id}">${esc(r.code)} · ${esc(r.name)}</option>`).join("");
-      document.getElementById("edtResponsible").innerHTML=responsibleOptions();
-    }
+    function refreshEdtModal(){const type=document.getElementById("edtType").value,parentField=document.getElementById("edtControlParentField");parentField.style.display=type==="work"?"grid":"none";document.getElementById("edtControlParent").innerHTML=projectControlLots().map((r,i)=>`<option value="${r.id}">CC ${controlDisplayNumber(r,i)} · ${esc(r.name)}</option>`).join("");document.getElementById("edtResponsible").innerHTML=responsibleOptions();const preview=document.getElementById("edtCodePreview");if(type==="control")preview.textContent=`CC ${nextControlNumber()}`;else{const parentId=document.getElementById("edtControlParent").value;preview.textContent=parentId?nextPackageNumber(parentId):"Selecciona una cuenta";}}
     document.getElementById("openEdtModal").addEventListener("click",()=>{if(!activeProjectId)return showToast("Selecciona un proyecto primero.");document.getElementById("edtForm").reset();refreshEdtModal();openModal("edtModal");});
-    document.getElementById("edtType").addEventListener("change",refreshEdtModal);
-    document.getElementById("edtForm").addEventListener("submit",async e=>{
-      e.preventDefault();
-      const type=document.getElementById("edtType").value;
-      const common={project_id:activeProjectId,code:document.getElementById("edtCode").value.trim(),name:document.getElementById("edtName").value.trim(),description:null,updated_at:new Date().toISOString()};
-      let q;
-      if(type==="requirement") q=supabaseClient.from("edt_requirements").insert(common);
-      else if(type==="control") q=supabaseClient.from("control_lots").insert({...common,requirement_id:document.getElementById("edtRequirementParent").value,responsible_id:document.getElementById("edtResponsible").value||null});
-      else q=supabaseClient.from("work_packages").insert({...common,control_lot_id:document.getElementById("edtControlParent").value,responsible_id:document.getElementById("edtResponsible").value||null,start_date:null,end_date:null});
-      const {error}=await q;if(error)return showToast("Error guardando EDT: "+error.message);
-      closeModal("edtModal");await loadSharedData();showToast("Elemento EDT guardado");
-    });
+    document.getElementById("edtType").addEventListener("change",refreshEdtModal);document.getElementById("edtControlParent").addEventListener("change",refreshEdtModal);
+    document.getElementById("edtForm").addEventListener("submit",async e=>{e.preventDefault();const type=document.getElementById("edtType").value,name=document.getElementById("edtName").value.trim(),responsibleId=document.getElementById("edtResponsible").value||null;let q;try{if(type==="control"){const requirementId=await ensureEdtRootRequirement();q=supabaseClient.from("control_lots").insert({project_id:activeProjectId,requirement_id:requirementId,code:`CC ${nextControlNumber()}`,name,description:null,responsible_id:responsibleId,updated_at:new Date().toISOString()});}else{const parentId=document.getElementById("edtControlParent").value;if(!parentId)return showToast("Selecciona una cuenta de control.");q=supabaseClient.from("work_packages").insert({project_id:activeProjectId,control_lot_id:parentId,code:nextPackageNumber(parentId),name,description:null,responsible_id:responsibleId,start_date:null,end_date:null,updated_at:new Date().toISOString()});}const {error}=await q;if(error)return showToast("Error guardando EDT: "+error.message);closeModal("edtModal");await loadSharedData();showToast("Elemento EDT guardado");}catch(err){showToast("Error guardando EDT: "+err.message);}});
 
     function populateBacklogFilters(){
       const values={
@@ -2437,11 +2346,6 @@
 
 
       const avgProgress=arr.length?Math.round(arr.reduce((s,t)=>s+(Number(t.physicalProgress)||0),0)/arr.length):0;
-      document.getElementById("metric-progress").textContent = avgProgress+"%";
-      document.getElementById("progress-bar").style.width = avgProgress+"%";
-      document.getElementById("metric-total").textContent = arr.length;
-      document.getElementById("metric-blocked").textContent = arr.filter(t=>t.status==="Bloqueado").length;
-      document.getElementById("metric-sprints").textContent = sprintArr.length;
 
 
       const counts = {};
@@ -2449,6 +2353,9 @@
       document.getElementById("status-summary").innerHTML = Object.entries(counts)
         .map(([st,n])=>`<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">${statusBadge(st)}<strong>${n}</strong></div>`)
         .join("") || '<div class="empty">Sin datos</div>';
+      const cutoffDate=evmCurrentCutoff();
+      const currentSprint=sprintArr.find(sp=>{if(!sp.start||!sp.end)return false;const s=new Date(sp.start+"T00:00:00"),e=new Date(sp.end+"T23:59:59");return cutoffDate>=s&&cutoffDate<=e;}) || [...sprintArr].filter(sp=>sp.start&&new Date(sp.start+"T00:00:00")<=cutoffDate).sort((a,b)=>String(b.start).localeCompare(String(a.start)))[0];
+      document.getElementById("activitySummaryMetrics").innerHTML=`<div class="activity-summary-metric"><span class="tiny">Actividades</span><strong>${arr.length}</strong></div><div class="activity-summary-metric"><span class="tiny">Bloqueadas</span><strong>${arr.filter(t=>t.status==="Bloqueado").length}</strong></div><div class="activity-summary-metric"><span class="tiny">Sprint actual</span><strong style="font-size:17px">${esc(currentSprint?.name||"—")}</strong></div>`;
 
 
       const disciplines = {};
@@ -2473,21 +2380,21 @@
       const duration=minDate&&maxDate?Math.round((maxDate-minDate)/86400000)+1:0;
       const dateFmt=d=>d?d.toLocaleDateString("es-CO",{year:"numeric",month:"short",day:"numeric"}):"—";
       document.getElementById("dashboardScheduleSummary").innerHTML=`
+        <div class="card dashboard-kpi"><div class="muted">Avance general</div><div class="metric">${avgProgress}%</div><div class="progress"><span style="width:${avgProgress}%"></span></div></div>
         <div class="card dashboard-kpi"><div class="muted">Inicio planeado</div><div class="metric">${dateFmt(minDate)}</div></div>
         <div class="card dashboard-kpi"><div class="muted">Fin planeado</div><div class="metric">${dateFmt(maxDate)}</div></div>
-        <div class="card dashboard-kpi"><div class="muted">Duración planeada</div><div class="metric">${duration?duration+" días":"—"}</div></div>
-        <div class="card dashboard-kpi"><div class="muted">Avance físico promedio</div><div class="metric">${avgProgress}%</div></div>`;
+        <div class="card dashboard-kpi"><div class="muted">Duración planeada</div><div class="metric">${duration?duration+" días":"—"}</div></div>`;
 
 
       const evm=evmSnapshot(evmCurrentCutoff(),arr);
       const [cpiLabel,cpiClass,cpiMsg]=evmStatus(evm.CPI,"CPI");
       const [spiLabel,spiClass,spiMsg]=evmStatus(evm.SPI,"SPI");
       document.getElementById("dashboardEvmSummary").innerHTML=`
-        <div class="card dashboard-kpi"><div class="muted">Costo planeado (BAC)</div><div class="metric">${money(evm.BAC)}</div></div>
-        <div class="card dashboard-kpi"><div class="muted">Costo real (AC)</div><div class="metric">${money(evm.AC)}</div></div>
+        <div class="card dashboard-kpi"><div class="muted">BAC</div><div class="metric">${money(evm.BAC)}</div><div class="tiny">Presupuesto base</div></div>
+        <div class="card dashboard-kpi"><div class="muted">EAC</div><div class="metric">${evm.EAC?money(evm.EAC):"—"}</div><div class="tiny">Estimación al completar</div></div>
         <div class="card dashboard-kpi"><div class="muted">CPI</div><div class="metric">${formatIndex(evm.CPI)}</div><div class="metric-alert ${cpiClass}">${cpiLabel}: ${cpiMsg}</div></div>
         <div class="card dashboard-kpi"><div class="muted">SPI</div><div class="metric">${formatIndex(evm.SPI)}</div><div class="metric-alert ${spiClass}">${spiLabel}: ${spiMsg}</div></div>`;
-      document.getElementById("dashboardMiniCurve").innerHTML=miniCurveSvg(buildCurveData(arr));
+      document.getElementById("dashboardFullCurve").innerHTML=curveSvg(buildCurveData(arr));
 
 
       const riskEl=document.getElementById("dashboard-risks");
