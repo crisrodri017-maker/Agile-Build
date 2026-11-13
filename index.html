@@ -2748,7 +2748,7 @@
       const planningPct=taskPlanPercentAtDate(t,d);
       return planned*(planningPct/100);
     }
-    function taskActualAtDate(t,d){const key=dateIsoLocal(new Date(d));const rows=taskPeriodRows(t.uid).filter(r=>r.periodDate<=key);return {cost:rows.reduce((s,r)=>s+(Number(r.actualCost)||0),0),progress:Math.min(100,rows.reduce((s,r)=>s+(Number(r.progressIncrement)||0),0))};}
+    function taskActualAtDate(t,d){const key=dateIsoLocal(new Date(d));const reportStart=projectReportingConfig().start;const rows=taskPeriodRows(t.uid).filter(r=>r.periodDate>=reportStart&&r.periodDate<=key);return {cost:rows.reduce((s,r)=>s+(Number(r.actualCost)||0),0),progress:Math.min(100,rows.reduce((s,r)=>s+(Number(r.progressIncrement)||0),0))};}
     async function savePeriodCell(taskId,periodDate,field,value){
       const period=projectReportingPeriods().find(p=>p.key===periodDate)||{start:periodDate,end:periodDate,key:periodDate};
       const existingRows=taskPeriodRows(taskId).filter(r=>r.periodDate>=period.start&&r.periodDate<=period.end);
@@ -2764,7 +2764,7 @@
       const del=await supabaseClient.from("task_period_performance").delete().eq("task_id",taskId).gte("period_date",period.start).lte("period_date",period.end);if(del.error)throw del.error;
       periodPerformance=periodPerformance.filter(r=>!(r.taskId===taskId&&r.periodDate>=period.start&&r.periodDate<=period.end));
       const payload={project_id:activeProjectId,task_id:taskId,period_date:period.end,actual_hours:actualHours,actual_cost:actualCost,progress_increment:progress,updated_at:new Date().toISOString()};const {data,error}=await supabaseClient.from("task_period_performance").insert(payload).select().single();if(error)throw error;const mapped=periodPerformanceFromDb(data);periodPerformance.push(mapped);
-      if(field==="progress"){const cutoff=evmCurrentCutoff(),cutKey=dateIsoLocal(cutoff),physicalProgress=Math.min(100,taskPeriodRows(taskId).filter(r=>r.periodDate<=cutKey).reduce((sum,r)=>sum+(Number(r.progressIncrement)||0),0));const {error:tErr}=await supabaseClient.from("tasks").update({physical_progress:physicalProgress,updated_at:new Date().toISOString()}).eq("id",taskId);if(tErr)throw tErr;const task=tasks.find(t=>t.uid===taskId);if(task)task.physicalProgress=physicalProgress;}
+      if(field==="progress"){const cutoff=evmCurrentCutoff(),cutKey=dateIsoLocal(cutoff),reportStart=projectReportingConfig().start,physicalProgress=Math.min(100,taskPeriodRows(taskId).filter(r=>r.periodDate>=reportStart&&r.periodDate<=cutKey).reduce((sum,r)=>sum+(Number(r.progressIncrement)||0),0));const {error:tErr}=await supabaseClient.from("tasks").update({physical_progress:physicalProgress,updated_at:new Date().toISOString()}).eq("id",taskId);if(tErr)throw tErr;const task=tasks.find(t=>t.uid===taskId);if(task)task.physicalProgress=physicalProgress;}
       return mapped;
     }
     function matrixTaskCell(t){return `<strong>${esc(t.id)}</strong><div>${esc(t.name)}</div>`;}
