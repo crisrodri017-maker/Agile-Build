@@ -413,6 +413,12 @@
     }
     .metric-alert{font-size:12px;font-weight:700;margin-top:7px}
     .metric-alert.good,.metric-alert.watch,.metric-alert.bad,.metric-alert.critical{color:var(--muted)}
+    .metric.perf-ev{color:#1f6feb}
+    .metric.perf-ac{color:#d98200}
+    .metric.perf-good{color:#166534}
+    .metric.perf-bad{color:#b42318}
+    .metric-alert.perf-good{color:#166534}
+    .metric-alert.perf-bad{color:#b42318}
     .performance-table input{min-width:92px}
     .evm-chart-wrap{overflow-x:auto}
     .evm-svg{width:100%;min-width:620px;height:auto;display:block}
@@ -798,10 +804,13 @@
               <div class="field"><label>Código</label><input id="projectCode" /></div>
               <div class="field"><label>Cliente</label><input id="projectClient" /></div>
               <div class="field"><label>No. de contrato</label><input id="projectContractNumber" placeholder="Ej. C-2026-045" /></div>
+              <div class="field"><label>Valor del contrato (COP)</label><input id="projectContractValue" type="number" min="0" step="1000" placeholder="Ej. 1500000000" /></div>
               <div class="field"><label>Tipo de edificación</label><select id="projectType"><option>Administrativo</option><option>Hospitalario</option><option>Educativo</option><option>Residencial</option><option>Industrial</option><option>Comercial</option><option>Infraestructura</option></select></div>
               <div class="field"><label>Ubicación</label><input id="projectLocation" /></div>
               <div class="field"><label>Duración preferida sprint</label><select id="sprintLength"><option value="1">1 semana</option><option value="2" selected>2 semanas</option><option value="3">3 semanas</option><option value="4">4 semanas</option></select></div>
               <div class="field full"><label>Alcance contractual</label><textarea id="projectDescription" placeholder="Describe el alcance contractual del proyecto"></textarea></div>
+              <div class="field full"><label>Supuestos</label><textarea id="projectAssumptions" placeholder="Registra los supuestos considerados para definir y ejecutar el alcance"></textarea></div>
+              <div class="field full"><label>Restricciones</label><textarea id="projectConstraints" placeholder="Registra las restricciones contractuales, técnicas, de plazo, recursos u otras"></textarea></div>
             </div>
             <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px"><button class="btn" type="button" id="clearProjectForm">Limpiar</button><button class="btn primary" type="submit">Guardar proyecto</button></div>
           </form>
@@ -1162,8 +1171,9 @@
     function projectFromDb(p){
       return {
         id:p.id, name:p.name||"", code:p.code||"", client:p.client||"",
-        contractNumber:p.contract_number||"", type:p.project_type||"Administrativo", location:p.location||"",
-        sprintLength:String(p.sprint_length||2), scope:p.scope||p.description||"", description:p.scope||p.description||""
+        contractNumber:p.contract_number||"", contractValue:Number(p.contract_value)||0, type:p.project_type||"Administrativo", location:p.location||"",
+        sprintLength:String(p.sprint_length||2), scope:p.scope||p.description||"", description:p.scope||p.description||"",
+        assumptions:p.assumptions||"", constraints:p.constraints||""
       };
     }
     function responsibleFromDb(r){
@@ -1948,10 +1958,13 @@
         document.getElementById("projectCode").value = p.code||"";
         document.getElementById("projectClient").value = p.client||"";
         document.getElementById("projectContractNumber").value = p.contractNumber||"";
+        document.getElementById("projectContractValue").value = p.contractValue||"";
         document.getElementById("projectType").value = p.type||"Administrativo";
         document.getElementById("projectLocation").value = p.location||"";
         document.getElementById("sprintLength").value = p.sprintLength||"2";
         document.getElementById("projectDescription").value = p.scope||p.description||"";
+        document.getElementById("projectAssumptions").value = p.assumptions||"";
+        document.getElementById("projectConstraints").value = p.constraints||"";
       }));
       document.querySelectorAll(".delete-project").forEach(b=>b.addEventListener("click",async()=>{
         if(!confirm("¿Eliminar este proyecto compartido y sus datos asociados?")) return;
@@ -1967,7 +1980,10 @@
       document.getElementById("projectForm").reset();
       document.getElementById("projectId").value="";
       document.getElementById("projectContractNumber").value="";
+      document.getElementById("projectContractValue").value="";
       document.getElementById("projectDescription").value="";
+      document.getElementById("projectAssumptions").value="";
+      document.getElementById("projectConstraints").value="";
       document.getElementById("projectName").focus();
     });
 
@@ -1980,11 +1996,14 @@
         code: document.getElementById("projectCode").value.trim() || null,
         client: document.getElementById("projectClient").value.trim() || null,
         contract_number: document.getElementById("projectContractNumber").value.trim() || null,
+        contract_value: Number(document.getElementById("projectContractValue").value)||null,
         project_type: document.getElementById("projectType").value,
         location: document.getElementById("projectLocation").value.trim() || null,
         sprint_length: Number(document.getElementById("sprintLength").value)||2,
         scope: document.getElementById("projectDescription").value.trim() || null,
         description: document.getElementById("projectDescription").value.trim() || null,
+        assumptions: document.getElementById("projectAssumptions").value.trim() || null,
+        constraints: document.getElementById("projectConstraints").value.trim() || null,
         updated_at: new Date().toISOString()
       };
       let result;
@@ -2836,7 +2855,6 @@
           ${labels}${circles}${zones}
           <g transform="translate(${padL+10},18)"><text x="0" y="0" font-size="11" fill="#64748b">PV</text><text x="45" y="0" font-size="11" fill="#1f6feb">EV</text><text x="90" y="0" font-size="11" fill="#d98200">AC</text></g>
         </svg>
-        <div class="evm-note">PV = Costo plan × % planeado acumulado. Cuando un entregable alcanza 100% de planeación, su PV equivale exactamente a su costo plan. La curva incluye un Mes 0 = 0 como origen visual; ese mes no aparece en las tablas.</div>
       </div>`;
     }
 
@@ -2868,20 +2886,24 @@
       const p=currentProjectForView();
       if(!p){el.innerHTML='<div class="empty">Selecciona un proyecto.</div>';return;}
       const s=evmSnapshot(evmCurrentCutoff());
-      const [cpiLabel,cpiClass,cpiMsg]=evmStatus(s.CPI,"CPI");
-      const [spiLabel,spiClass,spiMsg]=evmStatus(s.SPI,"SPI");
+      const [cpiLabel,,cpiMsg]=evmStatus(s.CPI,"CPI");
+      const [spiLabel,,spiMsg]=evmStatus(s.SPI,"SPI");
+      const cpiPerfClass=Number.isFinite(s.CPI)&&s.CPI>0?(s.CPI>=1?"perf-good":"perf-bad"):"";
+      const spiPerfClass=Number.isFinite(s.SPI)&&s.SPI>0?(s.SPI>=1?"perf-good":"perf-bad"):"";
+      const eacPerfClass=Number.isFinite(s.EAC)&&Number.isFinite(s.BAC)&&s.BAC>0&&s.EAC>s.BAC?"perf-bad":"";
+      const vacPerfClass=Number.isFinite(s.VAC)&&s.VAC<0?"perf-bad":"";
       el.innerHTML=`
         <div class="grid cols-4" style="margin-bottom:18px">
           <div class="card"><div class="muted">BAC</div><div class="metric">${money(s.BAC)}</div><div class="tiny">Presupuesto base directo</div></div>
           <div class="card"><div class="muted">PV</div><div class="metric">${money(s.PV)}</div><div class="tiny">Valor planificado a hoy</div></div>
-          <div class="card"><div class="muted">EV</div><div class="metric">${money(s.EV)}</div><div class="tiny">Valor ganado</div></div>
-          <div class="card"><div class="muted">AC</div><div class="metric">${money(s.AC)}</div><div class="tiny">Costo real</div></div>
+          <div class="card"><div class="muted">EV</div><div class="metric perf-ev">${money(s.EV)}</div><div class="tiny">Valor ganado</div></div>
+          <div class="card"><div class="muted">AC</div><div class="metric perf-ac">${money(s.AC)}</div><div class="tiny">Costo real</div></div>
         </div>
         <div class="grid cols-4" style="margin-bottom:18px">
-          <div class="card"><div class="muted">CPI</div><div class="metric">${formatIndex(s.CPI)}</div><div class="metric-alert ${cpiClass}">${cpiLabel}: ${cpiMsg}</div></div>
-          <div class="card"><div class="muted">SPI</div><div class="metric">${formatIndex(s.SPI)}</div><div class="metric-alert ${spiClass}">${spiLabel}: ${spiMsg}</div></div>
-          <div class="card"><div class="muted">EAC</div><div class="metric">${s.EAC?money(s.EAC):"—"}</div><div class="tiny">Estimación al completar</div></div>
-          <div class="card"><div class="muted">VAC</div><div class="metric">${s.EAC?money(s.VAC):"—"}</div><div class="tiny">Variación esperada al cierre</div></div>
+          <div class="card"><div class="muted">CPI</div><div class="metric ${cpiPerfClass}">${formatIndex(s.CPI)}</div><div class="metric-alert ${cpiPerfClass}">${cpiLabel}: ${cpiMsg}</div></div>
+          <div class="card"><div class="muted">SPI</div><div class="metric ${spiPerfClass}">${formatIndex(s.SPI)}</div><div class="metric-alert ${spiPerfClass}">${spiLabel}: ${spiMsg}</div></div>
+          <div class="card"><div class="muted">EAC</div><div class="metric ${eacPerfClass}">${s.EAC?money(s.EAC):"—"}</div><div class="tiny">Estimación al completar</div></div>
+          <div class="card"><div class="muted">VAC</div><div class="metric ${vacPerfClass}">${s.EAC?money(s.VAC):"—"}</div><div class="tiny">Variación esperada al cierre</div></div>
         </div>
         ${curveSvg(buildCurveData())}`;
     }
