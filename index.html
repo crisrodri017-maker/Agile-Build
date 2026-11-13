@@ -2756,7 +2756,8 @@
       if(field==="actualCost")actualCost=Math.max(0,Number(value)||0);
       if(field==="progress"){
         const requested=Math.max(0,Math.min(100,Number(String(value).replace(",","."))||0));
-        const past=taskPeriodRows(taskId).filter(r=>r.periodDate<period.start).reduce((sum,r)=>sum+(Number(r.progressIncrement)||0),0);
+        const reportStart=projectReportingConfig().start;
+        const past=taskPeriodRows(taskId).filter(r=>r.periodDate>=reportStart&&r.periodDate<period.start).reduce((sum,r)=>sum+(Number(r.progressIncrement)||0),0);
         const available=Math.max(0,100-past);
         if(requested>available+0.0001)throw new Error(`El máximo disponible para este corte es ${available.toFixed(1)}%, porque los cortes anteriores acumulan ${Math.min(100,past).toFixed(1)}%.`);
         progress=requested;
