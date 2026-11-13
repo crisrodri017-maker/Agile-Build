@@ -2856,11 +2856,33 @@
     }
 
     function buildCurveData(sourceTasks=projectTasks()){
-      const arr=sourceTasks.filter(t=>t.startDate&&t.endDate);if(!arr.length)return [];const c=projectReportingConfig(),min=new Date(c.start+"T00:00:00"),max=new Date(c.end+"T00:00:00"),cutoff=evmCurrentCutoff(),dates=[new Date(min),...projectReportingPeriods().map(p=>new Date(p.end+"T00:00:00"))];if(!dates.some(d=>Math.abs(d-cutoff)<43200000))dates.push(new Date(cutoff));const unique=[...new Map(dates.map(d=>[d.getTime(),d])).values()].filter(d=>d<=max).sort((a,b)=>a-b);const curve=unique.map(d=>{let pv=0,ev=0,ac=0;arr.forEach(t=>{const cst=taskCost(t);pv+=taskPlannedValueAtDate(t,d);if(d<=cutoff){const a=taskActualAtDate(t,d);ev+=cst.planned*(Math.max(0,Math.min(100,a.progress))/100);ac+=a.cost;}});return {date:d,pv,ev:d<=cutoff?ev:null,ac:d<=cutoff?ac:null,isCutoff:Math.abs(d-cutoff)<43200000,isMonthZero:false};});const zeroDate=new Date(min);zeroDate.setDate(zeroDate.getDate()-1);curve.unshift({date:zeroDate,pv:0,ev:0,ac:0,isCutoff:false,isMonthZero:true});return curve;
+      const arr=sourceTasks.filter(t=>t.startDate&&t.endDate);
+      if(!arr.length)return [];
+      const c=projectReportingConfig(),min=new Date(c.start+"T00:00:00"),max=new Date(c.end+"T00:00:00"),cutoff=evmCurrentCutoff();
+      const dates=[new Date(min),...projectReportingPeriods().map(p=>new Date(p.end+"T00:00:00"))];
+      if(!dates.some(d=>Math.abs(d-cutoff)<43200000))dates.push(new Date(cutoff));
+      const unique=[...new Map(dates.map(d=>[d.getTime(),d])).values()].filter(d=>d>=min&&d<=max).sort((a,b)=>a-b);
+      return unique.map(d=>{
+        const isProjectStart=Math.abs(d-min)<43200000;
+        if(isProjectStart){
+          return {date:d,pv:0,ev:0,ac:0,isCutoff:Math.abs(d-cutoff)<43200000,isProjectStart:true};
+        }
+        let pv=0,ev=0,ac=0;
+        arr.forEach(t=>{
+          const cst=taskCost(t);
+          pv+=taskPlannedValueAtDate(t,d);
+          if(d<=cutoff){
+            const a=taskActualAtDate(t,d);
+            ev+=cst.planned*(Math.max(0,Math.min(100,a.progress))/100);
+            ac+=a.cost;
+          }
+        });
+        return {date:d,pv,ev:d<=cutoff?ev:null,ac:d<=cutoff?ac:null,isCutoff:Math.abs(d-cutoff)<43200000,isProjectStart:false};
+      });
     }
 
     function evmTooltipText(p){
-      const label=p.isMonthZero?"Mes 0":p.date.toLocaleDateString("es-CO");
+      const label=p.date.toLocaleDateString("es-CO");
       return `${label}\nPV: ${money(p.pv)}${p.ev==null?"":`\nEV: ${money(p.ev)}`}${p.ac==null?"":`\nAC: ${money(p.ac)}`}`;
     }
 
@@ -2881,7 +2903,7 @@
       const actualPts=points.map((p,i)=>({p,i})).filter(o=>o.p.ev!=null);
       const evPoly=actualPts.map(o=>`${x(o.i)},${y(o.p.ev)}`).join(" ");
       const acPoly=actualPts.map(o=>`${x(o.i)},${y(o.p.ac)}`).join(" ");
-      const labels=points.map((p,i)=>i%2===0||p.isCutoff||p.isMonthZero?`<text x="${x(i)}" y="${H-15}" text-anchor="middle" font-size="10" fill="${p.isCutoff?'#b42318':'#687386'}">${p.isMonthZero?'Mes 0':p.date.toLocaleDateString("es-CO",{month:"short",day:"numeric"})}</text>`:"").join("");
+      const labels=points.map((p,i)=>i%2===0||p.isCutoff||p.isProjectStart?`<text x="${x(i)}" y="${H-15}" text-anchor="middle" font-size="10" fill="${p.isCutoff?'#b42318':'#687386'}">${p.date.toLocaleDateString("es-CO",{month:"short",day:"numeric"})}</text>`:"").join("");
       const cutoffIndex=points.findIndex(p=>p.isCutoff);
       const zones=points.map((p,i)=>{
         const left=i===0?padL:(x(i-1)+x(i))/2;
