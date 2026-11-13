@@ -681,6 +681,18 @@
     @media(max-width:900px){.sprint-team-header{display:none}.sprint-team-row{grid-template-columns:1fr 1fr}.sprint-derived-summary{grid-template-columns:1fr 1fr}}
     @media(max-width:600px){.sprint-team-row{grid-template-columns:1fr}.sprint-derived-summary{grid-template-columns:1fr}.monthly-matrix th:first-child,.monthly-matrix td:first-child{min-width:210px;max-width:210px}}
 
+
+    /* ===== v31: proyectos, hitos, cortes y gobernanza editable ===== */
+    .project-overview-layout{display:grid;grid-template-columns:minmax(300px,.8fr) minmax(0,1.4fr);gap:16px;align-items:start}
+    .project-row{cursor:pointer}.project-row:hover{border-color:#9dbdf5}.project-row-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+    .project-detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.project-detail-item{padding:11px 12px;border:1px solid var(--border);border-radius:10px;background:#fafbfd}.project-detail-item.full{grid-column:1/-1}.project-detail-item .label{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:800}.project-detail-item .value{margin-top:5px;font-weight:700;white-space:pre-wrap}
+    .schedule-controls-card{margin-bottom:12px}.schedule-project-dates,.timeline-filters{display:flex;gap:10px;align-items:end;flex-wrap:wrap}.schedule-project-dates .field,.timeline-filters .field{margin:0;min-width:180px}.timeline-filters{margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+    .milestone-row{background:#fffdf4;border-color:#efd88d}.milestone-label{font-weight:800;color:#8a5a00}.gantt-milestone{position:absolute;top:5px;width:12px;height:12px;background:#d97706;transform:translateX(-50%) rotate(45deg);border:2px solid #fff;box-shadow:0 0 0 1px #d97706;z-index:4}.gantt-project-milestone{background:#0f766e;box-shadow:0 0 0 1px #0f766e}
+    .sprint-status{display:inline-flex;margin-top:5px;font-size:10px;font-weight:800;padding:3px 7px;border-radius:999px;background:#eef2f7;color:#475569}.sprint-status.done{background:#e7f7ee;color:#137a4b}
+    .kanban-task-head{display:flex;justify-content:space-between;gap:6px;align-items:center}.kanban-sprint{font-size:10px;padding:2px 6px;border-radius:999px;background:#e8f1ff;color:#245ab7;font-weight:800}
+    .report-config-note{margin-bottom:12px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:#f8fafc;font-size:12px;color:var(--muted)}
+    .risk-grid,.minutes-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.risk-grid .card,.minutes-list .card{margin:0}.governance-card-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.governance-card-actions{display:flex;gap:6px;flex-wrap:wrap}.governance-summary{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.governance-summary .badge{font-size:11px}
+    @media(max-width:900px){.project-overview-layout{grid-template-columns:1fr}.risk-grid,.minutes-list{grid-template-columns:1fr}.project-detail-grid{grid-template-columns:1fr}.project-detail-item.full{grid-column:auto}}
   </style>
 </head>
 <body class="view-only">
@@ -793,35 +805,15 @@
           <button class="btn primary admin-only" id="newProjectBtn">+ Nuevo proyecto</button>
         </div>
         <div class="demo-note admin-only"><strong>Demo compartida:</strong> usa “✨ Cargar ejemplos demo” desde el Dashboard para crear o restablecer Torres del Sol y Hospital 20 de Julio en Supabase.</div>
-
-
-        <div class="grid cols-2">
-          <form id="projectForm" class="card admin-only">
-            <h3>Crear / editar proyecto</h3>
-            <input type="hidden" id="projectId" />
-            <div class="form-grid">
-              <div class="field"><label>Nombre del proyecto</label><input id="projectName" required /></div>
-              <div class="field"><label>Código</label><input id="projectCode" /></div>
-              <div class="field"><label>Cliente</label><input id="projectClient" /></div>
-              <div class="field"><label>No. de contrato</label><input id="projectContractNumber" placeholder="Ej. C-2026-045" /></div>
-              <div class="field"><label>Valor del contrato (COP)</label><input id="projectContractValue" type="number" min="0" step="1000" placeholder="Ej. 1500000000" /></div>
-              <div class="field"><label>Tipo de edificación</label><select id="projectType"><option>Administrativo</option><option>Hospitalario</option><option>Educativo</option><option>Residencial</option><option>Industrial</option><option>Comercial</option><option>Infraestructura</option></select></div>
-              <div class="field"><label>Ubicación</label><input id="projectLocation" /></div>
-              <div class="field"><label>Duración preferida sprint</label><select id="sprintLength"><option value="1">1 semana</option><option value="2" selected>2 semanas</option><option value="3">3 semanas</option><option value="4">4 semanas</option></select></div>
-              <div class="field full"><label>Alcance contractual</label><textarea id="projectDescription" placeholder="Describe el alcance contractual del proyecto"></textarea></div>
-              <div class="field full"><label>Supuestos</label><textarea id="projectAssumptions" placeholder="Registra los supuestos considerados para definir y ejecutar el alcance"></textarea></div>
-              <div class="field full"><label>Restricciones</label><textarea id="projectConstraints" placeholder="Registra las restricciones contractuales, técnicas, de plazo, recursos u otras"></textarea></div>
-            </div>
-            <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px"><button class="btn" type="button" id="clearProjectForm">Limpiar</button><button class="btn primary" type="submit">Guardar proyecto</button></div>
-          </form>
-
-
+        <div class="project-overview-layout">
           <div class="card">
             <h3>Proyectos guardados</h3>
             <div id="projectsList"></div>
           </div>
+          <div class="card" id="projectDetailsCard">
+            <div id="projectDetails"></div>
+          </div>
         </div>
-
 
         <h3 class="sub-header">👥 Equipo de Trabajo y Tarifas</h3>
 
@@ -927,6 +919,20 @@
 
 
         <h3 class="sub-header">📅 Cronograma de Entregables</h3>
+        <div class="card schedule-controls-card">
+          <div class="schedule-project-dates">
+            <div class="field"><label>Inicio planeado del proyecto</label><input id="projectPlannedStart" type="date"></div>
+            <div class="field"><label>Fin planeado del proyecto</label><input id="projectPlannedEnd" type="date"></div>
+            <button class="btn primary admin-only" id="saveProjectScheduleDates" type="button">Guardar fechas</button>
+            <button class="btn admin-only" id="openMilestoneModal" type="button">+ Añadir hito</button>
+          </div>
+          <div class="timeline-filters">
+            <div class="field"><label>Cuenta de Control</label><select id="timelineFilterCA"><option value="">Todas</option></select></div>
+            <div class="field"><label>Paquete de Trabajo</label><select id="timelineFilterWP"><option value="">Todos</option></select></div>
+            <div class="field"><label>Visualización</label><select id="timelineFilterView"><option value="all">Visualización completa</option><option value="milestones">Solo hitos</option><option value="activities">Solo entregables</option></select></div>
+            <button class="btn" id="clearTimelineFilters" type="button">Limpiar</button>
+          </div>
+        </div>
         <div class="card">
           <div class="timeline">
             <div class="timeline-head"><div>ID</div><div>Actividad</div><div>Predecesora</div><div>Inicio</div><div>Fin</div><div>Holgura</div><div>Cronograma / avance</div><div>Estado</div></div>
@@ -957,7 +963,8 @@
       <!-- MÓDULO 5: DESEMPEÑO -->
       <section id="performance" class="section">
         <div class="topbar">
-          <div><h2>Control Financiero y Desempeño</h2><p>Planeación mensual, presupuesto, costo real y Análisis de Valor Ganado (EVM).</p></div>
+          <div><h2>Control Financiero y Desempeño</h2><p>Planeación por cortes, presupuesto, costo real y Análisis de Valor Ganado (EVM).</p></div>
+          <button class="btn primary admin-only" id="openReportingModal" type="button">⚙ Definir fecha de corte</button>
         </div>
         <h3 class="sub-header">📈 Análisis de Valor Ganado (EVM)</h3>
         <div id="evmContent"></div>
@@ -1002,6 +1009,29 @@
 
 
   <!-- MODALES -->
+  <div class="modal-backdrop" id="projectModal">
+    <div class="modal" style="max-width:900px">
+      <div class="modal-head"><h3 id="projectModalTitle">Nuevo proyecto</h3><button class="close" type="button" data-close="projectModal">✕</button></div>
+      <form id="projectForm" class="admin-only">
+        <input type="hidden" id="projectId" />
+        <div class="form-grid">
+          <div class="field"><label>Nombre del proyecto</label><input id="projectName" required /></div>
+          <div class="field"><label>Código</label><input id="projectCode" /></div>
+          <div class="field"><label>Cliente</label><input id="projectClient" /></div>
+          <div class="field"><label>No. de contrato</label><input id="projectContractNumber" placeholder="Ej. C-2026-045" /></div>
+          <div class="field"><label>Valor del contrato (COP)</label><input id="projectContractValue" type="number" min="0" step="1000" placeholder="Ej. 1500000000" /></div>
+          <div class="field"><label>Tipo de edificación</label><select id="projectType"><option>Administrativo</option><option>Hospitalario</option><option>Educativo</option><option>Residencial</option><option>Industrial</option><option>Comercial</option><option>Infraestructura</option></select></div>
+          <div class="field"><label>Ubicación</label><input id="projectLocation" /></div>
+          <div class="field"><label>Duración preferida sprint</label><select id="sprintLength"><option value="1">1 semana</option><option value="2" selected>2 semanas</option><option value="3">3 semanas</option><option value="4">4 semanas</option></select></div>
+          <div class="field full"><label>Alcance contractual</label><textarea id="projectDescription" placeholder="Describe el alcance contractual del proyecto"></textarea></div>
+          <div class="field full"><label>Supuestos</label><textarea id="projectAssumptions" placeholder="Registra los supuestos considerados para definir y ejecutar el alcance"></textarea></div>
+          <div class="field full"><label>Restricciones</label><textarea id="projectConstraints" placeholder="Registra las restricciones contractuales, técnicas, de plazo, recursos u otras"></textarea></div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px"><button class="btn" type="button" data-close="projectModal">Cancelar</button><button class="btn primary" type="submit">Guardar proyecto</button></div>
+      </form>
+    </div>
+  </div>
+
   <div class="modal-backdrop" id="taskModal">
     <div class="modal">
       <div class="modal-head"><h3 id="taskModalTitle">Nueva actividad del backlog</h3><button class="close" type="button" data-close="taskModal">✕</button></div>
@@ -1069,8 +1099,9 @@
 
   <div class="modal-backdrop" id="riskModal">
     <div class="modal">
-      <div class="modal-head"><h3>Crear riesgo</h3><button class="close" type="button" data-close="riskModal">✕</button></div>
+      <div class="modal-head"><h3 id="riskModalTitle">Crear riesgo</h3><button class="close" type="button" data-close="riskModal">✕</button></div>
       <form id="riskForm">
+        <input type="hidden" id="riskEditId" />
         <div class="form-grid">
           <div class="field full"><label>Descripción</label><textarea id="riskDescription" required></textarea></div>
           <div class="field full"><label>Causas</label><textarea id="riskCauses" required></textarea></div>
@@ -1091,16 +1122,17 @@
           <div class="field full"><label>Medidas de control</label><textarea id="riskControls" required></textarea></div>
           <div class="field full"><div id="riskPreview" class="risk-preview"></div></div>
         </div>
-        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px"><button class="btn" type="button" data-close="riskModal">Cancelar</button><button class="btn primary" type="submit">Guardar riesgo</button></div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px"><button class="btn" type="button" data-close="riskModal">Cancelar</button><button class="btn primary" id="riskSubmitBtn" type="submit">Guardar riesgo</button></div>
       </form>
     </div>
   </div>
 
 
   <div class="modal-backdrop" id="minutesModal">
-    <div class="modal">
-      <div class="modal-head"><h3>Crear acta / Decisión</h3><button class="close" type="button" data-close="minutesModal">✕</button></div>
+    <div class="modal" style="max-width:900px">
+      <div class="modal-head"><h3 id="minutesModalTitle">Crear acta / Decisión</h3><button class="close" type="button" data-close="minutesModal">✕</button></div>
       <form id="minutesForm">
+        <input type="hidden" id="minuteEditId" />
         <div class="form-grid">
           <div class="field"><label>Fecha</label><input id="minutesDate" type="date" required /></div>
           <div class="field"><label>Asunto</label><input id="minutesTitle" required /></div>
@@ -1115,13 +1147,41 @@
         <h3 class="sub-header" style="margin-top:22px">Cambios solicitados por el cliente</h3>
         <div id="clientChangesBuilder"></div>
         <button class="btn small" type="button" id="addClientChange" style="margin-top:10px">+ Añadir cambio solicitado</button>
-        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px"><button class="btn" type="button" data-close="minutesModal">Cancelar</button><button class="btn primary" type="submit">Guardar acta</button></div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:20px"><button class="btn" type="button" data-close="minutesModal">Cancelar</button><button class="btn primary" id="minutesSubmitBtn" type="submit">Guardar acta</button></div>
       </form>
     </div>
   </div>
 
 
 
+
+  <div class="modal-backdrop" id="milestoneModal">
+    <div class="modal" style="max-width:560px">
+      <div class="modal-head"><h3>Añadir hito</h3><button class="close" type="button" data-close="milestoneModal">✕</button></div>
+      <form id="milestoneForm">
+        <div class="form-grid">
+          <div class="field full"><label>Nombre del hito</label><input id="milestoneName" required placeholder="Ej. Aprobación de anteproyecto"></div>
+          <div class="field"><label>Fecha</label><input id="milestoneDate" type="date" required></div>
+          <div class="field full"><label>Descripción (opcional)</label><textarea id="milestoneDescription"></textarea></div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px"><button class="btn" type="button" data-close="milestoneModal">Cancelar</button><button class="btn primary" type="submit">Guardar hito</button></div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="reportingModal">
+    <div class="modal" style="max-width:560px">
+      <div class="modal-head"><h3>Fecha de corte del informe</h3><button class="close" type="button" data-close="reportingModal">✕</button></div>
+      <form id="reportingForm">
+        <div class="form-grid">
+          <div class="field"><label>Frecuencia de cortes</label><select id="reportIntervalDays"><option value="15">Cada 15 días</option><option value="20">Cada 20 días</option><option value="30" selected>Cada 30 días</option></select></div>
+          <div class="field"><label>Fecha de corte actual</label><input id="reportCutoffDate" type="date" required></div>
+          <div class="field full"><div class="tiny">Las tablas de Planeación, Costo Real y Avance se redistribuirán usando esta frecuencia. La Curva S utilizará los mismos cortes.</div></div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:18px"><button class="btn" type="button" data-close="reportingModal">Cancelar</button><button class="btn primary" type="submit">Aplicar</button></div>
+      </form>
+    </div>
+  </div>
 
   <div class="modal-backdrop" id="edtModal">
     <div class="modal">
@@ -1174,7 +1234,9 @@
         id:p.id, name:p.name||"", code:p.code||"", client:p.client||"",
         contractNumber:p.contract_number||"", contractValue:Number(p.contract_value)||0, type:p.project_type||"Administrativo", location:p.location||"",
         sprintLength:String(p.sprint_length||2), scope:p.scope||p.description||"", description:p.scope||p.description||"",
-        assumptions:p.assumptions||"", constraints:p.constraints||""
+        assumptions:p.assumptions||"", constraints:p.constraints||"",
+        plannedStart:p.planned_start||"", plannedEnd:p.planned_end||"",
+        reportIntervalDays:Number(p.report_interval_days)||30, reportCutoffDate:p.report_cutoff_date||""
       };
     }
     function responsibleFromDb(r){
@@ -1205,9 +1267,10 @@
       };
     }
 
-    function monthlyPerformanceFromDb(r){
-      return {id:r.id,projectId:r.project_id,taskId:r.task_id,month:String(r.period_month||"").slice(0,7),actualHours:Number(r.actual_hours)||0,actualCost:Number(r.actual_cost)||0,progressIncrement:Number(r.progress_increment)||0};
+    function periodPerformanceFromDb(r){
+      return {id:r.id,projectId:r.project_id,taskId:r.task_id,periodDate:String(r.period_date||"").slice(0,10),actualHours:Number(r.actual_hours)||0,actualCost:Number(r.actual_cost)||0,progressIncrement:Number(r.progress_increment)||0};
     }
+    function milestoneFromDb(r){return {id:r.id,projectId:r.project_id,name:r.name||"",date:r.milestone_date||"",description:r.description||""};}
 
 
     function riskFromDb(r){
@@ -1228,7 +1291,7 @@
       sharedDataLoading = true;
       setSyncStatus("Actualizando…", "warning");
       try {
-        const [pRes, rRes, tRes, sRes, riskRes, minRes, chgRes, reqRes, ctlRes, wpRes, monRes] = await Promise.all([
+        const [pRes, rRes, tRes, sRes, riskRes, minRes, chgRes, reqRes, ctlRes, wpRes, periodRes, milestoneRes] = await Promise.all([
           supabaseClient.from("projects").select("*").order("created_at", {ascending:true}),
           supabaseClient.from("responsibles").select("*").order("created_at", {ascending:true}),
           supabaseClient.from("tasks").select("*").order("created_at", {ascending:true}),
@@ -1239,7 +1302,8 @@
           supabaseClient.from("edt_requirements").select("*").order("created_at", {ascending:true}),
           supabaseClient.from("control_lots").select("*").order("created_at", {ascending:true}),
           supabaseClient.from("work_packages").select("*").order("created_at", {ascending:true}),
-          supabaseClient.from("task_monthly_performance").select("*").order("period_month", {ascending:true})
+          supabaseClient.from("task_period_performance").select("*").order("period_date", {ascending:true}),
+          supabaseClient.from("project_milestones").select("*").order("milestone_date", {ascending:true})
         ]);
         if (pRes.error) throw pRes.error;
         if (rRes.error) throw rRes.error;
@@ -1251,7 +1315,8 @@
         if (reqRes.error) throw reqRes.error;
         if (ctlRes.error) throw ctlRes.error;
         if (wpRes.error) throw wpRes.error;
-        if (monRes.error) throw monRes.error;
+        if (periodRes.error) throw periodRes.error;
+        if (milestoneRes.error) throw milestoneRes.error;
 
 
         projects = (pRes.data||[]).map(projectFromDb);
@@ -1264,7 +1329,8 @@
         edtRequirements = (reqRes.data||[]).map(requirementFromDb);
         controlLots = (ctlRes.data||[]).map(controlLotFromDb);
         workPackages = (wpRes.data||[]).map(workPackageFromDb);
-        monthlyPerformance = (monRes.data||[]).map(monthlyPerformanceFromDb);
+        periodPerformance = (periodRes.data||[]).map(periodPerformanceFromDb);
+        milestones = (milestoneRes.data||[]).map(milestoneFromDb);
 
 
         if (!projects.some(p=>p.id===activeProjectId)) activeProjectId = projects[0]?.id || "";
@@ -1312,7 +1378,8 @@
     let edtRequirements = [];
     let controlLots = [];
     let workPackages = [];
-    let monthlyPerformance = [];
+    let periodPerformance = [];
+    let milestones = [];
     let sprintDraftTaskIds = new Set();
     let budgetSettings = JSON.parse(localStorage.getItem(KEY.budget)||"{}");
     let evmSettings = JSON.parse(localStorage.getItem(KEY.evm)||"{}");
@@ -1321,6 +1388,9 @@
     let responsiblePageSize = 15;
     let backlogPage = 1;
     let backlogPageSize = 15;
+    let timelineFilterCA = "";
+    let timelineFilterWP = "";
+    let timelineFilterView = "all";
 
 
     const DISCIPLINE_PREFIX = {
@@ -1674,7 +1744,8 @@
         if(uErr) throw uErr;
 
 
-        await supabaseClient.from("task_monthly_performance").delete().eq("project_id",projectId);
+        await supabaseClient.from("task_period_performance").delete().eq("project_id",projectId);
+        await supabaseClient.from("project_milestones").delete().eq("project_id",projectId);
         await supabaseClient.from("work_packages").delete().eq("project_id",projectId);
         await supabaseClient.from("control_lots").delete().eq("project_id",projectId);
         await supabaseClient.from("edt_requirements").delete().eq("project_id",projectId);
@@ -1735,9 +1806,9 @@
         if(totalHours<=0 && totalProgress<=0)continue;
         const s=new Date(raw[9]+"T00:00:00"),e=new Date(raw[10]+"T00:00:00"),cut=new Date("2026-11-12T00:00:00");const last=e<cut?e:cut;if(last<s)continue;
         const months=[];for(let d=new Date(s.getFullYear(),s.getMonth(),1);d<=new Date(last.getFullYear(),last.getMonth(),1);d=new Date(d.getFullYear(),d.getMonth()+1,1))months.push(new Date(d));
-        const weight=1/Math.max(1,months.length);const rate=Number(peopleByName[raw[5]]?.hourly_rate)||0;months.forEach((d,idx)=>{const monthHours=idx===months.length-1?Math.max(0,totalHours-totalHours*weight*(months.length-1)):totalHours*weight;monthlyRows.push({project_id:projectId,task_id:row.id,period_month:`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-01`,actual_hours:monthHours,actual_cost:monthHours*rate,progress_increment:idx===months.length-1?Math.max(0,totalProgress-totalProgress*weight*(months.length-1)):totalProgress*weight});});
+        const weight=1/Math.max(1,months.length);const rate=Number(peopleByName[raw[5]]?.hourly_rate)||0;months.forEach((d,idx)=>{const monthHours=idx===months.length-1?Math.max(0,totalHours-totalHours*weight*(months.length-1)):totalHours*weight;monthlyRows.push({project_id:projectId,task_id:row.id,period_date:`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-01`,actual_hours:monthHours,actual_cost:monthHours*rate,progress_increment:idx===months.length-1?Math.max(0,totalProgress-totalProgress*weight*(months.length-1)):totalProgress*weight});});
       }
-      if(monthlyRows.length){const {error:mErr}=await supabaseClient.from("task_monthly_performance").insert(monthlyRows);if(mErr)throw mErr;}
+      if(monthlyRows.length){const {error:mErr}=await supabaseClient.from("task_period_performance").insert(monthlyRows);if(mErr)throw mErr;}
 
 
       if(Array.isArray(spec.phases) && spec.phases.length){
@@ -1930,96 +2001,57 @@
     document.querySelectorAll("[data-close]").forEach(b => b.addEventListener("click", () => closeModal(b.dataset.close)));
 
 
+    function fillProjectForm(p=null){
+      document.getElementById("projectForm").reset();
+      document.getElementById("projectId").value=p?.id||"";
+      document.getElementById("projectName").value=p?.name||"";
+      document.getElementById("projectCode").value=p?.code||"";
+      document.getElementById("projectClient").value=p?.client||"";
+      document.getElementById("projectContractNumber").value=p?.contractNumber||"";
+      document.getElementById("projectContractValue").value=p?.contractValue||"";
+      document.getElementById("projectType").value=p?.type||"Administrativo";
+      document.getElementById("projectLocation").value=p?.location||"";
+      document.getElementById("sprintLength").value=p?.sprintLength||"2";
+      document.getElementById("projectDescription").value=p?.scope||p?.description||"";
+      document.getElementById("projectAssumptions").value=p?.assumptions||"";
+      document.getElementById("projectConstraints").value=p?.constraints||"";
+      document.getElementById("projectModalTitle").textContent=p?"Editar proyecto":"Nuevo proyecto";
+    }
+    function renderProjectDetails(){
+      const el=document.getElementById("projectDetails"),p=activeProject();
+      if(!p){el.innerHTML='<div class="empty">Selecciona un proyecto para ver su información.</div>';return;}
+      el.innerHTML=`<div class="governance-card-head"><div><h3 style="margin:0">${esc(p.name)}</h3><div class="tiny">${esc(p.code||"Sin código")}</div></div><button class="btn small admin-only edit-current-project" type="button">Editar</button></div>
+      <div class="project-detail-grid" style="margin-top:12px">
+        <div class="project-detail-item"><div class="label">Cliente</div><div class="value">${esc(p.client||"—")}</div></div>
+        <div class="project-detail-item"><div class="label">Contrato</div><div class="value">${esc(p.contractNumber||"—")}</div></div>
+        <div class="project-detail-item"><div class="label">Valor del contrato</div><div class="value">${p.contractValue?money(p.contractValue):"—"}</div></div>
+        <div class="project-detail-item"><div class="label">Tipo</div><div class="value">${esc(p.type||"—")}</div></div>
+        <div class="project-detail-item"><div class="label">Ubicación</div><div class="value">${esc(p.location||"—")}</div></div>
+        <div class="project-detail-item"><div class="label">Sprint preferido</div><div class="value">${esc(p.sprintLength||"2")} semana(s)</div></div>
+        <div class="project-detail-item full"><div class="label">Alcance contractual</div><div class="value">${esc(p.scope||"—")}</div></div>
+        <div class="project-detail-item full"><div class="label">Supuestos</div><div class="value">${esc(p.assumptions||"—")}</div></div>
+        <div class="project-detail-item full"><div class="label">Restricciones</div><div class="value">${esc(p.constraints||"—")}</div></div>
+      </div>`;
+      el.querySelector(".edit-current-project")?.addEventListener("click",()=>{fillProjectForm(p);openModal("projectModal");});
+    }
     function renderProjects(){
       const el = document.getElementById("projectsList");
-      el.innerHTML = projects.length ? projects.map(p => `
-        <div class="project-row ${p.id===activeProjectId?"active":""}">
-          <div style="display:flex;justify-content:space-between;gap:12px;align-items:start">
-            <div><strong>${esc(p.name)}</strong><div class="tiny">${esc(p.code)} · ${esc(p.client)}${p.contractNumber?` · Contrato ${esc(p.contractNumber)}`:""}</div></div>
-            ${p.id===activeProjectId?'<span class="badge info">Activo</span>':''}
-          </div>
-          <div style="display:flex;gap:8px;margin-top:10px" class="admin-only">
-            <button class="btn small activate-project" data-id="${p.id}">Activar</button>
-            <button class="btn small edit-project" data-id="${p.id}">Editar</button>
-            <button class="btn small danger delete-project" data-id="${p.id}">Eliminar</button>
-          </div>
-        </div>`).join("") : '<div class="empty">Aún no hay proyectos. Crea uno nuevo.</div>';
-
-
-      document.querySelectorAll(".activate-project").forEach(b=>b.addEventListener("click",()=>{
-        activeProjectId=b.dataset.id;
-        dashboardProjectFilter = activeProjectId;
-        localStorage.setItem(KEY.activeProject, activeProjectId);
-        renderAll(); showToast("Proyecto activado");
-      }));
-      document.querySelectorAll(".edit-project").forEach(b=>b.addEventListener("click",()=>{
-        const p = projects.find(x=>x.id===b.dataset.id); if(!p) return;
-        document.getElementById("projectId").value = p.id;
-        document.getElementById("projectName").value = p.name||"";
-        document.getElementById("projectCode").value = p.code||"";
-        document.getElementById("projectClient").value = p.client||"";
-        document.getElementById("projectContractNumber").value = p.contractNumber||"";
-        document.getElementById("projectContractValue").value = p.contractValue||"";
-        document.getElementById("projectType").value = p.type||"Administrativo";
-        document.getElementById("projectLocation").value = p.location||"";
-        document.getElementById("sprintLength").value = p.sprintLength||"2";
-        document.getElementById("projectDescription").value = p.scope||p.description||"";
-        document.getElementById("projectAssumptions").value = p.assumptions||"";
-        document.getElementById("projectConstraints").value = p.constraints||"";
-      }));
-      document.querySelectorAll(".delete-project").forEach(b=>b.addEventListener("click",async()=>{
-        if(!confirm("¿Eliminar este proyecto compartido y sus datos asociados?")) return;
-        const { error } = await supabaseClient.from("projects").delete().eq("id", b.dataset.id);
-        if(error) return showToast("Error al eliminar: "+error.message);
-        if(activeProjectId===b.dataset.id) activeProjectId="";
-        await loadSharedData(); showToast("Proyecto eliminado de Supabase");
-      }));
+      el.innerHTML = projects.length ? projects.map(p => `<div class="project-row ${p.id===activeProjectId?"active":""}" data-project-id="${p.id}"><div style="display:flex;justify-content:space-between;gap:12px;align-items:start"><div><strong>${esc(p.name)}</strong><div class="tiny">${esc(p.code)} · ${esc(p.client)}${p.contractNumber?` · Contrato ${esc(p.contractNumber)}`:""}</div></div>${p.id===activeProjectId?'<span class="badge info">Activo</span>':''}</div><div class="project-row-actions admin-only"><button class="btn small edit-project" data-id="${p.id}" type="button">Editar</button><button class="btn small danger delete-project" data-id="${p.id}" type="button">Eliminar</button></div></div>`).join("") : '<div class="empty">Aún no hay proyectos. Crea uno nuevo.</div>';
+      document.querySelectorAll(".project-row").forEach(row=>row.addEventListener("click",e=>{if(e.target.closest("button"))return;activeProjectId=row.dataset.projectId;dashboardProjectFilter=activeProjectId;localStorage.setItem(KEY.activeProject,activeProjectId);renderAll();}));
+      document.querySelectorAll(".edit-project").forEach(b=>b.addEventListener("click",e=>{e.stopPropagation();const p=projects.find(x=>x.id===b.dataset.id);if(!p)return;activeProjectId=p.id;fillProjectForm(p);openModal("projectModal");}));
+      document.querySelectorAll(".delete-project").forEach(b=>b.addEventListener("click",async e=>{e.stopPropagation();if(!confirm("¿Eliminar este proyecto compartido y sus datos asociados?"))return;const {error}=await supabaseClient.from("projects").delete().eq("id",b.dataset.id);if(error)return showToast("Error al eliminar: "+error.message);if(activeProjectId===b.dataset.id)activeProjectId="";await loadSharedData();showToast("Proyecto eliminado de Supabase");}));
+      renderProjectDetails();
     }
 
-
-    document.getElementById("newProjectBtn").addEventListener("click",()=>{
-      document.getElementById("projectForm").reset();
-      document.getElementById("projectId").value="";
-      document.getElementById("projectContractNumber").value="";
-      document.getElementById("projectContractValue").value="";
-      document.getElementById("projectDescription").value="";
-      document.getElementById("projectAssumptions").value="";
-      document.getElementById("projectConstraints").value="";
-      document.getElementById("projectName").focus();
-    });
-
+    document.getElementById("newProjectBtn").addEventListener("click",()=>{fillProjectForm(null);openModal("projectModal");setTimeout(()=>document.getElementById("projectName").focus(),50);});
 
     document.getElementById("projectForm").addEventListener("submit", async e => {
       e.preventDefault();
       const existingId = document.getElementById("projectId").value;
-      const payload = {
-        name: document.getElementById("projectName").value.trim(),
-        code: document.getElementById("projectCode").value.trim() || null,
-        client: document.getElementById("projectClient").value.trim() || null,
-        contract_number: document.getElementById("projectContractNumber").value.trim() || null,
-        contract_value: Number(document.getElementById("projectContractValue").value)||null,
-        project_type: document.getElementById("projectType").value,
-        location: document.getElementById("projectLocation").value.trim() || null,
-        sprint_length: Number(document.getElementById("sprintLength").value)||2,
-        scope: document.getElementById("projectDescription").value.trim() || null,
-        description: document.getElementById("projectDescription").value.trim() || null,
-        assumptions: document.getElementById("projectAssumptions").value.trim() || null,
-        constraints: document.getElementById("projectConstraints").value.trim() || null,
-        updated_at: new Date().toISOString()
-      };
-      let result;
-      if(existingId){
-        result = await supabaseClient.from("projects").update(payload).eq("id", existingId).select().single();
-      } else {
-        result = await supabaseClient.from("projects").insert(payload).select().single();
-      }
-      if(result.error) return showToast("Error al guardar proyecto: "+result.error.message);
-      activeProjectId = result.data.id;
-      dashboardProjectFilter = activeProjectId;
-      localStorage.setItem(KEY.activeProject, activeProjectId);
-      document.getElementById("projectForm").reset();
-      document.getElementById("projectId").value="";
-      await loadSharedData(); showToast("Proyecto guardado en Supabase");
+      const payload = {name:document.getElementById("projectName").value.trim(),code:document.getElementById("projectCode").value.trim()||null,client:document.getElementById("projectClient").value.trim()||null,contract_number:document.getElementById("projectContractNumber").value.trim()||null,contract_value:Number(document.getElementById("projectContractValue").value)||null,project_type:document.getElementById("projectType").value,location:document.getElementById("projectLocation").value.trim()||null,sprint_length:Number(document.getElementById("sprintLength").value)||2,scope:document.getElementById("projectDescription").value.trim()||null,description:document.getElementById("projectDescription").value.trim()||null,assumptions:document.getElementById("projectAssumptions").value.trim()||null,constraints:document.getElementById("projectConstraints").value.trim()||null,updated_at:new Date().toISOString()};
+      const result=existingId?await supabaseClient.from("projects").update(payload).eq("id",existingId).select().single():await supabaseClient.from("projects").insert(payload).select().single();
+      if(result.error)return showToast("Error al guardar proyecto: "+result.error.message);
+      activeProjectId=result.data.id;dashboardProjectFilter=activeProjectId;localStorage.setItem(KEY.activeProject,activeProjectId);closeModal("projectModal");await loadSharedData();showToast("Proyecto guardado en Supabase");
     });
 
 
@@ -2332,15 +2364,34 @@
       const projectDuration=Math.max(0,...ef.values()),lf=new Map(),ls=new Map();for(const id of [...order].reverse()){const successors=succ.get(id)||[];const finish=successors.length?Math.min(...successors.map(s=>ls.get(s))):projectDuration;lf.set(id,finish);ls.set(id,finish-dur.get(id));}
       for(const id of order){const slack=Math.max(0,Math.round((ls.get(id)-es.get(id))*100)/100);result.set(id,{slack,critical:slack===0,es:es.get(id),ef:ef.get(id),ls:ls.get(id),lf:lf.get(id)});}return {result,hasLinks:true,cycle:false,projectDuration};
     }
+    function projectMilestones(){return milestones.filter(m=>m.projectId===activeProjectId);}
+    function timelineDateBounds(){
+      const p=activeProject(),dates=[];if(p?.plannedStart)dates.push(p.plannedStart);if(p?.plannedEnd)dates.push(p.plannedEnd);projectTasks().forEach(t=>{if(t.startDate)dates.push(t.startDate);if(t.endDate)dates.push(t.endDate);});projectMilestones().forEach(m=>m.date&&dates.push(m.date));dates.sort();return {min:dates[0]||"",max:dates[dates.length-1]||""};
+    }
+    function populateTimelineFilters(){
+      const ca=document.getElementById("timelineFilterCA"),wp=document.getElementById("timelineFilterWP"),view=document.getElementById("timelineFilterView");
+      const accounts=projectControlLots();if(ca){ca.innerHTML='<option value="">Todas</option>'+accounts.map((a,i)=>`<option value="${a.id}">CA ${controlDisplayNumber(a,i)} · ${esc(a.name)}</option>`).join("");ca.value=timelineFilterCA;}
+      const packages=timelineFilterCA?projectWorkPackages().filter(w=>w.controlLotId===timelineFilterCA):projectWorkPackages();if(wp){wp.innerHTML='<option value="">Todos</option>'+packages.map(w=>{const a=accounts.find(x=>x.id===w.controlLotId),an=a?controlDisplayNumber(a,accounts.indexOf(a)):"?",ps=a?projectWorkPackages().filter(x=>x.controlLotId===a.id):[],pi=Math.max(0,ps.findIndex(x=>x.id===w.id));return `<option value="${w.id}">WP ${an}.${pi+1} · ${esc(w.name)}</option>`;}).join("");if(packages.some(w=>w.id===timelineFilterWP))wp.value=timelineFilterWP;else timelineFilterWP="";}
+      if(view)view.value=timelineFilterView;
+    }
+    function ganttMilestoneMarker(date,minDate,span,project=false){if(!date||!minDate)return '<div class="gantt-track"></div>';const d=new Date(date+"T00:00:00"),left=Math.max(0,Math.min(100,((d-minDate)/span)*100));return `<div class="gantt-track"><div class="gantt-milestone ${project?"gantt-project-milestone":""}" style="left:${left}%" title="${esc(date)}"></div></div>`;}
     function renderTimeline(){
-      const arr=projectTasks(),body=document.getElementById("timelineBody"),dated=arr.filter(t=>t.startDate&&t.endDate),scaleRow=document.getElementById("ganttScaleRow"),scale=document.getElementById("ganttScale");if(!arr.length){body.innerHTML='<div class="empty">Sin actividades.</div>';if(scaleRow)scaleRow.style.display="none";return;}
-      let minDate=null,maxDate=null;dated.forEach(t=>{const s=new Date(t.startDate+"T00:00:00"),e=new Date(t.endDate+"T00:00:00");if(!minDate||s<minDate)minDate=s;if(!maxDate||e>maxDate)maxDate=e;});const oneDay=86400000,span=minDate&&maxDate?Math.max(oneDay,(maxDate-minDate)+oneDay):oneDay;
-      if(scaleRow&&scale){scaleRow.style.display=dated.length?"grid":"none";scale.innerHTML=dated.length?`<span>${minDate.toLocaleDateString("es-CO")}</span><span>${maxDate.toLocaleDateString("es-CO")}</span>`:"";}
-      const today=new Date();today.setHours(0,0,0,0);const todayPct=minDate&&maxDate?Math.max(0,Math.min(100,((today-minDate)/span)*100)):0,cpm=calculateCriticalPath(arr);if(cpm.cycle)showToast("Existe un ciclo en las precedencias. Revisa la red del cronograma.");
-      let lastGroup="";const parts=[];arr.forEach(t=>{const group=taskGroupInfo(t);if(group.key!==lastGroup){parts.push(`<div class="timeline-group-title">${esc(group.title)}</div>`);lastGroup=group.key;}const cpmInfo=cpm.result.get(t.uid)||{slack:null,critical:false};let bar="";if(t.startDate&&t.endDate&&minDate){const s=new Date(t.startDate+"T00:00:00"),e=new Date(t.endDate+"T00:00:00"),left=Math.max(0,Math.min(100,((s-minDate)/span)*100)),width=Math.max(1,Math.min(100-left,(((e-s)+oneDay)/span)*100)),progress=Math.max(0,Math.min(100,Number(t.physicalProgress)||0));bar=`<div class="gantt-track" title="${esc(t.id)} · ${progress}% de avance"><div class="gantt-bar" style="left:${left}%;width:${width}%"><div class="gantt-progress" style="width:${progress}%"></div></div>${today>=minDate&&today<=maxDate?`<div class="gantt-today" style="left:${todayPct}%" title="Hoy"></div>`:""}</div>`;}else bar='<div class="gantt-track"></div>';
-        const predecessorOptions='<option value="">Sin predecesora</option>'+arr.filter(x=>x.uid!==t.uid).map(x=>`<option value="${x.uid}" ${x.uid===t.predecessorId?"selected":""}>${esc(x.id)} · ${esc(x.name)}</option>`).join("");parts.push(`<div class="timeline-row ${cpmInfo.critical?"critical-row":""}"><div><strong>${esc(t.id)}</strong>${cpmInfo.critical?'<div class="critical-badge">Ruta crítica</div>':""}<div class="tiny">V. ${esc(t.deliverableVersion||"A")}</div></div><div class="timeline-task-name">${esc(t.name)}<div class="tiny">Avance físico: ${Number(t.physicalProgress)||0}%</div></div><div><select class="precedence-editor" data-id="${t.uid}">${predecessorOptions}</select></div><div><input type="date" class="timeline-start" data-id="${t.uid}" value="${t.startDate||""}"></div><div><input type="date" class="timeline-end" data-id="${t.uid}" value="${t.endDate||""}"></div><div class="${cpmInfo.slack===0?"slack-zero":"slack-positive"}">${cpmInfo.slack===null?"—":`${cpmInfo.slack} d`}</div><div>${bar}</div><div>${statusBadge(t.status)}</div></div>`);});body.innerHTML=parts.join("");
+      const p=activeProject(),allTasks=projectTasks(),body=document.getElementById("timelineBody"),scaleRow=document.getElementById("ganttScaleRow"),scale=document.getElementById("ganttScale");populateTimelineFilters();
+      if(document.getElementById("projectPlannedStart"))document.getElementById("projectPlannedStart").value=p?.plannedStart||"";if(document.getElementById("projectPlannedEnd"))document.getElementById("projectPlannedEnd").value=p?.plannedEnd||"";
+      const filteredTasks=allTasks.filter(t=>{const g=taskGroupInfo(t);return (!timelineFilterCA||g.account?.id===timelineFilterCA)&&(!timelineFilterWP||t.workPackageId===timelineFilterWP);});
+      const showActivities=timelineFilterView!=="milestones",showMilestones=timelineFilterView!=="activities";if(!p){body.innerHTML='<div class="empty">Selecciona un proyecto.</div>';if(scaleRow)scaleRow.style.display="none";return;}
+      const bounds=timelineDateBounds(),minDate=bounds.min?new Date(bounds.min+"T00:00:00"):null,maxDate=bounds.max?new Date(bounds.max+"T00:00:00"):null,oneDay=86400000,span=minDate&&maxDate?Math.max(oneDay,(maxDate-minDate)+oneDay):oneDay;
+      if(scaleRow&&scale){scaleRow.style.display=minDate&&maxDate?"grid":"none";scale.innerHTML=minDate&&maxDate?`<span>${minDate.toLocaleDateString("es-CO")}</span><span>${maxDate.toLocaleDateString("es-CO")}</span>`:"";}
+      const today=new Date();today.setHours(0,0,0,0);const todayPct=minDate&&maxDate?Math.max(0,Math.min(100,((today-minDate)/span)*100)):0,cpm=calculateCriticalPath(allTasks);if(cpm.cycle)showToast("Existe un ciclo en las precedencias. Revisa la red del cronograma.");
+      const parts=[];
+      if(showMilestones&&p.plannedStart)parts.push(`<div class="timeline-row milestone-row"><div><strong>HITO</strong></div><div class="milestone-label">Inicio planeado del proyecto</div><div>—</div><div>${esc(p.plannedStart)}</div><div>${esc(p.plannedStart)}</div><div>0 d</div><div>${ganttMilestoneMarker(p.plannedStart,minDate,span,true)}</div><div><span class="badge info">Hito</span></div></div>`);
+      if(showMilestones)projectMilestones().forEach(m=>parts.push(`<div class="timeline-row milestone-row"><div><strong>HITO</strong></div><div><span class="milestone-label">${esc(m.name)}</span>${m.description?`<div class="tiny">${esc(m.description)}</div>`:""}</div><div>—</div><div>${esc(m.date)}</div><div>${esc(m.date)}</div><div>0 d</div><div>${ganttMilestoneMarker(m.date,minDate,span,false)}</div><div><button class="btn small danger admin-only delete-milestone" data-id="${m.id}" type="button">Eliminar</button></div></div>`));
+      if(showActivities){let lastGroup="";filteredTasks.forEach(t=>{const group=taskGroupInfo(t);if(group.key!==lastGroup){parts.push(`<div class="timeline-group-title">${esc(group.title)}</div>`);lastGroup=group.key;}const cpmInfo=cpm.result.get(t.uid)||{slack:null,critical:false};let bar="";if(t.startDate&&t.endDate&&minDate){const s=new Date(t.startDate+"T00:00:00"),e=new Date(t.endDate+"T00:00:00"),left=Math.max(0,Math.min(100,((s-minDate)/span)*100)),width=Math.max(1,Math.min(100-left,(((e-s)+oneDay)/span)*100)),progress=Math.max(0,Math.min(100,Number(t.physicalProgress)||0));bar=`<div class="gantt-track" title="${esc(t.id)} · ${progress}% de avance"><div class="gantt-bar" style="left:${left}%;width:${width}%"><div class="gantt-progress" style="width:${progress}%"></div></div>${today>=minDate&&today<=maxDate?`<div class="gantt-today" style="left:${todayPct}%" title="Hoy"></div>`:""}</div>`;}else bar='<div class="gantt-track"></div>';const predecessorOptions='<option value="">Sin predecesora</option>'+allTasks.filter(x=>x.uid!==t.uid).map(x=>`<option value="${x.uid}" ${x.uid===t.predecessorId?"selected":""}>${esc(x.id)} · ${esc(x.name)}</option>`).join("");parts.push(`<div class="timeline-row ${cpmInfo.critical?"critical-row":""}"><div><strong>${esc(t.id)}</strong>${cpmInfo.critical?'<div class="critical-badge">Ruta crítica</div>':""}<div class="tiny">V. ${esc(t.deliverableVersion||"A")}</div></div><div class="timeline-task-name">${esc(t.name)}<div class="tiny">Avance físico: ${Number(t.physicalProgress)||0}%</div></div><div><select class="precedence-editor" data-id="${t.uid}">${predecessorOptions}</select></div><div><input type="date" class="timeline-start" data-id="${t.uid}" value="${t.startDate||""}"></div><div><input type="date" class="timeline-end" data-id="${t.uid}" value="${t.endDate||""}"></div><div class="${cpmInfo.slack===0?"slack-zero":"slack-positive"}">${cpmInfo.slack===null?"—":`${cpmInfo.slack} d`}</div><div>${bar}</div><div>${statusBadge(t.status)}</div></div>`);});}
+      if(showMilestones&&p.plannedEnd)parts.push(`<div class="timeline-row milestone-row"><div><strong>HITO</strong></div><div class="milestone-label">Fin planeado del proyecto</div><div>—</div><div>${esc(p.plannedEnd)}</div><div>${esc(p.plannedEnd)}</div><div>0 d</div><div>${ganttMilestoneMarker(p.plannedEnd,minDate,span,true)}</div><div><span class="badge info">Hito</span></div></div>`);
+      body.innerHTML=parts.length?parts.join(""):'<div class="empty">No hay elementos para los filtros seleccionados.</div>';
       document.querySelectorAll(".precedence-editor").forEach(sel=>sel.addEventListener("change",async()=>{const pred=sel.value||null;if(pred&&wouldCreatePrecedenceCycle(sel.dataset.id,pred)){showToast("Esa precedencia generaría un ciclo. Selecciona otra actividad.");renderTimeline();return;}const {error}=await supabaseClient.from("tasks").update({predecessor_task_id:pred,updated_at:new Date().toISOString()}).eq("id",sel.dataset.id);if(error)return showToast("Error al guardar precedencia: "+error.message);await loadSharedData();}));
       document.querySelectorAll(".timeline-start, .timeline-end").forEach(inp=>inp.addEventListener("change",async()=>{const field=inp.classList.contains("timeline-start")?"start_date":"end_date",payload={[field]:inp.value||null,updated_at:new Date().toISOString()};const {error}=await supabaseClient.from("tasks").update(payload).eq("id",inp.dataset.id);if(error)return showToast("Error al actualizar fecha: "+error.message);await loadSharedData();}));
+      document.querySelectorAll(".delete-milestone").forEach(b=>b.addEventListener("click",async()=>{if(!confirm("¿Eliminar este hito?"))return;const {error}=await supabaseClient.from("project_milestones").delete().eq("id",b.dataset.id);if(error)return showToast(error.message);await loadSharedData();}));
     }
 
     function sprintRangesOverlap(aStart,aEnd,bStart,bEnd){
@@ -2496,33 +2547,18 @@
     }
     function sprintDisplayName(sp){const objective=String(sp.objective||"").trim();return objective.split(" · ")[0]||objective||"Sin nombre";}
 
+    function sprintCompletionStatus(sp){const arr=projectTasks().filter(t=>t.sprintId===sp.id);return arr.length>0&&arr.every(t=>t.status==="Aprobado")?"Finalizado":"En Proceso";}
     function renderSprints(){
       const el=document.getElementById("sprintsList");
-      el.innerHTML=projectSprints().map(sp=>`<div class="card sprint-compact-card" data-sprint-id="${sp.id}" role="button" tabindex="0"><div class="sprint-compact-number">${esc(sp.name)}</div><div class="sprint-compact-name">${esc(sprintDisplayName(sp))}</div><div class="sprint-compact-owner">${esc(sprintPrimaryResponsible(sp))}</div></div>`).join("")||'<div class="empty">No hay sprints.</div>';
+      el.innerHTML=projectSprints().map(sp=>{const status=sprintCompletionStatus(sp);return `<div class="card sprint-compact-card" data-sprint-id="${sp.id}" role="button" tabindex="0"><div class="sprint-compact-number">${esc(sp.name)}</div><div class="sprint-compact-name">${esc(sprintDisplayName(sp))}</div><div class="sprint-compact-owner">${esc(sprintPrimaryResponsible(sp))}</div><span class="sprint-status ${status==="Finalizado"?"done":""}">${status}</span></div>`;}).join("")||'<div class="empty">No hay sprints.</div>';
       document.querySelectorAll(".sprint-compact-card").forEach(card=>{const open=()=>openSprintEditor(card.dataset.sprintId);card.addEventListener("click",open);card.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();open();}});});
     }
 
     function renderKanban(){
-      const sts = ["Backlog","Por iniciar","En proceso","En revisión","Bloqueado","Aprobado"], board = document.getElementById("kanbanBoard");
-      board.innerHTML = sts.map(st => {
-        const items = projectTasks().filter(t=>t.status===st);
-        return `<div class="kanban-col" data-status="${st}"><div class="kanban-head"><span>${st}</span><span class="badge">${items.length}</span></div>
-          ${items.map(t=>`<div class="task-card" draggable="true" data-task-id="${t.uid}"><div class="tiny">${t.id}</div><h4>${esc(t.name)}</h4></div>`).join("")}</div>`;
-      }).join("");
-      
-      board.querySelectorAll('.task-card[draggable="true"]').forEach(card=>{
-        card.addEventListener("dragstart",e=>{ card.classList.add("dragging"); e.dataTransfer.setData("text/plain",card.dataset.taskId); });
-        card.addEventListener("dragend",()=>{ card.classList.remove("dragging"); board.querySelectorAll(".kanban-col").forEach(c=>c.classList.remove("drag-over")); });
-      });
-      board.querySelectorAll(".kanban-col").forEach(col=>{
-        col.addEventListener("dragover",e=>{ e.preventDefault(); col.classList.add("drag-over"); });
-        col.addEventListener("dragleave",e=>{ col.classList.remove("drag-over"); });
-        col.addEventListener("drop",e=>{
-          e.preventDefault(); col.classList.remove("drag-over");
-          const id = e.dataTransfer.getData("text/plain"), t = tasks.find(x=>x.uid===id);
-          if(t && t.status !== col.dataset.status) { const newStatus=col.dataset.status; t.status=newStatus; renderAll(); supabaseClient.from("tasks").update({status:newStatus,updated_at:new Date().toISOString()}).eq("id",id).then(({error})=>{ if(error){ showToast("Error al mover actividad: "+error.message); loadSharedData(); } }); }
-        });
-      });
+      const sts=["Backlog","Por iniciar","En proceso","En revisión","Bloqueado","Aprobado"],board=document.getElementById("kanbanBoard"),sprintMap=new Map(projectSprints().map(sp=>[sp.id,sp.name]));
+      board.innerHTML=sts.map(st=>{const items=projectTasks().filter(t=>t.status===st);return `<div class="kanban-col" data-status="${st}"><div class="kanban-head"><span>${st}</span><span class="badge">${items.length}</span></div>${items.map(t=>`<div class="task-card" draggable="true" data-task-id="${t.uid}"><div class="kanban-task-head"><span class="tiny">${t.id}</span>${t.sprintId?`<span class="kanban-sprint">${esc(sprintMap.get(t.sprintId)||"Sprint")}</span>`:""}</div><h4>${esc(t.name)}</h4></div>`).join("")}</div>`;}).join("");
+      board.querySelectorAll('.task-card[draggable="true"]').forEach(card=>{card.addEventListener("dragstart",e=>{card.classList.add("dragging");e.dataTransfer.setData("text/plain",card.dataset.taskId);});card.addEventListener("dragend",()=>{card.classList.remove("dragging");board.querySelectorAll(".kanban-col").forEach(c=>c.classList.remove("drag-over"));});});
+      board.querySelectorAll(".kanban-col").forEach(col=>{col.addEventListener("dragover",e=>{e.preventDefault();col.classList.add("drag-over");});col.addEventListener("dragleave",()=>col.classList.remove("drag-over"));col.addEventListener("drop",e=>{e.preventDefault();col.classList.remove("drag-over");const id=e.dataTransfer.getData("text/plain"),t=tasks.find(x=>x.uid===id);if(t&&t.status!==col.dataset.status){const newStatus=col.dataset.status;t.status=newStatus;renderAll();supabaseClient.from("tasks").update({status:newStatus,updated_at:new Date().toISOString()}).eq("id",id).then(({error})=>{if(error){showToast("Error al mover actividad: "+error.message);loadSharedData();}});}});});
     }
 
 
@@ -2659,103 +2695,37 @@
     }
 
 
-    function projectMonthlyPerformance(){return monthlyPerformance.filter(r=>r.projectId===activeProjectId);}
-    function monthKeyFromDate(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;}
-    function monthLabel(key){if(!key)return "";const [y,m]=key.split("-").map(Number);return new Date(y,m-1,1).toLocaleDateString("es-CO",{month:"short",year:"numeric"});}
+    function projectPeriodPerformance(){return periodPerformance.filter(r=>r.projectId===activeProjectId);}
     function dateIsoLocal(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;}
-    function projectMonthKeys(){
-      const dated=projectTasks().flatMap(t=>[t.startDate,t.endDate]).filter(Boolean).sort();
-      if(!dated.length)return [monthKeyFromDate(new Date())];
-      const start=new Date(dated[0]+"T00:00:00"),end=new Date(dated[dated.length-1]+"T00:00:00"),out=[];
-      for(let d=new Date(start.getFullYear(),start.getMonth(),1);d<=new Date(end.getFullYear(),end.getMonth(),1);d=new Date(d.getFullYear(),d.getMonth()+1,1))out.push(monthKeyFromDate(d));
-      return out;
-    }
-    function taskMonthlyRows(taskId){return projectMonthlyPerformance().filter(r=>r.taskId===taskId).sort((a,b)=>a.month.localeCompare(b.month));}
-    function taskActiveMonthKeys(t){
-      if(!t.startDate||!t.endDate)return [];
-      const s=monthKeyFromDate(new Date(t.startDate+"T00:00:00")),e=monthKeyFromDate(new Date(t.endDate+"T00:00:00"));
-      return projectMonthKeys().filter(k=>k>=s&&k<=e);
-    }
-    function taskPlanDistribution(t){
-      const keys=taskActiveMonthKeys(t),out={};if(!keys.length)return out;
-      const base=100/keys.length;let used=0;keys.forEach((k,i)=>{const v=i===keys.length-1?100-used:base;out[k]=v;used+=v;});return out;
-    }
-    function taskPlanPercentAtDate(t,d){
-      if(!t.startDate||!t.endDate)return 0;
-      const cutoff=new Date(d);cutoff.setHours(0,0,0,0);
-      const taskStart=new Date(t.startDate+"T00:00:00"),taskEnd=new Date(t.endDate+"T00:00:00");
-      if(cutoff<taskStart)return 0;
-      // Regla EVM: cuando la planeacion acumulada del entregable llega al 100%,
-      // su PV debe ser exactamente igual a su costo planificado.
-      if(cutoff>=taskEnd)return 100;
-      const dist=taskPlanDistribution(t),key=monthKeyFromDate(cutoff);let total=0;
-      for(const [k,v] of Object.entries(dist)){
-        if(k<key)total+=v;
-        else if(k===key){
-          const [y,m]=k.split("-").map(Number);const monthStart=new Date(y,m-1,1),monthEnd=new Date(y,m,0);
-          const activeStart=taskStart>monthStart?taskStart:monthStart,activeEnd=taskEnd<monthEnd?taskEnd:monthEnd;
-          if(cutoff>=activeEnd)total+=v;
-          else if(cutoff>=activeStart){
-            const denom=businessDaysInclusive(dateIsoLocal(activeStart),dateIsoLocal(activeEnd));
-            const numer=businessDaysInclusive(dateIsoLocal(activeStart),dateIsoLocal(cutoff));
-            total+=v*Math.max(0,Math.min(1,numer/Math.max(1,denom)));
-          }
-        }
-      }
-      const pct=Math.max(0,Math.min(100,total));
-      return pct>99.999999?100:pct;
-    }
-    function taskPlannedValueAtDate(t,d){
-      const planned=taskCost(t).planned;
-      const pct=taskPlanPercentAtDate(t,d);
-      return pct>=100?planned:planned*(pct/100);
-    }
-    function taskActualAtDate(t,d){
-      const key=monthKeyFromDate(d);const rows=taskMonthlyRows(t.uid).filter(r=>r.month<=key);
-      return {cost:rows.reduce((s,r)=>s+(Number(r.actualCost)||0),0),progress:Math.min(100,rows.reduce((s,r)=>s+(Number(r.progressIncrement)||0),0))};
-    }
-    async function saveMonthlyCell(taskId,month,field,value){
-      const rows=taskMonthlyRows(taskId);
-      const current=rows.find(r=>r.month===month);
-      let actualCost=Number(current?.actualCost)||0,progress=Number(current?.progressIncrement)||0;
-      if(field==="actualCost") actualCost=Math.max(0,Number(value)||0);
-      if(field==="progress"){
-        // Solo el avance ya reportado en meses anteriores limita el mes que se está editando.
-        // Los meses futuros no deben impedir guardar un corte histórico.
-        const past=rows.filter(r=>r.month<month).reduce((sum,r)=>sum+(Number(r.progressIncrement)||0),0);
-        progress=Math.max(0,Math.min(Math.max(0,100-past),Number(value)||0));
-      }
-      const payload={project_id:activeProjectId,task_id:taskId,period_month:month+"-01",actual_hours:Number(current?.actualHours)||0,actual_cost:actualCost,progress_increment:progress,updated_at:new Date().toISOString()};
-      const {data,error}=await supabaseClient.from("task_monthly_performance").upsert(payload,{onConflict:"task_id,period_month"}).select().single();
-      if(error)throw error;
-      const mapped=monthlyPerformanceFromDb(data);
-      const pos=monthlyPerformance.findIndex(r=>r.taskId===taskId&&r.month===month);
-      if(pos>=0)monthlyPerformance[pos]=mapped;else monthlyPerformance.push(mapped);
-      let physicalProgress=null;
-      if(field==="progress"){
-        const currentMonth=monthKeyFromDate(new Date());
-        physicalProgress=Math.min(100,taskMonthlyRows(taskId).filter(r=>r.month<=currentMonth).reduce((sum,r)=>sum+(Number(r.progressIncrement)||0),0));
-        const {error:tErr}=await supabaseClient.from("tasks").update({physical_progress:physicalProgress,updated_at:new Date().toISOString()}).eq("id",taskId);
-        if(tErr)throw tErr;
-        const task=tasks.find(t=>t.uid===taskId);if(task)task.physicalProgress=physicalProgress;
-      }
-      return {row:mapped,physicalProgress};
+    function addDaysIso(iso,days){const d=new Date(iso+"T00:00:00");d.setDate(d.getDate()+days);return dateIsoLocal(d);}
+    function projectReportingConfig(){const p=activeProject(),bounds=timelineDateBounds();return {start:p?.plannedStart||bounds.min||dateIsoLocal(new Date()),end:p?.plannedEnd||bounds.max||dateIsoLocal(new Date()),interval:[15,20,30].includes(Number(p?.reportIntervalDays))?Number(p.reportIntervalDays):30,cutoff:p?.reportCutoffDate||dateIsoLocal(new Date())};}
+    function projectReportingPeriods(){const c=projectReportingConfig();if(!c.start||!c.end||c.end<c.start)return [];const out=[];let start=c.start,index=1;while(start<=c.end){let end=addDaysIso(start,c.interval-1);if(end>c.end)end=c.end;out.push({key:end,start,end,label:`Corte ${index} · ${new Date(end+"T00:00:00").toLocaleDateString("es-CO",{day:"numeric",month:"short",year:"2-digit"})}`});if(end===c.end)break;start=addDaysIso(end,1);index++;}return out;}
+    function taskPeriodRows(taskId){return projectPeriodPerformance().filter(r=>r.taskId===taskId).sort((a,b)=>a.periodDate.localeCompare(b.periodDate));}
+    function periodForDate(date){return projectReportingPeriods().find(p=>date>=p.start&&date<=p.end)||null;}
+    function taskBucketValue(taskId,period,field){return taskPeriodRows(taskId).filter(r=>r.periodDate>=period.start&&r.periodDate<=period.end).reduce((s,r)=>s+(Number(r[field])||0),0);}
+    function taskBucketProgress(taskId,period){return taskBucketValue(taskId,period,"progressIncrement");}
+    function overlapBusinessDays(a1,a2,b1,b2){const s=a1>b1?a1:b1,e=a2<b2?a2:b2;return e<s?0:businessDaysInclusive(s,e);}
+    function taskPlanDistribution(t){const periods=projectReportingPeriods(),out={};if(!t.startDate||!t.endDate)return out;const total=Math.max(1,businessDaysInclusive(t.startDate,t.endDate));let used=0,active=[];periods.forEach(p=>{const days=overlapBusinessDays(t.startDate,t.endDate,p.start,p.end);if(days>0)active.push([p.key,days]);});active.forEach(([key,days],i)=>{const v=i===active.length-1?100-used:(days/total*100);out[key]=v;used+=v;});return out;}
+    function taskPlanPercentAtDate(t,d){if(!t.startDate||!t.endDate)return 0;const cutoff=dateIsoLocal(new Date(d)),taskStart=t.startDate,taskEnd=t.endDate;if(cutoff<taskStart)return 0;if(cutoff>=taskEnd)return 100;const denom=Math.max(1,businessDaysInclusive(taskStart,taskEnd)),numer=businessDaysInclusive(taskStart,cutoff);return Math.max(0,Math.min(100,numer/denom*100));}
+    function taskPlannedValueAtDate(t,d){const planned=taskCost(t).planned,pct=taskPlanPercentAtDate(t,d);return pct>=100?planned:planned*(pct/100);}
+    function taskActualAtDate(t,d){const key=dateIsoLocal(new Date(d));const rows=taskPeriodRows(t.uid).filter(r=>r.periodDate<=key);return {cost:rows.reduce((s,r)=>s+(Number(r.actualCost)||0),0),progress:Math.min(100,rows.reduce((s,r)=>s+(Number(r.progressIncrement)||0),0))};}
+    async function savePeriodCell(taskId,periodDate,field,value){
+      const period=projectReportingPeriods().find(p=>p.key===periodDate)||{start:periodDate,end:periodDate,key:periodDate};
+      const existingRows=taskPeriodRows(taskId).filter(r=>r.periodDate>=period.start&&r.periodDate<=period.end);
+      let actualCost=existingRows.reduce((s,r)=>s+(Number(r.actualCost)||0),0),progress=existingRows.reduce((s,r)=>s+(Number(r.progressIncrement)||0),0),actualHours=existingRows.reduce((s,r)=>s+(Number(r.actualHours)||0),0);
+      if(field==="actualCost")actualCost=Math.max(0,Number(value)||0);
+      if(field==="progress"){const past=taskPeriodRows(taskId).filter(r=>r.periodDate<period.start).reduce((sum,r)=>sum+(Number(r.progressIncrement)||0),0);progress=Math.max(0,Math.min(Math.max(0,100-past),Number(value)||0));}
+      const del=await supabaseClient.from("task_period_performance").delete().eq("task_id",taskId).gte("period_date",period.start).lte("period_date",period.end);if(del.error)throw del.error;
+      periodPerformance=periodPerformance.filter(r=>!(r.taskId===taskId&&r.periodDate>=period.start&&r.periodDate<=period.end));
+      const payload={project_id:activeProjectId,task_id:taskId,period_date:period.end,actual_hours:actualHours,actual_cost:actualCost,progress_increment:progress,updated_at:new Date().toISOString()};const {data,error}=await supabaseClient.from("task_period_performance").insert(payload).select().single();if(error)throw error;const mapped=periodPerformanceFromDb(data);periodPerformance.push(mapped);
+      if(field==="progress"){const cutoff=evmCurrentCutoff(),cutKey=dateIsoLocal(cutoff),physicalProgress=Math.min(100,taskPeriodRows(taskId).filter(r=>r.periodDate<=cutKey).reduce((sum,r)=>sum+(Number(r.progressIncrement)||0),0));const {error:tErr}=await supabaseClient.from("tasks").update({physical_progress:physicalProgress,updated_at:new Date().toISOString()}).eq("id",taskId);if(tErr)throw tErr;const task=tasks.find(t=>t.uid===taskId);if(task)task.physicalProgress=physicalProgress;}
+      return mapped;
     }
     function matrixTaskCell(t){return `<strong>${esc(t.id)}</strong><div>${esc(t.name)}</div>`;}
-    function renderPlanning(){
-      const el=document.getElementById("planningContent");if(!el)return;const months=projectMonthKeys(),rows=projectTasks();
-      el.innerHTML=`<div class="card monthly-matrix-card"><div class="monthly-matrix-wrap"><table class="monthly-matrix"><thead><tr><th>Entregable</th>${months.map(m=>`<th>${esc(monthLabel(m))}</th>`).join("")}<th>Total</th></tr></thead><tbody>${rows.map(t=>{const dist=taskPlanDistribution(t);const total=Object.values(dist).reduce((s,v)=>s+v,0);return `<tr><td>${matrixTaskCell(t)}</td>${months.map(m=>`<td class="${dist[m]!=null?"plan-cell":"inactive-cell"}">${dist[m]!=null?dist[m].toFixed(1)+"%":"—"}</td>`).join("")}<td class="matrix-total">${total?total.toFixed(1)+"%":"—"}</td></tr>`;}).join("")}</tbody></table></div><div class="matrix-note">La planeación se distribuye en partes iguales entre los meses comprendidos desde el inicio hasta la finalización de cada entregable.</div></div>`;
-    }
-    function renderActualCost(){
-      const el=document.getElementById("actualCostContent");if(!el)return;const months=projectMonthKeys(),rows=projectTasks();
-      el.innerHTML=`<div class="card monthly-matrix-card"><div class="monthly-matrix-wrap"><table class="monthly-matrix"><thead><tr><th>Entregable</th>${months.map(m=>`<th>${esc(monthLabel(m))}</th>`).join("")}<th>Total</th></tr></thead><tbody>${rows.map(t=>{const byMonth=Object.fromEntries(taskMonthlyRows(t.uid).map(r=>[r.month,r]));const total=months.reduce((s,m)=>s+(Number(byMonth[m]?.actualCost)||0),0);return `<tr><td>${matrixTaskCell(t)}</td>${months.map(m=>`<td><input class="actual-cost-input" data-task="${t.uid}" data-month="${m}" type="number" min="0" step="1000" value="${Number(byMonth[m]?.actualCost)||0}"></td>`).join("")}<td class="matrix-total">${money(total)}</td></tr>`;}).join("")}</tbody></table></div><div class="matrix-note">Registra el costo real incurrido por entregable en cada mes del proyecto.</div></div>`;
-      document.querySelectorAll(".actual-cost-input").forEach(inp=>inp.addEventListener("change",async()=>{try{const saved=await saveMonthlyCell(inp.dataset.task,inp.dataset.month,"actualCost",inp.value);inp.value=Number(saved.row.actualCost)||0;const total=projectMonthKeys().reduce((sum,m)=>sum+(Number(taskMonthlyRows(inp.dataset.task).find(r=>r.month===m)?.actualCost)||0),0);const cell=inp.closest("tr")?.querySelector(".matrix-total");if(cell)cell.textContent=money(total);renderEvm();renderDashboard();showToast("Costo real actualizado");}catch(err){showToast("Error guardando costo real: "+err.message);}}));
-    }
-    function renderEarnedValue(){
-      const el=document.getElementById("earnedValueContent");if(!el)return;const months=projectMonthKeys(),rows=projectTasks();
-      el.innerHTML=`<div class="card monthly-matrix-card"><div class="monthly-matrix-wrap"><table class="monthly-matrix"><thead><tr><th>Entregable</th>${months.map(m=>`<th>${esc(monthLabel(m))}</th>`).join("")}<th>Acumulado</th></tr></thead><tbody>${rows.map(t=>{const byMonth=Object.fromEntries(taskMonthlyRows(t.uid).map(r=>[r.month,r]));const total=Math.min(100,months.reduce((s,m)=>s+(Number(byMonth[m]?.progressIncrement)||0),0));return `<tr><td>${matrixTaskCell(t)}</td>${months.map(m=>`<td><input class="earned-progress-input" data-task="${t.uid}" data-month="${m}" type="number" min="0" max="100" step="0.5" value="${Number(byMonth[m]?.progressIncrement)||0}"> %</td>`).join("")}<td class="matrix-total">${total.toFixed(1)}%</td></tr>`;}).join("")}</tbody></table></div><div class="matrix-note">Registra el porcentaje de avance real generado en cada mes. La suma acumulada por entregable no puede superar 100%.</div></div>`;
-      document.querySelectorAll(".earned-progress-input").forEach(inp=>inp.addEventListener("change",async()=>{try{const saved=await saveMonthlyCell(inp.dataset.task,inp.dataset.month,"progress",inp.value);inp.value=Number(saved.row.progressIncrement)||0;const total=Math.min(100,projectMonthKeys().reduce((sum,m)=>sum+(Number(taskMonthlyRows(inp.dataset.task).find(r=>r.month===m)?.progressIncrement)||0),0));const cell=inp.closest("tr")?.querySelector(".matrix-total");if(cell)cell.textContent=total.toFixed(1)+"%";renderEvm();renderDashboard();showToast("Avance actualizado");}catch(err){showToast("Error guardando avance: "+err.message);}}));
-    }
+    function reportingConfigNote(){const c=projectReportingConfig();return `<div class="report-config-note">Frecuencia: <strong>cada ${c.interval} días</strong> · Fecha de corte: <strong>${new Date(c.cutoff+"T00:00:00").toLocaleDateString("es-CO")}</strong></div>`;}
+    function renderPlanning(){const el=document.getElementById("planningContent");if(!el)return;const periods=projectReportingPeriods(),rows=projectTasks();el.innerHTML=reportingConfigNote()+`<div class="card monthly-matrix-card"><div class="monthly-matrix-wrap"><table class="monthly-matrix"><thead><tr><th>Entregable</th>${periods.map(p=>`<th>${esc(p.label)}</th>`).join("")}<th>Total</th></tr></thead><tbody>${rows.map(t=>{const dist=taskPlanDistribution(t),total=Object.values(dist).reduce((s,v)=>s+v,0);return `<tr><td>${matrixTaskCell(t)}</td>${periods.map(p=>`<td class="${dist[p.key]!=null?"plan-cell":"inactive-cell"}">${dist[p.key]!=null?dist[p.key].toFixed(1)+"%":"—"}</td>`).join("")}<td class="matrix-total">${total?total.toFixed(1)+"%":"—"}</td></tr>`;}).join("")}</tbody></table></div><div class="matrix-note">La planeación se distribuye proporcionalmente por días hábiles dentro de cada periodo de corte.</div></div>`;}
+    function renderActualCost(){const el=document.getElementById("actualCostContent");if(!el)return;const periods=projectReportingPeriods(),rows=projectTasks();el.innerHTML=reportingConfigNote()+`<div class="card monthly-matrix-card"><div class="monthly-matrix-wrap"><table class="monthly-matrix"><thead><tr><th>Entregable</th>${periods.map(p=>`<th>${esc(p.label)}</th>`).join("")}<th>Total</th></tr></thead><tbody>${rows.map(t=>{const total=periods.reduce((s,p)=>s+taskBucketValue(t.uid,p,"actualCost"),0);return `<tr><td>${matrixTaskCell(t)}</td>${periods.map(p=>`<td><input class="actual-cost-input" data-task="${t.uid}" data-period="${p.key}" type="number" min="0" step="1000" value="${taskBucketValue(t.uid,p,"actualCost")}"></td>`).join("")}<td class="matrix-total">${money(total)}</td></tr>`;}).join("")}</tbody></table></div></div>`;document.querySelectorAll(".actual-cost-input").forEach(inp=>inp.addEventListener("change",async()=>{try{const saved=await savePeriodCell(inp.dataset.task,inp.dataset.period,"actualCost",inp.value);inp.value=Number(saved.actualCost)||0;renderActualCost();renderEvm();renderDashboard();showToast("Costo real actualizado");}catch(err){showToast("Error guardando costo real: "+err.message);}}));}
+    function renderEarnedValue(){const el=document.getElementById("earnedValueContent");if(!el)return;const periods=projectReportingPeriods(),rows=projectTasks();el.innerHTML=reportingConfigNote()+`<div class="card monthly-matrix-card"><div class="monthly-matrix-wrap"><table class="monthly-matrix"><thead><tr><th>Entregable</th>${periods.map(p=>`<th>${esc(p.label)}</th>`).join("")}<th>Acumulado</th></tr></thead><tbody>${rows.map(t=>{const total=Math.min(100,periods.reduce((s,p)=>s+taskBucketProgress(t.uid,p),0));return `<tr><td>${matrixTaskCell(t)}</td>${periods.map(p=>`<td><input class="earned-progress-input" data-task="${t.uid}" data-period="${p.key}" type="number" min="0" max="100" step="0.5" value="${taskBucketProgress(t.uid,p)}"> %</td>`).join("")}<td class="matrix-total">${total.toFixed(1)}%</td></tr>`;}).join("")}</tbody></table></div></div>`;document.querySelectorAll(".earned-progress-input").forEach(inp=>inp.addEventListener("change",async()=>{try{const saved=await savePeriodCell(inp.dataset.task,inp.dataset.period,"progress",inp.value);inp.value=Number(saved.progressIncrement)||0;renderEarnedValue();renderEvm();renderDashboard();showToast("Avance actualizado");}catch(err){showToast("Error guardando avance: "+err.message);}}));}
 
     function renderBudget(){
       const el=document.getElementById("budgetContent");
@@ -2808,12 +2778,7 @@
     }
 
 
-    function evmCurrentCutoff(){
-      const arr=projectTasks().filter(t=>t.startDate&&t.endDate);if(!arr.length)return new Date();
-      const min=new Date(Math.min(...arr.map(t=>new Date(t.startDate+"T00:00:00"))));
-      const max=new Date(Math.max(...arr.map(t=>new Date(t.endDate+"T00:00:00"))));
-      const today=new Date();today.setHours(0,0,0,0);return today<min?min:(today>max?max:today);
-    }
+    function evmCurrentCutoff(){const c=projectReportingConfig(),min=new Date(c.start+"T00:00:00"),max=new Date(c.end+"T00:00:00"),chosen=new Date(c.cutoff+"T00:00:00");return chosen<min?min:(chosen>max?max:chosen);}
 
     function evmSnapshot(cutoff, arr=projectTasks()){
       let BAC=0,PV=0,EV=0,AC=0;
@@ -2828,20 +2793,7 @@
     }
 
     function buildCurveData(sourceTasks=projectTasks()){
-      const arr=sourceTasks.filter(t=>t.startDate&&t.endDate);if(!arr.length)return [];
-      const min=new Date(Math.min(...arr.map(t=>new Date(t.startDate+"T00:00:00"))));
-      const max=new Date(Math.max(...arr.map(t=>new Date(t.endDate+"T00:00:00"))));
-      const cutoff=evmCurrentCutoff(),dates=[new Date(min)];
-      for(let d=new Date(min.getFullYear(),min.getMonth()+1,0);d<=max;d=new Date(d.getFullYear(),d.getMonth()+2,0))dates.push(new Date(d));
-      if(!dates.some(d=>Math.abs(d-cutoff)<43200000))dates.push(new Date(cutoff));
-      if(!dates.some(d=>Math.abs(d-max)<43200000))dates.push(new Date(max));
-      const unique=[...new Map(dates.map(d=>[d.getTime(),d])).values()].sort((a,b)=>a-b);
-      const curve=unique.map(d=>{let pv=0,ev=0,ac=0;arr.forEach(t=>{const c=taskCost(t);pv+=taskPlannedValueAtDate(t,d);if(d<=cutoff){const a=taskActualAtDate(t,d);ev+=c.planned*(Math.max(0,Math.min(100,a.progress))/100);ac+=a.cost;}});return {date:d,pv,ev:d<=cutoff?ev:null,ac:d<=cutoff?ac:null,isCutoff:Math.abs(d-cutoff)<43200000,isMonthZero:false};});
-      // Mes 0 sintetico: sirve exclusivamente como origen 0,0,0 de la Curva S.
-      // No forma parte de las matrices mensuales visibles ni se guarda en Supabase.
-      const zeroDate=new Date(min);zeroDate.setDate(zeroDate.getDate()-1);
-      curve.unshift({date:zeroDate,pv:0,ev:0,ac:0,isCutoff:false,isMonthZero:true});
-      return curve;
+      const arr=sourceTasks.filter(t=>t.startDate&&t.endDate);if(!arr.length)return [];const c=projectReportingConfig(),min=new Date(c.start+"T00:00:00"),max=new Date(c.end+"T00:00:00"),cutoff=evmCurrentCutoff(),dates=[new Date(min),...projectReportingPeriods().map(p=>new Date(p.end+"T00:00:00"))];if(!dates.some(d=>Math.abs(d-cutoff)<43200000))dates.push(new Date(cutoff));const unique=[...new Map(dates.map(d=>[d.getTime(),d])).values()].filter(d=>d<=max).sort((a,b)=>a-b);const curve=unique.map(d=>{let pv=0,ev=0,ac=0;arr.forEach(t=>{const cst=taskCost(t);pv+=taskPlannedValueAtDate(t,d);if(d<=cutoff){const a=taskActualAtDate(t,d);ev+=cst.planned*(Math.max(0,Math.min(100,a.progress))/100);ac+=a.cost;}});return {date:d,pv,ev:d<=cutoff?ev:null,ac:d<=cutoff?ac:null,isCutoff:Math.abs(d-cutoff)<43200000,isMonthZero:false};});const zeroDate=new Date(min);zeroDate.setDate(zeroDate.getDate()-1);curve.unshift({date:zeroDate,pv:0,ev:0,ac:0,isCutoff:false,isMonthZero:true});return curve;
     }
 
     function evmTooltipText(p){
@@ -2956,34 +2908,12 @@
 
 
     function renderGovernanceShared(){
-      const riskEl=document.getElementById("risksList"),minutesEl=document.getElementById("minutesList"),newReqEl=document.getElementById("newRequirementsList"),changesEl=document.getElementById("changesList");
-      if(!activeProjectId){riskEl.innerHTML=minutesEl.innerHTML=newReqEl.innerHTML=changesEl.innerHTML='<div class="empty">Selecciona un proyecto.</div>';return;}
-      const pr=projectRisks();
-      riskEl.innerHTML=pr.length?pr.map((r,idx)=>{
-        const [lvl,cls]=riskLevel(r.probability,r.impact);
-        const rr=projectResponsibles().find(x=>x.id===r.responsibleId);
-        return `<div class="card"><div style="display:flex;justify-content:space-between;gap:10px"><span class="badge ${cls}">${lvl} · ${r.probability*r.impact}</span><button class="btn small danger delete-risk admin-only" data-id="${r.id}">Eliminar</button></div><h3 style="margin-top:12px">R-${String(idx+1).padStart(3,"0")} · ${esc(r.description)}</h3><div class="risk-card-grid"><div><span class="tiny">Probabilidad</span><br><strong>${r.probability}/5</strong></div><div><span class="tiny">Impacto</span><br><strong>${r.impact}/5</strong></div><div><span class="tiny">Tratamiento</span><br><strong>${esc(r.treatment)}</strong></div></div><p><strong>Responsable:</strong> ${esc(rr?.name||"Por asignar")}</p>${r.causes?`<p><strong>Causas:</strong> ${esc(r.causes)}</p>`:""}${r.consequences?`<p><strong>Consecuencias:</strong> ${esc(r.consequences)}</p>`:""}<p><strong>Controles:</strong> ${esc(r.controls)}</p></div>`;
-      }).join(""):'<div class="empty">No hay riesgos registrados.</div>';
-
-
-      const pm=projectMinutes();
-      minutesEl.innerHTML=pm.length?pm.map(m=>`<div class="card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;gap:10px"><span class="badge info">${esc(m.date)}</span><button class="btn small danger delete-minute admin-only" data-id="${m.id}">Eliminar</button></div><h3 style="margin-top:10px">${esc(m.title)}</h3><p>${esc(m.topics)}</p>${m.commitments.length?`<h4>Compromisos</h4><div>${m.commitments.map(c=>`<div class="task-card"><strong>${esc(c.text||"")}</strong><div class="tiny">${esc(c.responsibleName||"Por asignar")} · Entrega: ${esc(c.dueDate||"Sin fecha")}</div></div>`).join("")}</div>`:""}${m.newRequirements.length?`<div class="tiny" style="margin-top:10px"><strong>Nuevos requisitos:</strong> ${m.newRequirements.length}</div>`:""}</div>`).join(""):'<div class="empty">No hay actas registradas.</div>';
-
-      const flattenedRequirements=[];
-      pm.forEach(m=>(m.newRequirements||[]).forEach(r=>flattenedRequirements.push({...r,minuteDate:m.date,minuteTitle:m.title})));
-      newReqEl.innerHTML=flattenedRequirements.length?flattenedRequirements.map((r,idx)=>`<div class="card"><span class="badge info">REQ-${String(idx+1).padStart(3,"0")}</span><h3 style="margin-top:10px">${esc(r.description||"Nuevo requisito")}</h3><div class="tiny">Acta: ${esc(r.minuteDate||"—")} · ${esc(r.minuteTitle||"—")}</div>${r.impact?`<div class="change-extra"><strong>Impactos:</strong> ${esc(r.impact)}</div>`:""}${r.alternatives?`<div class="change-extra"><strong>Alternativas:</strong> ${esc(r.alternatives)}</div>`:""}</div>`).join(""):'<div class="empty">No hay requisitos nuevos registrados en actas.</div>';
-
-      const pc=projectChanges();
-      changesEl.innerHTML=pc.length?pc.map(c=>{
-        const affected=c.affectedTaskIds.map(id=>projectTasks().find(t=>t.uid===id)).filter(Boolean);
-        return `<div class="card"><span class="badge ${c.approved?"success":"warning"}">${c.approved?"Aprobado":"No aprobado"}</span><h3 style="margin-top:10px">${esc(c.code)} · ${esc(c.description)}</h3><div class="tiny">Entregables afectados: ${affected.length?affected.map(t=>esc(t.id)).join(", "):"Ninguno"}</div>${c.impactDescription?`<div class="change-extra"><strong>Impacto:</strong> ${esc(c.impactDescription)}</div>`:""}${c.alternatives?`<div class="change-extra"><strong>Alternativas:</strong> ${esc(c.alternatives)}</div>`:""}<div class="change-controls admin-only"><div class="field"><label>Cambio aprobado</label><select class="change-approved" data-id="${c.id}"><option value="false" ${!c.approved?"selected":""}>No</option><option value="true" ${c.approved?"selected":""}>Sí</option></select></div><div class="field"><label>Estado</label><select class="change-status" data-id="${c.id}">${["Solicitado","En evaluación","Aprobado","Rechazado","En implementación","Implementado"].map(s=>`<option ${s===c.status?"selected":""}>${s}</option>`).join("")}</select></div></div></div>`;
-      }).join(""):'<div class="empty">No hay cambios registrados.</div>';
-
-
-      document.querySelectorAll(".delete-risk").forEach(b=>b.addEventListener("click",async()=>{const {error}=await supabaseClient.from("risks").delete().eq("id",b.dataset.id);if(error)return showToast(error.message);await loadSharedData();}));
-      document.querySelectorAll(".delete-minute").forEach(b=>b.addEventListener("click",async()=>{const {error}=await supabaseClient.from("minutes").delete().eq("id",b.dataset.id);if(error)return showToast(error.message);await loadSharedData();}));
-      document.querySelectorAll(".change-approved").forEach(s=>s.addEventListener("change",async()=>{const approved=s.value==="true";const {error}=await supabaseClient.from("changes").update({approved,status:approved?"Aprobado":"Solicitado",updated_at:new Date().toISOString()}).eq("id",s.dataset.id);if(error)return showToast(error.message);await loadSharedData();}));
-      document.querySelectorAll(".change-status").forEach(s=>s.addEventListener("change",async()=>{const {error}=await supabaseClient.from("changes").update({status:s.value,approved:s.value==="Aprobado",updated_at:new Date().toISOString()}).eq("id",s.dataset.id);if(error)return showToast(error.message);await loadSharedData();}));
+      const riskEl=document.getElementById("risksList"),minutesEl=document.getElementById("minutesList"),newReqEl=document.getElementById("newRequirementsList"),changesEl=document.getElementById("changesList");if(!activeProjectId){riskEl.innerHTML=minutesEl.innerHTML=newReqEl.innerHTML=changesEl.innerHTML='<div class="empty">Selecciona un proyecto.</div>';return;}
+      const pr=projectRisks();riskEl.innerHTML=pr.length?pr.map((r,idx)=>{const [lvl,cls]=riskLevel(r.probability,r.impact),rr=projectResponsibles().find(x=>x.id===r.responsibleId);return `<div class="card"><div class="governance-card-head"><span class="badge ${cls}">${lvl} · ${r.probability*r.impact}</span><div class="governance-card-actions admin-only"><button class="btn small edit-risk" data-id="${r.id}" type="button">Editar</button><button class="btn small danger delete-risk" data-id="${r.id}" type="button">Eliminar</button></div></div><h3 style="margin-top:12px">R-${String(idx+1).padStart(3,"0")} · ${esc(r.description)}</h3><div class="risk-card-grid"><div><span class="tiny">Probabilidad</span><br><strong>${r.probability}/5</strong></div><div><span class="tiny">Impacto</span><br><strong>${r.impact}/5</strong></div><div><span class="tiny">Tratamiento</span><br><strong>${esc(r.treatment)}</strong></div></div><p><strong>Responsable:</strong> ${esc(rr?.name||"Por asignar")}</p>${r.causes?`<p><strong>Causas:</strong> ${esc(r.causes)}</p>`:""}${r.consequences?`<p><strong>Consecuencias:</strong> ${esc(r.consequences)}</p>`:""}<p><strong>Controles:</strong> ${esc(r.controls)}</p></div>`;}).join(""):'<div class="empty">No hay riesgos registrados.</div>';
+      const pm=projectMinutes();minutesEl.innerHTML=pm.length?pm.map(m=>{const linked=projectChanges().filter(c=>c.minuteId===m.id);return `<div class="card"><div class="governance-card-head"><div><span class="badge info">${esc(m.date)}</span><h3 style="margin:9px 0 0">${esc(m.title)}</h3></div><div class="governance-card-actions admin-only"><button class="btn small edit-minute" data-id="${m.id}" type="button">Editar</button><button class="btn small danger delete-minute" data-id="${m.id}" type="button">Eliminar</button></div></div><p>${esc(m.topics)}</p><div class="governance-summary"><span class="badge">${m.commitments.length} compromiso(s)</span><span class="badge">${m.newRequirements.length} requisito(s) nuevo(s)</span><span class="badge">${linked.length} cambio(s)</span></div>${m.commitments.length?`<div style="margin-top:10px">${m.commitments.slice(0,3).map(c=>`<div class="task-card"><strong>${esc(c.text||"")}</strong><div class="tiny">${esc(c.responsibleName||"Por asignar")} · ${esc(c.dueDate||"Sin fecha")}</div></div>`).join("")}${m.commitments.length>3?`<div class="tiny">+ ${m.commitments.length-3} compromiso(s) adicionales</div>`:""}</div>`:""}</div>`;}).join(""):'<div class="empty">No hay actas registradas.</div>';
+      const flattenedRequirements=[];pm.forEach(m=>(m.newRequirements||[]).forEach(r=>flattenedRequirements.push({...r,minuteDate:m.date,minuteTitle:m.title})));newReqEl.innerHTML=flattenedRequirements.length?flattenedRequirements.map((r,idx)=>`<div class="card"><span class="badge info">REQ-${String(idx+1).padStart(3,"0")}</span><h3 style="margin-top:10px">${esc(r.description||"Nuevo requisito")}</h3><div class="tiny">Acta: ${esc(r.minuteDate||"—")} · ${esc(r.minuteTitle||"—")}</div>${r.impact?`<div class="change-extra"><strong>Impactos:</strong> ${esc(r.impact)}</div>`:""}${r.alternatives?`<div class="change-extra"><strong>Alternativas:</strong> ${esc(r.alternatives)}</div>`:""}</div>`).join(""):'<div class="empty">No hay requisitos nuevos registrados en actas.</div>';
+      const pc=projectChanges();changesEl.innerHTML=pc.length?pc.map(c=>{const affected=c.affectedTaskIds.map(id=>projectTasks().find(t=>t.uid===id)).filter(Boolean);return `<div class="card"><div class="governance-card-head"><span class="badge ${c.approved?"success":"warning"}">${c.approved?"Aprobado":"No aprobado"}</span><span class="tiny">${esc(c.status)}</span></div><h3 style="margin-top:10px">${esc(c.code)} · ${esc(c.description)}</h3><div class="governance-summary"><span class="badge">${affected.length} entregable(s) afectado(s)</span></div>${c.impactDescription?`<div class="change-extra"><strong>Impacto:</strong> ${esc(c.impactDescription)}</div>`:""}${c.alternatives?`<div class="change-extra"><strong>Alternativas:</strong> ${esc(c.alternatives)}</div>`:""}<div class="change-controls admin-only"><div class="field"><label>Cambio aprobado</label><select class="change-approved" data-id="${c.id}"><option value="false" ${!c.approved?"selected":""}>No</option><option value="true" ${c.approved?"selected":""}>Sí</option></select></div><div class="field"><label>Estado</label><select class="change-status" data-id="${c.id}">${["Solicitado","En evaluación","Aprobado","Rechazado","En implementación","Implementado"].map(s=>`<option ${s===c.status?"selected":""}>${s}</option>`).join("")}</select></div></div></div>`;}).join(""):'<div class="empty">No hay cambios registrados.</div>';
+      document.querySelectorAll(".edit-risk").forEach(b=>b.addEventListener("click",()=>openRiskEditor(b.dataset.id)));document.querySelectorAll(".delete-risk").forEach(b=>b.addEventListener("click",async()=>{const {error}=await supabaseClient.from("risks").delete().eq("id",b.dataset.id);if(error)return showToast(error.message);await loadSharedData();}));document.querySelectorAll(".edit-minute").forEach(b=>b.addEventListener("click",()=>openMinuteEditor(b.dataset.id)));document.querySelectorAll(".delete-minute").forEach(b=>b.addEventListener("click",async()=>{if(!confirm("¿Eliminar esta acta y sus cambios asociados?"))return;const ch=await supabaseClient.from("changes").delete().eq("minute_id",b.dataset.id);if(ch.error)return showToast(ch.error.message);const {error}=await supabaseClient.from("minutes").delete().eq("id",b.dataset.id);if(error)return showToast(error.message);await loadSharedData();}));document.querySelectorAll(".change-approved").forEach(s=>s.addEventListener("change",async()=>{const approved=s.value==="true",{error}=await supabaseClient.from("changes").update({approved,status:approved?"Aprobado":"Solicitado",updated_at:new Date().toISOString()}).eq("id",s.dataset.id);if(error)return showToast(error.message);await loadSharedData();}));document.querySelectorAll(".change-status").forEach(s=>s.addEventListener("change",async()=>{const {error}=await supabaseClient.from("changes").update({status:s.value,approved:s.value==="Aprobado",updated_at:new Date().toISOString()}).eq("id",s.dataset.id);if(error)return showToast(error.message);await loadSharedData();}));
     }
 
 
@@ -2993,52 +2923,21 @@
     }
     document.getElementById("riskProbability").addEventListener("input",updateRiskPreview);
     document.getElementById("riskImpact").addEventListener("input",updateRiskPreview);
-    document.getElementById("openRiskModal").addEventListener("click",()=>{if(!activeProjectId)return showToast("Selecciona un proyecto primero.");document.getElementById("riskForm").reset();document.getElementById("riskProbability").value=3;document.getElementById("riskImpact").value=3;document.getElementById("riskResponsible").innerHTML=responsibleOptions();updateRiskPreview();openModal("riskModal");});
-    document.getElementById("riskForm").addEventListener("submit",async e=>{e.preventDefault();const payload={project_id:activeProjectId,description:document.getElementById("riskDescription").value.trim(),causes:document.getElementById("riskCauses").value.trim(),consequences:document.getElementById("riskConsequences").value.trim(),probability:Number(document.getElementById("riskProbability").value)||1,impact:Number(document.getElementById("riskImpact").value)||1,treatment:document.getElementById("riskTreatment").value,responsible_id:document.getElementById("riskResponsible").value||null,controls:document.getElementById("riskControls").value.trim(),updated_at:new Date().toISOString()};const {error}=await supabaseClient.from("risks").insert(payload);if(error)return showToast("Error guardando riesgo: "+error.message);closeModal("riskModal");await loadSharedData();showToast("Riesgo guardado");});
+    function openRiskEditor(id=""){const r=id?projectRisks().find(x=>x.id===id):null;document.getElementById("riskForm").reset();document.getElementById("riskEditId").value=r?.id||"";document.getElementById("riskModalTitle").textContent=r?"Editar riesgo":"Crear riesgo";document.getElementById("riskSubmitBtn").textContent=r?"Guardar cambios":"Guardar riesgo";document.getElementById("riskDescription").value=r?.description||"";document.getElementById("riskCauses").value=r?.causes||"";document.getElementById("riskConsequences").value=r?.consequences||"";document.getElementById("riskProbability").value=r?.probability||3;document.getElementById("riskImpact").value=r?.impact||3;document.getElementById("riskTreatment").value=r?.treatment||"Mitigar";document.getElementById("riskResponsible").innerHTML=responsibleOptions();document.getElementById("riskResponsible").value=r?.responsibleId||"";document.getElementById("riskControls").value=r?.controls||"";updateRiskPreview();openModal("riskModal");}
+    document.getElementById("openRiskModal").addEventListener("click",()=>{if(!activeProjectId)return showToast("Selecciona un proyecto primero.");openRiskEditor();});
+    document.getElementById("riskForm").addEventListener("submit",async e=>{e.preventDefault();const editId=document.getElementById("riskEditId").value,payload={project_id:activeProjectId,description:document.getElementById("riskDescription").value.trim(),causes:document.getElementById("riskCauses").value.trim(),consequences:document.getElementById("riskConsequences").value.trim(),probability:Number(document.getElementById("riskProbability").value)||1,impact:Number(document.getElementById("riskImpact").value)||1,treatment:document.getElementById("riskTreatment").value,responsible_id:document.getElementById("riskResponsible").value||null,controls:document.getElementById("riskControls").value.trim(),updated_at:new Date().toISOString()};const q=editId?supabaseClient.from("risks").update(payload).eq("id",editId):supabaseClient.from("risks").insert(payload);const {error}=await q;if(error)return showToast("Error guardando riesgo: "+error.message);closeModal("riskModal");await loadSharedData();showToast(editId?"Riesgo actualizado":"Riesgo guardado");});
 
 
     let commitmentCounter=0,newRequirementCounter=0,clientChangeCounter=0;
     function responsibleOptions(){return '<option value="">Por asignar</option>'+projectResponsibles().map(r=>`<option value="${r.id}">${esc(r.name)}</option>`).join("");}
-    function addCommitmentRow(){
-      const idx=commitmentCounter++;const box=document.createElement("div");box.className="builder-card commitment-row";box.dataset.index=idx;box.innerHTML=`<div class="form-grid"><div class="field full"><label>Compromiso</label><input class="commitment-text" placeholder="Actividad acordada"></div><div class="field"><label>Responsable</label><select class="commitment-responsible">${responsibleOptions()}</select></div><div class="field"><label>Fecha de entrega</label><input type="date" class="commitment-date"></div></div><button class="btn small danger remove-builder" type="button" style="margin-top:8px">Eliminar compromiso</button>`;box.querySelector(".remove-builder").addEventListener("click",()=>box.remove());document.getElementById("commitmentsBuilder").appendChild(box);
-    }
-    function addNewRequirementRow(){
-      const idx=newRequirementCounter++;const box=document.createElement("div");box.className="builder-card new-requirement-row";box.dataset.index=idx;box.innerHTML=`<div class="field"><label>Descripción del nuevo requisito</label><textarea class="new-requirement-description" placeholder="Describe el nuevo requerimiento o entregable no previsto"></textarea></div><div class="field" style="margin-top:10px"><label>Impactos</label><textarea class="new-requirement-impact" placeholder="Impacto en alcance, plazo, costo, recursos, calidad o coordinación"></textarea></div><div class="field" style="margin-top:10px"><label>Alternativas</label><textarea class="new-requirement-alternatives" placeholder="Alternativas evaluadas para atender el requisito"></textarea></div><button class="btn small danger remove-builder" type="button" style="margin-top:8px">Eliminar requisito</button>`;box.querySelector(".remove-builder").addEventListener("click",()=>box.remove());document.getElementById("newRequirementsBuilder").appendChild(box);
-    }
-    function addClientChangeRow(){
-      const idx=clientChangeCounter++;const box=document.createElement("div");box.className="builder-card client-change-row";box.dataset.index=idx;box.innerHTML=`<div class="field"><label>Descripción del cambio</label><textarea class="client-change-description"></textarea></div><div class="field" style="margin-top:10px"><label>Impacto esperado del cambio</label><textarea class="client-change-impact" placeholder="Impacto en plazo, costo, alcance, coordinación, calidad..."></textarea></div><div class="field" style="margin-top:10px"><label>Alternativas evaluadas</label><textarea class="client-change-alternatives" placeholder="Alternativas consideradas antes de aprobar el cambio"></textarea></div><div class="field" style="margin-top:10px"><label>Entregables afectados</label><div class="affected-tasks">${projectTasks().map(t=>`<label><input type="checkbox" class="affected-task" value="${t.uid}"><span><strong>${esc(t.id)}</strong> · ${esc(t.name)}</span></label>`).join("")||'<span class="tiny">No hay entregables.</span>'}</div></div><div class="field" style="margin-top:10px"><label>Cambio aprobado</label><select class="client-change-approved"><option value="false">No</option><option value="true">Sí</option></select></div><button class="btn small danger remove-builder" type="button" style="margin-top:8px">Eliminar cambio</button>`;box.querySelector(".remove-builder").addEventListener("click",()=>box.remove());document.getElementById("clientChangesBuilder").appendChild(box);
-    }
-    document.getElementById("addCommitment").addEventListener("click",addCommitmentRow);
-    document.getElementById("addNewRequirement").addEventListener("click",addNewRequirementRow);
-    document.getElementById("addClientChange").addEventListener("click",addClientChangeRow);
-    document.getElementById("openMinutesModal").addEventListener("click",()=>{if(!activeProjectId)return showToast("Selecciona un proyecto primero.");document.getElementById("minutesForm").reset();document.getElementById("commitmentsBuilder").innerHTML="";document.getElementById("newRequirementsBuilder").innerHTML="";document.getElementById("clientChangesBuilder").innerHTML="";commitmentCounter=newRequirementCounter=clientChangeCounter=0;addCommitmentRow();addNewRequirementRow();openModal("minutesModal");});
-    document.getElementById("minutesForm").addEventListener("submit",async e=>{
-      e.preventDefault();
-      const commitments=[...document.querySelectorAll(".commitment-row")].map(row=>{
-        const rid=row.querySelector(".commitment-responsible").value;const r=projectResponsibles().find(x=>x.id===rid);
-        return {text:row.querySelector(".commitment-text").value.trim(),responsibleId:rid,responsibleName:r?.name||"",dueDate:row.querySelector(".commitment-date").value};
-      }).filter(c=>c.text);
-      const newRequirements=[...document.querySelectorAll(".new-requirement-row")].map(row=>({
-        description:row.querySelector(".new-requirement-description").value.trim(),
-        impact:row.querySelector(".new-requirement-impact").value.trim(),
-        alternatives:row.querySelector(".new-requirement-alternatives").value.trim()
-      })).filter(r=>r.description);
-      const {data:minute,error:mErr}=await supabaseClient.from("minutes").insert({
-        project_id:activeProjectId,meeting_date:document.getElementById("minutesDate").value,title:document.getElementById("minutesTitle").value.trim(),topics:document.getElementById("minutesTopics").value.trim(),commitments,new_requirements:newRequirements,updated_at:new Date().toISOString()
-      }).select().single();
-      if(mErr)return showToast("Error guardando acta: "+mErr.message);
-      const baseCode=Number(nextChangeCode().split("-")[1])||1;
-      const changeRows=[...document.querySelectorAll(".client-change-row")].map((row,i)=>{
-        const desc=row.querySelector(".client-change-description").value.trim();
-        const affected=[...row.querySelectorAll(".affected-task:checked")].map(x=>x.value);
-        const approved=row.querySelector(".client-change-approved").value==="true";
-        const impact=row.querySelector(".client-change-impact").value.trim();
-        const alternatives=row.querySelector(".client-change-alternatives").value.trim();
-        return desc?{project_id:activeProjectId,minute_id:minute.id,code:`CHG-${String(baseCode+i).padStart(3,"0")}`,description:desc,impact_description:impact,alternatives,status:approved?"Aprobado":"Solicitado",approved,affected_task_ids:affected}:null;
-      }).filter(Boolean);
-      if(changeRows.length){const {error:cErr}=await supabaseClient.from("changes").insert(changeRows);if(cErr)return showToast("Acta guardada, pero fallaron cambios: "+cErr.message);}
-      closeModal("minutesModal");await loadSharedData();showToast("Acta guardada");
-    });
+    function addCommitmentRow(data={}){const idx=commitmentCounter++,box=document.createElement("div");box.className="builder-card commitment-row";box.dataset.index=idx;box.innerHTML=`<div class="form-grid"><div class="field full"><label>Compromiso</label><input class="commitment-text" value="${esc(data.text||"")}" placeholder="Actividad acordada"></div><div class="field"><label>Responsable</label><select class="commitment-responsible">${responsibleOptions()}</select></div><div class="field"><label>Fecha de entrega</label><input type="date" class="commitment-date" value="${esc(data.dueDate||"")}"></div></div><button class="btn small danger remove-builder" type="button" style="margin-top:8px">Eliminar compromiso</button>`;box.querySelector(".commitment-responsible").value=data.responsibleId||"";box.querySelector(".remove-builder").addEventListener("click",()=>box.remove());document.getElementById("commitmentsBuilder").appendChild(box);}
+    function addNewRequirementRow(data={}){const idx=newRequirementCounter++,box=document.createElement("div");box.className="builder-card new-requirement-row";box.dataset.index=idx;box.innerHTML=`<div class="field"><label>Descripción del nuevo requisito</label><textarea class="new-requirement-description">${esc(data.description||"")}</textarea></div><div class="field" style="margin-top:10px"><label>Impactos</label><textarea class="new-requirement-impact">${esc(data.impact||"")}</textarea></div><div class="field" style="margin-top:10px"><label>Alternativas</label><textarea class="new-requirement-alternatives">${esc(data.alternatives||"")}</textarea></div><button class="btn small danger remove-builder" type="button" style="margin-top:8px">Eliminar requisito</button>`;box.querySelector(".remove-builder").addEventListener("click",()=>box.remove());document.getElementById("newRequirementsBuilder").appendChild(box);}
+    function addClientChangeRow(data={}){const idx=clientChangeCounter++,box=document.createElement("div");box.className="builder-card client-change-row";box.dataset.index=idx;box.dataset.code=data.code||"";box.innerHTML=`<div class="field"><label>Descripción del cambio</label><textarea class="client-change-description">${esc(data.description||"")}</textarea></div><div class="field" style="margin-top:10px"><label>Impacto esperado del cambio</label><textarea class="client-change-impact">${esc(data.impactDescription||"")}</textarea></div><div class="field" style="margin-top:10px"><label>Alternativas evaluadas</label><textarea class="client-change-alternatives">${esc(data.alternatives||"")}</textarea></div><div class="field" style="margin-top:10px"><label>Entregables afectados</label><div class="affected-tasks">${projectTasks().map(t=>`<label><input type="checkbox" class="affected-task" value="${t.uid}" ${(data.affectedTaskIds||[]).includes(t.uid)?"checked":""}><span><strong>${esc(t.id)}</strong> · ${esc(t.name)}</span></label>`).join("")||'<span class="tiny">No hay entregables.</span>'}</div></div><div class="field" style="margin-top:10px"><label>Cambio aprobado</label><select class="client-change-approved"><option value="false" ${!data.approved?"selected":""}>No</option><option value="true" ${data.approved?"selected":""}>Sí</option></select></div><button class="btn small danger remove-builder" type="button" style="margin-top:8px">Eliminar cambio</button>`;box.querySelector(".remove-builder").addEventListener("click",()=>box.remove());document.getElementById("clientChangesBuilder").appendChild(box);}
+    document.getElementById("addCommitment").addEventListener("click",()=>addCommitmentRow());document.getElementById("addNewRequirement").addEventListener("click",()=>addNewRequirementRow());document.getElementById("addClientChange").addEventListener("click",()=>addClientChangeRow());
+    function resetMinuteForm(m=null){document.getElementById("minutesForm").reset();document.getElementById("minuteEditId").value=m?.id||"";document.getElementById("minutesModalTitle").textContent=m?"Editar acta / Decisión":"Crear acta / Decisión";document.getElementById("minutesSubmitBtn").textContent=m?"Guardar cambios":"Guardar acta";document.getElementById("minutesDate").value=m?.date||"";document.getElementById("minutesTitle").value=m?.title||"";document.getElementById("minutesTopics").value=m?.topics||"";document.getElementById("commitmentsBuilder").innerHTML="";document.getElementById("newRequirementsBuilder").innerHTML="";document.getElementById("clientChangesBuilder").innerHTML="";commitmentCounter=newRequirementCounter=clientChangeCounter=0;(m?.commitments?.length?m.commitments:[{}]).forEach(addCommitmentRow);(m?.newRequirements?.length?m.newRequirements:[{}]).forEach(addNewRequirementRow);projectChanges().filter(c=>c.minuteId===m?.id).forEach(addClientChangeRow);}
+    function openMinuteEditor(id=""){const m=id?projectMinutes().find(x=>x.id===id):null;resetMinuteForm(m);openModal("minutesModal");}
+    document.getElementById("openMinutesModal").addEventListener("click",()=>{if(!activeProjectId)return showToast("Selecciona un proyecto primero.");openMinuteEditor();});
+    document.getElementById("minutesForm").addEventListener("submit",async e=>{e.preventDefault();const editId=document.getElementById("minuteEditId").value,commitments=[...document.querySelectorAll(".commitment-row")].map(row=>{const rid=row.querySelector(".commitment-responsible").value,r=projectResponsibles().find(x=>x.id===rid);return {text:row.querySelector(".commitment-text").value.trim(),responsibleId:rid,responsibleName:r?.name||"",dueDate:row.querySelector(".commitment-date").value};}).filter(c=>c.text),newRequirements=[...document.querySelectorAll(".new-requirement-row")].map(row=>({description:row.querySelector(".new-requirement-description").value.trim(),impact:row.querySelector(".new-requirement-impact").value.trim(),alternatives:row.querySelector(".new-requirement-alternatives").value.trim()})).filter(r=>r.description),minutePayload={project_id:activeProjectId,meeting_date:document.getElementById("minutesDate").value,title:document.getElementById("minutesTitle").value.trim(),topics:document.getElementById("minutesTopics").value.trim(),commitments,new_requirements:newRequirements,updated_at:new Date().toISOString()};let minuteRes;if(editId)minuteRes=await supabaseClient.from("minutes").update(minutePayload).eq("id",editId).select().single();else minuteRes=await supabaseClient.from("minutes").insert(minutePayload).select().single();if(minuteRes.error)return showToast("Error guardando acta: "+minuteRes.error.message);const minute=minuteRes.data;if(editId){const {error:dErr}=await supabaseClient.from("changes").delete().eq("minute_id",editId);if(dErr)return showToast("Acta guardada, pero no se pudieron actualizar los cambios: "+dErr.message);}const baseCode=Number(nextChangeCode().split("-")[1])||1,changeRows=[...document.querySelectorAll(".client-change-row")].map((row,i)=>{const desc=row.querySelector(".client-change-description").value.trim();if(!desc)return null;const affected=[...row.querySelectorAll(".affected-task:checked")].map(x=>x.value),approved=row.querySelector(".client-change-approved").value==="true";return {project_id:activeProjectId,minute_id:minute.id,code:row.dataset.code||`CHG-${String(baseCode+i).padStart(3,"0")}`,description:desc,impact_description:row.querySelector(".client-change-impact").value.trim(),alternatives:row.querySelector(".client-change-alternatives").value.trim(),status:approved?"Aprobado":"Solicitado",approved,affected_task_ids:affected};}).filter(Boolean);if(changeRows.length){const {error:cErr}=await supabaseClient.from("changes").insert(changeRows);if(cErr)return showToast("Acta guardada, pero fallaron cambios: "+cErr.message);}closeModal("minutesModal");await loadSharedData();showToast(editId?"Acta actualizada":"Acta guardada");});
 
 
 
@@ -3055,6 +2954,16 @@
       meta.textContent=[p.client,p.contractNumber?`Contrato ${p.contractNumber}`:"",p.location].filter(Boolean).join(" · ");
     }
 
+
+    document.getElementById("timelineFilterCA")?.addEventListener("change",e=>{timelineFilterCA=e.target.value;timelineFilterWP="";renderTimeline();});
+    document.getElementById("timelineFilterWP")?.addEventListener("change",e=>{timelineFilterWP=e.target.value;renderTimeline();});
+    document.getElementById("timelineFilterView")?.addEventListener("change",e=>{timelineFilterView=e.target.value;renderTimeline();});
+    document.getElementById("clearTimelineFilters")?.addEventListener("click",()=>{timelineFilterCA="";timelineFilterWP="";timelineFilterView="all";renderTimeline();});
+    document.getElementById("saveProjectScheduleDates")?.addEventListener("click",async()=>{if(!activeProjectId)return showToast("Selecciona un proyecto.");const start=document.getElementById("projectPlannedStart").value,end=document.getElementById("projectPlannedEnd").value;if(start&&end&&end<start)return showToast("La fecha final no puede ser anterior al inicio.");const {error}=await supabaseClient.from("projects").update({planned_start:start||null,planned_end:end||null,updated_at:new Date().toISOString()}).eq("id",activeProjectId);if(error)return showToast(error.message);await loadSharedData();showToast("Fechas del proyecto actualizadas");});
+    document.getElementById("openMilestoneModal")?.addEventListener("click",()=>{if(!activeProjectId)return showToast("Selecciona un proyecto.");document.getElementById("milestoneForm").reset();openModal("milestoneModal");});
+    document.getElementById("milestoneForm")?.addEventListener("submit",async e=>{e.preventDefault();const {error}=await supabaseClient.from("project_milestones").insert({project_id:activeProjectId,name:document.getElementById("milestoneName").value.trim(),milestone_date:document.getElementById("milestoneDate").value,description:document.getElementById("milestoneDescription").value.trim()||null});if(error)return showToast("Error guardando hito: "+error.message);closeModal("milestoneModal");await loadSharedData();showToast("Hito guardado");});
+    document.getElementById("openReportingModal")?.addEventListener("click",()=>{if(!activeProjectId)return showToast("Selecciona un proyecto.");const c=projectReportingConfig();document.getElementById("reportIntervalDays").value=String(c.interval);document.getElementById("reportCutoffDate").value=c.cutoff;openModal("reportingModal");});
+    document.getElementById("reportingForm")?.addEventListener("submit",async e=>{e.preventDefault();const interval=Number(document.getElementById("reportIntervalDays").value)||30,cutoff=document.getElementById("reportCutoffDate").value;const {error}=await supabaseClient.from("projects").update({report_interval_days:interval,report_cutoff_date:cutoff||null,updated_at:new Date().toISOString()}).eq("id",activeProjectId);if(error)return showToast("Error guardando corte: "+error.message);closeModal("reportingModal");await loadSharedData();showToast("Configuración de corte actualizada");});
 
     function renderAll(){
       renderGlobalProjectContext(); renderDashboardProjectSelector();
