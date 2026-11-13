@@ -1,4 +1,4 @@
-const CACHE_NAME = "agilebuild-v32";
+const CACHE_NAME = "agilebuild-v35";
 const APP_SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png"];
 
 self.addEventListener("install", event => {
