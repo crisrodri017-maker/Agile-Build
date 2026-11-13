@@ -827,13 +827,14 @@
 
         <div class="team-management-grid">
           <div class="card admin-only team-entry-card">
-            <h3>Añadir equipo de trabajo</h3>
+            <h3 id="responsibleFormTitle">Añadir equipo de trabajo</h3>
             <form id="responsibleForm" class="team-entry-grid">
+              <input id="responsibleEditId" type="hidden" value="" />
               <div class="field"><label>Nombre Completo</label><input id="responsibleName" required placeholder="Ej. Juan Pérez" /></div>
               <div class="field"><label>Rol Estandarizado</label><select id="responsibleRole"><option>Director</option><option>Scrum Master</option><option>Líder</option><option>Especialista</option><option>Ingeniero Auxiliar</option><option>Dibujante</option></select></div>
               <div class="field"><label>Área / Disciplina</label><select id="responsibleArea"><option>General / Proyecto</option><option>Arquitectura</option><option>Estructuras</option><option>Geotecnia</option><option>Geología</option><option>Hidrología</option><option>Eléctrico</option><option>Hidrosanitario</option><option>BIM</option><option>Topografía</option><option>Urbanismo</option><option>Gas</option><option>PCI</option><option>Telecomunicaciones</option><option>HVAC</option><option>Gases medicinales</option><option>Equipamiento médico</option><option>Seguridad electrónica</option><option>Transporte vertical</option><option>Presupuestos</option></select></div>
               <div class="field"><label>Costo por hora (COP)</label><input id="responsibleHourlyRate" type="number" min="0" step="1000" value="0" placeholder="Ej. 85000" /></div>
-              <div class="field team-add-action"><button class="btn primary" type="submit">+ Añadir responsable</button></div>
+              <div class="field team-add-action" style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary" id="responsibleSubmitBtn" type="submit">+ Añadir responsable</button><button class="btn" id="cancelResponsibleEdit" type="button" style="display:none">Cancelar edición</button></div>
             </form>
             <div class="csv-inline-tools">
               <input type="file" id="csvFileInput" accept=".csv" style="display:none" />
@@ -2033,16 +2034,43 @@
       const start=(responsiblePage-1)*pageSize,pageRows=responsiblePageSize===Infinity?arr:arr.slice(start,start+pageSize);
       if(countEl)countEl.textContent=`${arr.length} persona(s) · mostrando ${arr.length?start+1:0}-${responsiblePageSize===Infinity?arr.length:Math.min(start+pageSize,arr.length)}`;
       if(pageInfo)pageInfo.textContent=responsiblePageSize===Infinity?"Todos":`Página ${responsiblePage} de ${totalPages}`;if(prev)prev.disabled=responsiblePage<=1||responsiblePageSize===Infinity;if(next)next.disabled=responsiblePage>=totalPages||responsiblePageSize===Infinity;
-      el.innerHTML=arr.length?`<div class="table-wrap"><table class="team-table"><thead><tr><th>Nombre</th><th>Rol</th><th>Tarifa / hora</th><th class="admin-only">Acción</th></tr></thead><tbody>${pageRows.map(r=>`<tr><td><strong>${esc(r.name)}</strong></td><td>${esc(r.role)}</td><td>${money(r.hourlyRate||0)}</td><td class="admin-only"><button class="btn small danger delete-responsible" data-id="${r.id}">Eliminar</button></td></tr>`).join("")}</tbody></table></div>`:'<div class="empty">No hay personal agregado.</div>';
-      document.querySelectorAll(".delete-responsible").forEach(b=>b.addEventListener("click",async()=>{const {error}=await supabaseClient.from("responsibles").delete().eq("id",b.dataset.id);if(error)return showToast("Error al eliminar personal: "+error.message);await loadSharedData();showToast("Personal eliminado");}));
+      el.innerHTML=arr.length?`<div class="table-wrap"><table class="team-table"><thead><tr><th>Nombre</th><th>Rol</th><th>Área / Disciplina</th><th>Tarifa / hora</th><th class="admin-only">Acciones</th></tr></thead><tbody>${pageRows.map(r=>`<tr><td><strong>${esc(r.name)}</strong></td><td>${esc(r.role)}</td><td>${esc(r.area||"General / Proyecto")}</td><td>${money(r.hourlyRate||0)}</td><td class="admin-only"><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn small edit-responsible" data-id="${r.id}" type="button">Editar</button><button class="btn small danger delete-responsible" data-id="${r.id}" type="button">Eliminar</button></div></td></tr>`).join("")}</tbody></table></div>`:'<div class="empty">No hay personal agregado.</div>';
+      document.querySelectorAll(".edit-responsible").forEach(b=>b.addEventListener("click",()=>startResponsibleEdit(b.dataset.id)));
+      document.querySelectorAll(".delete-responsible").forEach(b=>b.addEventListener("click",async()=>{const {error}=await supabaseClient.from("responsibles").delete().eq("id",b.dataset.id);if(error)return showToast("Error al eliminar personal: "+error.message);if(document.getElementById("responsibleEditId")?.value===b.dataset.id)resetResponsibleForm();await loadSharedData();showToast("Personal eliminado");}));
       updateDropdowns();
     }
     document.getElementById("responsiblesPageSize").addEventListener("change",e=>{responsiblePageSize=e.target.value==="all"?Infinity:(Number(e.target.value)||15);responsiblePage=1;renderResponsibles();});
     document.getElementById("responsiblesPrev").addEventListener("click",()=>{if(responsiblePage>1){responsiblePage--;renderResponsibles();}});
     document.getElementById("responsiblesNext").addEventListener("click",()=>{const total=responsiblePageSize===Infinity?1:Math.max(1,Math.ceil(projectResponsibles().length/responsiblePageSize));if(responsiblePage<total){responsiblePage++;renderResponsibles();}});
 
+    function resetResponsibleForm(){
+      const form=document.getElementById("responsibleForm");
+      if(form)form.reset();
+      document.getElementById("responsibleEditId").value="";
+      document.getElementById("responsibleFormTitle").textContent="Añadir equipo de trabajo";
+      document.getElementById("responsibleSubmitBtn").textContent="+ Añadir responsable";
+      document.getElementById("cancelResponsibleEdit").style.display="none";
+      document.getElementById("responsibleHourlyRate").value=0;
+    }
+    function startResponsibleEdit(id){
+      const r=projectResponsibles().find(x=>x.id===id);
+      if(!r)return showToast("No se encontró la persona seleccionada.");
+      document.getElementById("responsibleEditId").value=r.id;
+      document.getElementById("responsibleName").value=r.name||"";
+      document.getElementById("responsibleRole").value=r.role||"Especialista";
+      document.getElementById("responsibleArea").value=r.area||"General / Proyecto";
+      document.getElementById("responsibleHourlyRate").value=Number(r.hourlyRate)||0;
+      document.getElementById("responsibleFormTitle").textContent="Editar integrante del equipo";
+      document.getElementById("responsibleSubmitBtn").textContent="Guardar cambios";
+      document.getElementById("cancelResponsibleEdit").style.display="inline-flex";
+      document.getElementById("responsibleName").focus();
+    }
+    document.getElementById("cancelResponsibleEdit").addEventListener("click",resetResponsibleForm);
+
     document.getElementById("responsibleForm").addEventListener("submit", async e => {
-      e.preventDefault();      if(!activeProjectId) return showToast("Activa un proyecto primero.");
+      e.preventDefault();
+      if(!activeProjectId) return showToast("Activa un proyecto primero.");
+      const editId=document.getElementById("responsibleEditId").value;
       const payload = {
         project_id: activeProjectId,
         name: document.getElementById("responsibleName").value.trim(),
@@ -2051,9 +2079,12 @@
         hourly_rate: Number(document.getElementById("responsibleHourlyRate").value)||0,
         updated_at: new Date().toISOString()
       };
-      const { error } = await supabaseClient.from("responsibles").insert(payload);
-      if(error) return showToast("Error al guardar responsable: "+error.message);
-      e.target.reset(); await loadSharedData(); showToast("Responsable guardado en Supabase");
+      const query=editId?supabaseClient.from("responsibles").update(payload).eq("id",editId):supabaseClient.from("responsibles").insert(payload);
+      const { error } = await query;
+      if(error) return showToast("Error al guardar personal: "+error.message);
+      resetResponsibleForm();
+      await loadSharedData();
+      showToast(editId?"Datos del personal actualizados":"Responsable guardado en Supabase");
     });
 
 
