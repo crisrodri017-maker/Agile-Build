@@ -4,6 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AgileBuild - Gestión Ágil de Diseño</title>
+  <meta name="theme-color" content="#111827" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="AgileBuild" />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png" />
+  <link rel="apple-touch-icon" href="./icon-192.png" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root{
@@ -105,6 +112,12 @@
     }
     .nav-btn:hover,.nav-btn.active{background:#1f2937;color:white}
     .nav-btn.active{box-shadow:inset 3px 0 0 #3b82f6}
+
+    .install-app-wrap{margin-top:18px;padding:14px 8px 0;border-top:1px solid rgba(148,163,184,.2)}
+    .install-app-btn{width:100%;border:1px solid rgba(96,165,250,.45);background:#172554;color:#dbeafe;border-radius:10px;padding:10px 12px;font-weight:800;text-align:left;display:flex;align-items:center;gap:8px}
+    .install-app-btn:hover{background:#1e3a8a;color:white}
+    .install-app-btn:disabled{opacity:.65;cursor:default}
+    .install-app-hint{font-size:10px;color:#94a3b8;margin:6px 2px 0;line-height:1.35}
 
 
     main{padding:28px;min-width:0;position:relative;}
@@ -717,6 +730,10 @@
         <button class="nav-btn" data-section="performance">📈 Desempeño</button>
         <button class="nav-btn" data-section="governance">🛡️ Gobernanza</button>
       </nav>
+      <div class="install-app-wrap">
+        <button class="install-app-btn" id="installAppBtn" type="button">📲 Instalar AgileBuild</button>
+        <div class="install-app-hint" id="installAppHint">Instala AgileBuild en este dispositivo.</div>
+      </div>
     </aside>
 
 
@@ -2706,15 +2723,44 @@
     function taskBucketProgress(taskId,period){return taskBucketValue(taskId,period,"progressIncrement");}
     function overlapBusinessDays(a1,a2,b1,b2){const s=a1>b1?a1:b1,e=a2<b2?a2:b2;return e<s?0:businessDaysInclusive(s,e);}
     function taskPlanDistribution(t){const periods=projectReportingPeriods(),out={};if(!t.startDate||!t.endDate)return out;const total=Math.max(1,businessDaysInclusive(t.startDate,t.endDate));let used=0,active=[];periods.forEach(p=>{const days=overlapBusinessDays(t.startDate,t.endDate,p.start,p.end);if(days>0)active.push([p.key,days]);});active.forEach(([key,days],i)=>{const v=i===active.length-1?100-used:(days/total*100);out[key]=v;used+=v;});return out;}
-    function taskPlanPercentAtDate(t,d){if(!t.startDate||!t.endDate)return 0;const cutoff=dateIsoLocal(new Date(d)),taskStart=t.startDate,taskEnd=t.endDate;if(cutoff<taskStart)return 0;if(cutoff>=taskEnd)return 100;const denom=Math.max(1,businessDaysInclusive(taskStart,taskEnd)),numer=businessDaysInclusive(taskStart,cutoff);return Math.max(0,Math.min(100,numer/denom*100));}
-    function taskPlannedValueAtDate(t,d){const planned=taskCost(t).planned,pct=taskPlanPercentAtDate(t,d);return pct>=100?planned:planned*(pct/100);}
+    function taskPlanPercentAtDate(t,d){
+      if(!t.startDate||!t.endDate)return 0;
+      const cutoff=dateIsoLocal(new Date(d));
+      if(cutoff<t.startDate)return 0;
+      if(cutoff>=t.endDate)return 100;
+      const periods=projectReportingPeriods(),dist=taskPlanDistribution(t);
+      let pct=0;
+      for(const p of periods){
+        const plannedInPeriod=Number(dist[p.key])||0;
+        if(!plannedInPeriod)continue;
+        if(cutoff>=p.end){pct+=plannedInPeriod;continue;}
+        if(cutoff>=p.start&&cutoff<p.end){
+          const periodTaskDays=overlapBusinessDays(t.startDate,t.endDate,p.start,p.end);
+          const elapsedTaskDays=overlapBusinessDays(t.startDate,t.endDate,p.start,cutoff);
+          if(periodTaskDays>0)pct+=plannedInPeriod*(elapsedTaskDays/periodTaskDays);
+        }
+        break;
+      }
+      return Math.max(0,Math.min(100,pct));
+    }
+    function taskPlannedValueAtDate(t,d){
+      const planned=taskCost(t).planned;
+      const planningPct=taskPlanPercentAtDate(t,d);
+      return planned*(planningPct/100);
+    }
     function taskActualAtDate(t,d){const key=dateIsoLocal(new Date(d));const rows=taskPeriodRows(t.uid).filter(r=>r.periodDate<=key);return {cost:rows.reduce((s,r)=>s+(Number(r.actualCost)||0),0),progress:Math.min(100,rows.reduce((s,r)=>s+(Number(r.progressIncrement)||0),0))};}
     async function savePeriodCell(taskId,periodDate,field,value){
       const period=projectReportingPeriods().find(p=>p.key===periodDate)||{start:periodDate,end:periodDate,key:periodDate};
       const existingRows=taskPeriodRows(taskId).filter(r=>r.periodDate>=period.start&&r.periodDate<=period.end);
       let actualCost=existingRows.reduce((s,r)=>s+(Number(r.actualCost)||0),0),progress=existingRows.reduce((s,r)=>s+(Number(r.progressIncrement)||0),0),actualHours=existingRows.reduce((s,r)=>s+(Number(r.actualHours)||0),0);
       if(field==="actualCost")actualCost=Math.max(0,Number(value)||0);
-      if(field==="progress"){const past=taskPeriodRows(taskId).filter(r=>r.periodDate<period.start).reduce((sum,r)=>sum+(Number(r.progressIncrement)||0),0);progress=Math.max(0,Math.min(Math.max(0,100-past),Number(value)||0));}
+      if(field==="progress"){
+        const requested=Math.max(0,Math.min(100,Number(String(value).replace(",","."))||0));
+        const past=taskPeriodRows(taskId).filter(r=>r.periodDate<period.start).reduce((sum,r)=>sum+(Number(r.progressIncrement)||0),0);
+        const available=Math.max(0,100-past);
+        if(requested>available+0.0001)throw new Error(`El máximo disponible para este corte es ${available.toFixed(1)}%, porque los cortes anteriores acumulan ${Math.min(100,past).toFixed(1)}%.`);
+        progress=requested;
+      }
       const del=await supabaseClient.from("task_period_performance").delete().eq("task_id",taskId).gte("period_date",period.start).lte("period_date",period.end);if(del.error)throw del.error;
       periodPerformance=periodPerformance.filter(r=>!(r.taskId===taskId&&r.periodDate>=period.start&&r.periodDate<=period.end));
       const payload={project_id:activeProjectId,task_id:taskId,period_date:period.end,actual_hours:actualHours,actual_cost:actualCost,progress_increment:progress,updated_at:new Date().toISOString()};const {data,error}=await supabaseClient.from("task_period_performance").insert(payload).select().single();if(error)throw error;const mapped=periodPerformanceFromDb(data);periodPerformance.push(mapped);
@@ -2725,7 +2771,24 @@
     function reportingConfigNote(){const c=projectReportingConfig();return `<div class="report-config-note">Frecuencia: <strong>cada ${c.interval} días</strong> · Fecha de corte: <strong>${new Date(c.cutoff+"T00:00:00").toLocaleDateString("es-CO")}</strong></div>`;}
     function renderPlanning(){const el=document.getElementById("planningContent");if(!el)return;const periods=projectReportingPeriods(),rows=projectTasks();el.innerHTML=reportingConfigNote()+`<div class="card monthly-matrix-card"><div class="monthly-matrix-wrap"><table class="monthly-matrix"><thead><tr><th>Entregable</th>${periods.map(p=>`<th>${esc(p.label)}</th>`).join("")}<th>Total</th></tr></thead><tbody>${rows.map(t=>{const dist=taskPlanDistribution(t),total=Object.values(dist).reduce((s,v)=>s+v,0);return `<tr><td>${matrixTaskCell(t)}</td>${periods.map(p=>`<td class="${dist[p.key]!=null?"plan-cell":"inactive-cell"}">${dist[p.key]!=null?dist[p.key].toFixed(1)+"%":"—"}</td>`).join("")}<td class="matrix-total">${total?total.toFixed(1)+"%":"—"}</td></tr>`;}).join("")}</tbody></table></div><div class="matrix-note">La planeación se distribuye proporcionalmente por días hábiles dentro de cada periodo de corte.</div></div>`;}
     function renderActualCost(){const el=document.getElementById("actualCostContent");if(!el)return;const periods=projectReportingPeriods(),rows=projectTasks();el.innerHTML=reportingConfigNote()+`<div class="card monthly-matrix-card"><div class="monthly-matrix-wrap"><table class="monthly-matrix"><thead><tr><th>Entregable</th>${periods.map(p=>`<th>${esc(p.label)}</th>`).join("")}<th>Total</th></tr></thead><tbody>${rows.map(t=>{const total=periods.reduce((s,p)=>s+taskBucketValue(t.uid,p,"actualCost"),0);return `<tr><td>${matrixTaskCell(t)}</td>${periods.map(p=>`<td><input class="actual-cost-input" data-task="${t.uid}" data-period="${p.key}" type="number" min="0" step="1000" value="${taskBucketValue(t.uid,p,"actualCost")}"></td>`).join("")}<td class="matrix-total">${money(total)}</td></tr>`;}).join("")}</tbody></table></div></div>`;document.querySelectorAll(".actual-cost-input").forEach(inp=>inp.addEventListener("change",async()=>{try{const saved=await savePeriodCell(inp.dataset.task,inp.dataset.period,"actualCost",inp.value);inp.value=Number(saved.actualCost)||0;renderActualCost();renderEvm();renderDashboard();showToast("Costo real actualizado");}catch(err){showToast("Error guardando costo real: "+err.message);}}));}
-    function renderEarnedValue(){const el=document.getElementById("earnedValueContent");if(!el)return;const periods=projectReportingPeriods(),rows=projectTasks();el.innerHTML=reportingConfigNote()+`<div class="card monthly-matrix-card"><div class="monthly-matrix-wrap"><table class="monthly-matrix"><thead><tr><th>Entregable</th>${periods.map(p=>`<th>${esc(p.label)}</th>`).join("")}<th>Acumulado</th></tr></thead><tbody>${rows.map(t=>{const total=Math.min(100,periods.reduce((s,p)=>s+taskBucketProgress(t.uid,p),0));return `<tr><td>${matrixTaskCell(t)}</td>${periods.map(p=>`<td><input class="earned-progress-input" data-task="${t.uid}" data-period="${p.key}" type="number" min="0" max="100" step="0.5" value="${taskBucketProgress(t.uid,p)}"> %</td>`).join("")}<td class="matrix-total">${total.toFixed(1)}%</td></tr>`;}).join("")}</tbody></table></div></div>`;document.querySelectorAll(".earned-progress-input").forEach(inp=>inp.addEventListener("change",async()=>{try{const saved=await savePeriodCell(inp.dataset.task,inp.dataset.period,"progress",inp.value);inp.value=Number(saved.progressIncrement)||0;renderEarnedValue();renderEvm();renderDashboard();showToast("Avance actualizado");}catch(err){showToast("Error guardando avance: "+err.message);}}));}
+    function renderEarnedValue(){
+      const el=document.getElementById("earnedValueContent");if(!el)return;
+      const periods=projectReportingPeriods(),rows=projectTasks();
+      el.innerHTML=reportingConfigNote()+`<div class="card monthly-matrix-card"><div class="monthly-matrix-wrap"><table class="monthly-matrix"><thead><tr><th>Entregable</th>${periods.map(p=>`<th>${esc(p.label)}</th>`).join("")}<th>Acumulado</th></tr></thead><tbody>${rows.map(t=>{const total=Math.min(100,periods.reduce((s,p)=>s+taskBucketProgress(t.uid,p),0));return `<tr><td>${matrixTaskCell(t)}</td>${periods.map(p=>`<td><input class="earned-progress-input" data-task="${t.uid}" data-period="${p.key}" type="number" min="0" max="100" step="0.5" value="${taskBucketProgress(t.uid,p)}"> %</td>`).join("")}<td class="matrix-total">${total.toFixed(1)}%</td></tr>`;}).join("")}</tbody></table></div><div class="matrix-note">Registra el avance generado en cada corte. Los cortes anteriores determinan el porcentaje disponible hasta completar 100%.</div></div>`;
+      document.querySelectorAll(".earned-progress-input").forEach(inp=>inp.addEventListener("change",async()=>{
+        const previous=taskBucketProgress(inp.dataset.task,projectReportingPeriods().find(p=>p.key===inp.dataset.period)||{start:inp.dataset.period,end:inp.dataset.period,key:inp.dataset.period});
+        try{
+          const saved=await savePeriodCell(inp.dataset.task,inp.dataset.period,"progress",inp.value);
+          inp.value=Number(saved.progressIncrement)||0;
+          const total=Math.min(100,projectReportingPeriods().reduce((sum,p)=>sum+taskBucketProgress(inp.dataset.task,p),0));
+          const cell=inp.closest("tr")?.querySelector(".matrix-total");if(cell)cell.textContent=total.toFixed(1)+"%";
+          renderEvm();renderDashboard();showToast("Avance actualizado");
+        }catch(err){
+          inp.value=previous;
+          showToast("Error guardando avance: "+err.message);
+        }
+      }));
+    }
 
     function renderBudget(){
       const el=document.getElementById("budgetContent");
@@ -2992,6 +3055,31 @@
     mobileNavBackdrop.addEventListener("click",closeMobileMenu);
     navButtons.forEach(b=>b.addEventListener("click",closeMobileMenu));
 
+
+    // Instalación PWA. La interfaz puede abrirse desde el dispositivo; Supabase requiere conexión para sincronizar datos.
+    let deferredInstallPrompt=null;
+    const installAppBtn=document.getElementById("installAppBtn");
+    const installAppHint=document.getElementById("installAppHint");
+    function appIsInstalled(){return window.matchMedia("(display-mode: standalone)").matches||window.navigator.standalone===true;}
+    function refreshInstallUi(){
+      if(!installAppBtn)return;
+      if(appIsInstalled()){installAppBtn.textContent="✓ AgileBuild instalado";installAppBtn.disabled=true;if(installAppHint)installAppHint.textContent="La aplicación ya está instalada en este dispositivo.";}
+      else {installAppBtn.textContent="📲 Instalar AgileBuild";installAppBtn.disabled=false;if(installAppHint)installAppHint.textContent="Instala AgileBuild en este dispositivo.";}
+    }
+    window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredInstallPrompt=e;refreshInstallUi();});
+    window.addEventListener("appinstalled",()=>{deferredInstallPrompt=null;refreshInstallUi();showToast("AgileBuild instalado correctamente");});
+    installAppBtn?.addEventListener("click",async()=>{
+      if(appIsInstalled())return;
+      if(deferredInstallPrompt){
+        deferredInstallPrompt.prompt();
+        await deferredInstallPrompt.userChoice;
+        deferredInstallPrompt=null;refreshInstallUi();return;
+      }
+      const isiOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+      showToast(isiOS?"En iPhone/iPad: Compartir → Añadir a pantalla de inicio.":"Abre el menú del navegador y elige Instalar aplicación o Añadir a pantalla de inicio.");
+    });
+    if("serviceWorker" in navigator){window.addEventListener("load",()=>navigator.serviceWorker.register("./service-worker.js").catch(err=>console.warn("Service Worker:",err)));}
+    refreshInstallUi();
 
     // Actualización manual + refresco periódico para colaboración entre equipos.
     document.getElementById("refreshSharedDataBtn").addEventListener("click",()=>loadSharedData(true));
