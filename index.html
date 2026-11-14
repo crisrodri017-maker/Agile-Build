@@ -706,9 +706,66 @@
     .report-config-note{margin-bottom:12px;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:#f8fafc;font-size:12px;color:var(--muted)}
     .risk-grid,.minutes-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.risk-grid .card,.minutes-list .card{margin:0}.governance-card-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.governance-card-actions{display:flex;gap:6px;flex-wrap:wrap}.governance-summary{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.governance-summary .badge{font-size:11px}
     @media(max-width:900px){.project-overview-layout{grid-template-columns:1fr}.risk-grid,.minutes-list{grid-template-columns:1fr}.project-detail-grid{grid-template-columns:1fr}.project-detail-item.full{grid-column:auto}}
+
+
+    /* Acceso y consentimiento */
+    .access-gate{position:fixed;inset:0;z-index:1000;background:linear-gradient(135deg,rgba(15,23,42,.98),rgba(30,41,59,.96));display:flex;align-items:center;justify-content:center;padding:20px}
+    .access-card{width:min(520px,100%);background:#fff;border-radius:20px;box-shadow:0 30px 90px rgba(0,0,0,.38);padding:28px}
+    .access-brand{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+    .access-brand .brand-mark{flex:0 0 42px}
+    .access-brand h2{margin:0;font-size:22px}.access-brand p{margin:3px 0 0;color:var(--muted);font-size:12px}
+    .access-stage[hidden]{display:none!important}
+    .access-stage h3{margin:0 0 10px;font-size:20px}.access-stage p{color:#475569;line-height:1.55;margin:0 0 14px}
+    .privacy-box{background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:14px;margin:14px 0;font-size:13px;line-height:1.5;color:#475569}
+    .consent-check{display:flex;align-items:flex-start;gap:10px;padding:12px;border:1px solid var(--border);border-radius:12px;background:white;margin:14px 0 18px}
+    .consent-check input{margin-top:3px;transform:scale(1.15)}.consent-check label{font-size:13px;line-height:1.45;color:#334155;font-weight:600}
+    .access-actions{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+    .access-error{display:none;margin-top:12px;padding:10px 12px;border-radius:10px;background:#fff1f2;color:#b42318;border:1px solid #fecdd3;font-size:12px;font-weight:700}.access-error.show{display:block}
+    .login-fields{display:grid;gap:12px;margin:18px 0}.login-fields .field{margin:0}
+    .session-box{margin-top:14px;padding:12px 8px 0;border-top:1px solid rgba(148,163,184,.2);display:none}
+    .session-box.show{display:block}.session-user{font-size:12px;font-weight:800;color:#e2e8f0}.session-consent{font-size:10px;color:#86efac;margin-top:4px}.session-logout{margin-top:8px;width:100%;border:1px solid rgba(148,163,184,.35);background:transparent;color:#cbd5e1;border-radius:8px;padding:8px 10px;text-align:left;font-size:12px;font-weight:700}.session-logout:hover{background:#1f2937;color:white}
+    @media(max-width:600px){.access-card{padding:20px;border-radius:16px}.access-actions .btn{flex:1}}
+
   </style>
 </head>
 <body class="view-only">
+  <div class="access-gate" id="accessGate" role="dialog" aria-modal="true" aria-labelledby="accessGateTitle">
+    <div class="access-card">
+      <div class="access-brand">
+        <div class="brand-mark">AB</div>
+        <div><h2 id="accessGateTitle">AgileBuild</h2><p>Gestión ágil de diseño</p></div>
+      </div>
+
+      <div class="access-stage" id="consentStage">
+        <h3>Aviso de privacidad y consentimiento</h3>
+        <p>Antes de acceder, confirma la autorización para el tratamiento de la información registrada en AgileBuild.</p>
+        <div class="privacy-box">
+          AgileBuild utiliza la información ingresada para la gestión, coordinación y seguimiento de proyectos. Los datos asociados a clientes, trabajadores y demás participantes deben registrarse únicamente cuando exista autorización para su tratamiento y para las finalidades propias del proyecto.
+        </div>
+        <div class="consent-check">
+          <input id="privacyConsentCheck" type="checkbox" />
+          <label for="privacyConsentCheck">He leído el aviso de privacidad y autorizo el tratamiento de los datos personales registrados en la plataforma para las finalidades de gestión del proyecto.</label>
+        </div>
+        <div class="access-actions">
+          <button class="btn primary" type="button" id="acceptConsentBtn" disabled>Aceptar y continuar</button>
+        </div>
+      </div>
+
+      <div class="access-stage" id="loginStage" hidden>
+        <h3>Inicio de sesión</h3>
+        <p>Ingresa tus credenciales para acceder a AgileBuild.</p>
+        <form id="loginForm">
+          <div class="login-fields">
+            <div class="field"><label for="loginUser">Usuario</label><input id="loginUser" autocomplete="username" required /></div>
+            <div class="field"><label for="loginPassword">Contraseña</label><input id="loginPassword" type="password" autocomplete="current-password" required /></div>
+          </div>
+          <div class="access-actions"><button class="btn primary" type="submit">Iniciar sesión</button></div>
+          <div class="access-error" id="loginError">Usuario o contraseña incorrectos.</div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <button class="mobile-menu-btn" id="mobileMenuBtn" type="button" aria-label="Abrir menú">☰</button>
   <div class="mobile-nav-backdrop" id="mobileNavBackdrop"></div>
   <div class="app" id="appShell">
@@ -733,6 +790,11 @@
       <div class="install-app-wrap">
         <button class="install-app-btn" id="installAppBtn" type="button">📲 Instalar AgileBuild</button>
         <div class="install-app-hint" id="installAppHint">Instala AgileBuild en este dispositivo.</div>
+      </div>
+      <div class="session-box" id="sessionBox">
+        <div class="session-user" id="sessionUser">👤 Administrador</div>
+        <div class="session-consent" id="sessionConsent">✓ Consentimiento aceptado</div>
+        <button class="session-logout" type="button" id="logoutBtn">Cerrar sesión</button>
       </div>
     </aside>
 
@@ -3108,9 +3170,77 @@
     document.getElementById("refreshSharedDataBtn").addEventListener("click",()=>loadSharedData(true));
 
 
+    // Acceso: el consentimiento y la sesión solo existen en memoria. Al recargar se solicitan nuevamente.
+    const ACCESS_USER = "admin";
+    const ACCESS_PASSWORD = "AgileBuild2026";
+    let consentAcceptedAt = null;
+    let authenticated = false;
+    let sharedRefreshTimer = null;
+    const accessGate = document.getElementById("accessGate");
+    const consentStage = document.getElementById("consentStage");
+    const loginStage = document.getElementById("loginStage");
+    const privacyConsentCheck = document.getElementById("privacyConsentCheck");
+    const acceptConsentBtn = document.getElementById("acceptConsentBtn");
+    const loginForm = document.getElementById("loginForm");
+    const loginError = document.getElementById("loginError");
+    const sessionBox = document.getElementById("sessionBox");
+
+    function startAuthenticatedApp(){
+      if(sharedRefreshTimer) clearInterval(sharedRefreshTimer);
+      document.getElementById("roleSimulator").value = "admin";
+      document.body.classList.remove("view-only");
+      sessionBox?.classList.add("show");
+      document.getElementById("sessionUser").textContent = "👤 Administrador";
+      if(consentAcceptedAt){
+        const time = consentAcceptedAt.toLocaleTimeString("es-CO",{hour:"2-digit",minute:"2-digit"});
+        document.getElementById("sessionConsent").textContent = `✓ Consentimiento aceptado · ${time}`;
+      }
+      renderAll();
+      loadSharedData();
+      sharedRefreshTimer = setInterval(()=>loadSharedData(false), 20000);
+    }
+
+    function resetAccessGate(){
+      authenticated = false;
+      consentAcceptedAt = null;
+      if(sharedRefreshTimer){clearInterval(sharedRefreshTimer);sharedRefreshTimer=null;}
+      document.body.classList.add("view-only");
+      sessionBox?.classList.remove("show");
+      privacyConsentCheck.checked = false;
+      acceptConsentBtn.disabled = true;
+      document.getElementById("loginUser").value = "";
+      document.getElementById("loginPassword").value = "";
+      loginError.classList.remove("show");
+      consentStage.hidden = false;
+      loginStage.hidden = true;
+      accessGate.style.display = "flex";
+    }
+
+    privacyConsentCheck.addEventListener("change",()=>{acceptConsentBtn.disabled=!privacyConsentCheck.checked;});
+    acceptConsentBtn.addEventListener("click",()=>{
+      if(!privacyConsentCheck.checked) return;
+      consentAcceptedAt = new Date();
+      consentStage.hidden = true;
+      loginStage.hidden = false;
+      setTimeout(()=>document.getElementById("loginUser").focus(),0);
+    });
+    loginForm.addEventListener("submit",e=>{
+      e.preventDefault();
+      const user = document.getElementById("loginUser").value.trim();
+      const password = document.getElementById("loginPassword").value;
+      if(user !== ACCESS_USER || password !== ACCESS_PASSWORD){
+        loginError.classList.add("show");
+        return;
+      }
+      loginError.classList.remove("show");
+      authenticated = true;
+      accessGate.style.display = "none";
+      startAuthenticatedApp();
+    });
+    document.getElementById("logoutBtn")?.addEventListener("click",resetAccessGate);
+
+    // El contenido compartido no se solicita hasta completar consentimiento + inicio de sesión.
     renderAll();
-    loadSharedData();
-    setInterval(()=>loadSharedData(false), 20000);
   </script>
 </body>
 </html>
