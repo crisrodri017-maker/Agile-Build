@@ -772,7 +772,10 @@
             <div class="field"><label for="loginUser">Usuario</label><input id="loginUser" autocomplete="username" required /></div>
             <div class="field"><label for="loginPassword">Contraseña</label><input id="loginPassword" type="password" autocomplete="current-password" required /></div>
           </div>
-          <div class="access-actions"><button class="btn primary" type="submit">Iniciar sesión</button></div>
+          <div class="access-actions">
+            <button class="btn" type="button" id="guestAccessBtn">Entrar sin iniciar sesión</button>
+            <button class="btn primary" type="submit">Iniciar sesión</button>
+          </div>
           <div class="access-error" id="loginError">Usuario o contraseña incorrectos.</div>
         </form>
       </div>
@@ -1378,6 +1381,17 @@
     function controlLotFromDb(r){ return {id:r.id,projectId:r.project_id,requirementId:r.requirement_id||"",code:r.code||"",name:r.name||"",description:r.description||"",responsibleId:r.responsible_id||""}; }    function workPackageFromDb(r){ return {id:r.id,projectId:r.project_id,controlLotId:r.control_lot_id||"",code:r.code||"",name:r.name||"",description:r.description||"",responsibleId:r.responsible_id||"",startDate:r.start_date||"",endDate:r.end_date||""}; }
 
 
+    function normalizeProjectLabel(value){
+      return String(value||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().trim();
+    }
+    function isPreferredCreaProject(project){
+      const name=normalizeProjectLabel(project?.name);
+      return name.includes("crea") && name.includes("diseno") && (name.includes("edificio") || name.includes("edicifio"));
+    }
+    function prioritizeProjects(list){
+      return [...list].sort((a,b)=>Number(isPreferredCreaProject(b))-Number(isPreferredCreaProject(a)));
+    }
+
     async function loadSharedData(showMessage=false){
       if (sharedDataLoading) return;
       sharedDataLoading = true;
@@ -1411,7 +1425,7 @@
         if (milestoneRes.error) throw milestoneRes.error;
 
 
-        projects = (pRes.data||[]).map(projectFromDb);
+        projects = prioritizeProjects((pRes.data||[]).map(projectFromDb));
         responsibles = (rRes.data||[]).map(responsibleFromDb);
         tasks = (tRes.data||[]).map(taskFromDb);
         sprints = (sRes.data||[]).map(sprintFromDb);
@@ -1425,9 +1439,14 @@
         milestones = (milestoneRes.data||[]).map(milestoneFromDb);
 
 
-        if (!projects.some(p=>p.id===activeProjectId)) activeProjectId = projects[0]?.id || "";
-        if (!projects.some(p=>p.id===dashboardProjectFilter)) {
-          dashboardProjectFilter = activeProjectId || "";
+        const preferredProject = projects.find(isPreferredCreaProject);
+        if (!preferredProjectActivated && preferredProject) {
+          activeProjectId = preferredProject.id;
+          dashboardProjectFilter = preferredProject.id;
+          preferredProjectActivated = true;
+        } else {
+          if (!projects.some(p=>p.id===activeProjectId)) activeProjectId = projects[0]?.id || "";
+          if (!projects.some(p=>p.id===dashboardProjectFilter)) dashboardProjectFilter = activeProjectId || "";
         }
         localStorage.setItem(KEY.activeProject, activeProjectId);
         // Caché local de respaldo; Supabase sigue siendo la fuente compartida.
@@ -1483,6 +1502,7 @@
     let timelineFilterCA = "";
     let timelineFilterWP = "";
     let timelineFilterView = "all";
+    let preferredProjectActivated = false;
 
 
     const DISCIPLINE_PREFIX = {
@@ -3185,7 +3205,7 @@
 
     // Acceso: el consentimiento y la sesión solo existen en memoria. Al recargar se solicitan nuevamente.
     const ACCESS_USER = "admin";
-    const ACCESS_PASSWORD = "AgileBuild2026";
+    const ACCESS_PASSWORD = "1234";
     let consentAcceptedAt = null;
     let authenticated = false;
     let sharedRefreshTimer = null;
@@ -3196,14 +3216,15 @@
     const acceptConsentBtn = document.getElementById("acceptConsentBtn");
     const loginForm = document.getElementById("loginForm");
     const loginError = document.getElementById("loginError");
+    const guestAccessBtn = document.getElementById("guestAccessBtn");
     const sessionBox = document.getElementById("sessionBox");
 
-    function startAuthenticatedApp(){
+    function startAuthenticatedApp(sessionLabel="Administrador"){
       if(sharedRefreshTimer) clearInterval(sharedRefreshTimer);
       document.getElementById("roleSimulator").value = "admin";
       document.body.classList.remove("view-only");
       sessionBox?.classList.add("show");
-      document.getElementById("sessionUser").textContent = "👤 Administrador";
+      document.getElementById("sessionUser").textContent = sessionLabel === "Invitado" ? "👤 Invitado" : "👤 Administrador";
       if(consentAcceptedAt){
         const time = consentAcceptedAt.toLocaleTimeString("es-CO",{hour:"2-digit",minute:"2-digit"});
         document.getElementById("sessionConsent").textContent = `✓ Consentimiento aceptado · ${time}`;
@@ -3215,6 +3236,7 @@
 
     function resetAccessGate(){
       authenticated = false;
+      preferredProjectActivated = false;
       consentAcceptedAt = null;
       if(sharedRefreshTimer){clearInterval(sharedRefreshTimer);sharedRefreshTimer=null;}
       document.body.classList.add("view-only");
@@ -3253,7 +3275,13 @@
       loginError.classList.remove("show");
       authenticated = true;
       accessGate.style.display = "none";
-      startAuthenticatedApp();
+      startAuthenticatedApp("Administrador");
+    });
+    guestAccessBtn?.addEventListener("click",()=>{
+      loginError.classList.remove("show");
+      authenticated = true;
+      accessGate.style.display = "none";
+      startAuthenticatedApp("Invitado");
     });
     document.getElementById("logoutBtn")?.addEventListener("click",resetAccessGate);
 
